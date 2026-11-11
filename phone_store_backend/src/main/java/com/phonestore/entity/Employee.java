@@ -1,31 +1,41 @@
 package com.phonestore.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import java.math.BigDecimal;
 
 @Entity
-@Table(name = "employees")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Table(name = "nhan_vien")
 public class Employee {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "employee_code", unique = true, nullable = false)
-    private String employeeCode;
+    @Column(name = "ten_dang_nhap", nullable = false, unique = true)
+    private String username;
 
-    @Column(name = "full_name", nullable = false)
+    @Column(name = "mat_khau", nullable = false)
+    private String password;
+
+    @Column(name = "ho_ten", nullable = false)
     private String fullName;
 
-    private String email;
-    private String phone;
-    private String position;
-    private BigDecimal salary;
+    @Column(name = "chuc_vu")
+    private String role; // MANAGER, STAFF
 
-    private String status = "ACTIVE";
+    @Column(name = "trang_thai")
+    private Boolean active = true;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user;
+    public Employee() {}
+
+    public Long getId() { return id; }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+    public Boolean getActive() { return active; }
+    public void setActive(Boolean active) { this.active = active; }
 }
