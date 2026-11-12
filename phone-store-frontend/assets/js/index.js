@@ -24,6 +24,9 @@ function showLoadingState() {
     document.getElementById('tableStockAlertSkeleton').classList.remove('hidden');
     document.getElementById('tableStockAlertContent').classList.add('hidden');
 
+    document.getElementById('kpiEmployeesSkeleton').classList.remove('hidden');
+    document.getElementById('kpiEmployees').classList.add('hidden');
+
     const banner = document.getElementById('loadingStatusBanner');
     banner.className = 'bg-blue-50 border-b border-blue-200 px-6 py-2.5 flex items-center justify-between text-xs text-blue-800';
     document.getElementById('bannerSpinner').className = 'fa-solid fa-circle-notch fa-spin text-blue-600 text-sm';
@@ -56,6 +59,9 @@ function hideLoadingState() {
 
     document.getElementById('tableStockAlertSkeleton').classList.add('hidden');
     document.getElementById('tableStockAlertContent').classList.remove('hidden');
+
+    document.getElementById('kpiEmployeesSkeleton').classList.add('hidden');
+    document.getElementById('kpiEmployees').classList.remove('hidden');
 }
 
 function updateSyncTime() {
@@ -173,6 +179,7 @@ async function reloadDashboardData() {
         document.getElementById('kpiOrders').textContent = `${realData.totalOrders || 0} đơn`;
         document.getElementById('kpiPhones').textContent = `${realData.totalPhonesSold || 0} thiết bị`;
         document.getElementById('kpiAlert').textContent = `${realData.stockAlertCount || 0} dòng máy`;
+        document.getElementById('kpiEmployees').textContent = `${realData.totalEmployees || 0} người`;
 
         // 2. Vẽ biểu đồ với dữ liệu thực tế
         renderCharts(realData);

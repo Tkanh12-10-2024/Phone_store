@@ -100,6 +100,10 @@
                 <i class="fa-solid fa-tags w-5 text-center text-pink-400"></i>
                 <span>Khuyến mãi / Voucher</span>
             </a>
+            <a href="employee.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-users-gear w-5 text-center text-purple-400"></i>
+                <span>Quản lý nhân viên</span>
+            </a>
             <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
                 <i class="fa-solid fa-file-lines w-5 text-center text-purple-400"></i>
                 <span>Báo cáo & Thống kê</span>
@@ -238,6 +242,24 @@
                     </p>
                 </div>
                 <div class="absolute bottom-0 left-0 right-0 h-1 bg-amber-500"></div>
+            </div>
+
+            <!-- Card 5: Quản lý nhân viên hệ thống -->
+            <div onclick="window.location.href='employee.html'" class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden cursor-pointer hover:border-purple-400 transition group">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider group-hover:text-purple-600 transition">Nhân viên hệ thống</span>
+                    <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
+                        <i class="fa-solid fa-users-gear text-lg"></i>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div id="kpiEmployeesSkeleton" class="skeleton h-8 w-20 rounded mb-1"></div>
+                    <h3 id="kpiEmployees" class="hidden text-2xl font-extrabold text-slate-900 tracking-tight">-- người</h3>
+                    <p class="text-xs text-purple-600 font-semibold mt-1 flex items-center gap-1">
+                        Bấm để quản lý danh sách <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </p>
+                </div>
+                <div class="absolute bottom-0 left-0 right-0 h-1 bg-purple-500"></div>
             </div>
 
         </div>
