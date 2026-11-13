@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Kho Hàng & Kiểm Kê - PhoneStore Pro</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            500: '#2563eb',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            900: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col lg:flex-row overflow-x-hidden">
+
+<!-- SIDEBAR BÊN TRÁI -->
+<aside class="w-full lg:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between shadow-xl min-h-screen">
+    <div>
+        <!-- Logo Cửa hàng -->
+        <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                <i class="fa-solid fa-mobile-screen-button text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-white text-base leading-tight">PhoneStore Pro</h1>
+                <span class="text-xs text-blue-400 font-medium">Hệ Thống SGU - Nhóm 05</span>
+            </div>
+        </div>
+
+        <!-- Profile vắn tắt -->
+        <div class="p-4 mx-3 my-3 bg-slate-800/60 rounded-xl border border-slate-700/50 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
+                ĐN
+            </div>
+            <div class="overflow-hidden">
+                <p class="text-sm font-semibold text-white truncate">Đặng Hoàng Nam</p>
+                <p class="text-xs text-emerald-400 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Quản lý Kho & Nhập
+                </p>
+            </div>
+        </div>
+
+        <!-- Menu Điều hướng -->
+        <nav class="px-3 space-y-1 text-sm font-medium">
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-chart-pie w-5 text-center text-blue-400"></i>
+                <span>Tổng quan (Dashboard)</span>
+            </a>
+            <a href="employee.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-users-gear w-5 text-center text-sky-400"></i>
+                <span>Quản lý nhân viên</span>
+            </a>
+            <!-- Mục Quản lý kho hàng đang chọn -->
+            <a href="warehouse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white shadow-md shadow-blue-600/30 font-semibold">
+                <i class="fa-solid fa-boxes-stacked w-5 text-center text-white"></i>
+                <span>Quản lý kho hàng</span>
+            </a>
+            <a href="import.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-truck-ramp-box w-5 text-center text-amber-400"></i>
+                <span>Quản lý nhập hàng</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Trạng thái CSDL -->
+    <div class="p-4 m-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs">
+        <div class="flex items-center justify-between mb-1">
+            <span class="text-slate-400">Backend API:</span>
+            <span id="apiStatusBadge" class="text-emerald-400 font-semibold flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Port 8080
+            </span>
+        </div>
+        <p class="text-slate-400 truncate">CSDL: <span class="text-white font-mono">quanly_cuahang_dienthoai</span></p>
+    </div>
+</aside>
+
+<!-- VÙNG NỘI DUNG CHÍNH -->
+<main class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto custom-scrollbar">
+    <!-- Top Header -->
+    <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between flex-shrink-0 sticky top-0 z-20">
+        <div>
+            <h2 class="text-lg font-bold text-slate-800">Quản Lý Tồn Kho & Kiểm Kê Hàng Hóa</h2>
+            <p class="text-xs text-slate-500">Phân hệ Định mức tồn kho, Cảnh báo hết hàng và Đối chiếu kiểm kê thực tế</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="openCreateCheckModal()" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition shadow-sm">
+                <i class="fa-solid fa-clipboard-check"></i>
+                <span>Lập Phiếu Kiểm Kê</span>
+            </button>
+            <a href="import.html" class="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-200 transition">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                <span>Nhập Hàng Kho</span>
+            </a>
+        </div>
+    </header>
+
+    <div class="p-6 space-y-6">
+        <!-- Thống kê nhanh phân hệ kho -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Tổng sản phẩm</span>
+                    <h3 id="statTotalProducts" class="text-2xl font-bold text-slate-800 mt-1">7</h3>
+                    <span class="text-xs text-blue-600 font-medium">Mã dòng sản phẩm</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-mobile-screen"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Tổng máy trong kho</span>
+                    <h3 id="statTotalStockQty" class="text-2xl font-bold text-emerald-600 mt-1">19</h3>
+                    <span class="text-xs text-slate-500">Thiết bị có mã IMEI</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Cảnh báo sắp hết</span>
+                    <h3 id="statLowStockCount" class="text-2xl font-bold text-rose-600 mt-1">3</h3>
+                    <span class="text-xs text-rose-500 font-medium">Tồn <= Định mức</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Đợt kiểm kê</span>
+                    <h3 id="statTotalChecks" class="text-2xl font-bold text-slate-800 mt-1">1</h3>
+                    <span class="text-xs text-indigo-600 font-medium">Đã cân bằng</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Banner Cảnh Báo Tồn Kho Nổi Bật (UC 2.6.1.2) -->
+        <div id="warningBanner" class="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 hidden">
+            <div class="text-amber-500 text-xl mt-0.5">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="flex-1">
+                <h4 class="text-sm font-bold text-amber-800">Cảnh Báo Tồn Kho: Có sản phẩm dưới định mức an toàn!</h4>
+                <p id="warningBannerText" class="text-xs text-amber-700 mt-0.5">Hệ thống phát hiện sản phẩm có lượng tồn kho thấp hơn định mức quy định tối thiểu. Hãy cân nhắc lập phiếu nhập hàng.</p>
+            </div>
+            <button onclick="filterOnlyWarnings()" class="px-3 py-1.5 bg-amber-600 text-white rounded-lg text-xs font-semibold hover:bg-amber-700 transition">
+                Xem Danh Sách Cảnh Báo
+            </button>
+        </div>
+
+        <!-- Tab chuyển đổi giữa Quản lý tồn kho và Kiểm kê kho -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="border-b border-slate-200 px-6 flex items-center justify-between">
+                <div class="flex gap-8">
+                    <button id="tabBtnStock" onclick="switchWarehouseTab('stock')" class="py-4 text-sm font-bold border-b-2 border-blue-600 text-blue-600 flex items-center gap-2">
+                        <i class="fa-solid fa-warehouse"></i>
+                        <span>Tồn Kho & Cảnh Báo Tồn (UC 2.6.1)</span>
+                    </button>
+                    <button id="tabBtnChecks" onclick="switchWarehouseTab('checks')" class="py-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>Kiểm Kê Kho Hàng (UC 2.6.2)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 1: BẢNG TỒN KHO & CẢNH BÁO -->
+            <div id="tabContentStock" class="p-6 space-y-4">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="relative w-full sm:w-80">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
+                        <input id="searchProductInput" onkeyup="filterProducts()" type="text" placeholder="Tìm tên máy, mã sản phẩm, màu sắc..." 
+                               class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="setFilterCategory('all')" id="filterBtnAll" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                            Tất Cả Sản Phẩm
+                        </button>
+                        <button onclick="setFilterCategory('low')" id="filterBtnLow" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-600 border border-slate-200">
+                            <i class="fa-solid fa-bell text-rose-500"></i> Cảnh Báo Sắp Hết
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto rounded-lg border border-slate-200">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-100 text-slate-600 uppercase text-xs font-semibold">
+                            <tr>
+                                <th class="p-3">Mã SP</th>
+                                <th class="p-3">Tên Điện Thoại</th>
+                                <th class="p-3">Dòng Máy & Màu</th>
+                                <th class="p-3">Cấu Hình</th>
+                                <th class="p-3 text-right">Giá Nhập</th>
+                                <th class="p-3 text-center">Tồn Kho</th>
+                                <th class="p-3 text-center">Định Mức Tối Thiểu</th>
+                                <th class="p-3 text-center">Tình Trạng</th>
+                                <th class="p-3 text-center">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody" class="divide-y divide-slate-200 bg-white">
+                            <!-- JS render -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 2: BẢNG KIỂM KÊ KHO HÀNG -->
+            <div id="tabContentChecks" class="p-6 space-y-4 hidden">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="relative w-full sm:w-80">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
+                        <input id="searchCheckInput" onkeyup="filterChecks()" type="text" placeholder="Tìm theo mã phiếu kiểm kê, người kiểm..." 
+                               class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <button onclick="openCreateCheckModal()" class="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700">
+                        <i class="fa-solid fa-plus"></i> Tạo Phiếu Kiểm Mới
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto rounded-lg border border-slate-200">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-100 text-slate-600 uppercase text-xs font-semibold">
+                            <tr>
+                                <th class="p-3">Mã Phiếu Kiểm</th>
+                                <th class="p-3">Nhân Viên Kiểm Kê</th>
+                                <th class="p-3">Ngày Kiểm Kê</th>
+                                <th class="p-3">Ghi Chú Đợt Kiểm</th>
+                                <th class="p-3 text-center">Trạng Thái</th>
+                                <th class="p-3 text-center">Chi Tiết</th>
+                            </tr>
+                        </thead>
+                        <tbody id="checksTableBody" class="divide-y divide-slate-200 bg-white">
+                            <!-- JS render -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- MODAL 1: THIẾT LẬP ĐỊNH MỨC TỒN KHO TỐI THIỂU (UC 2.6.1.1) -->
+<div id="minStockModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+            <h3 class="font-bold text-slate-800 text-base">Thiết Lập Định Mức Tồn Kho</h3>
+            <button onclick="closeMinStockModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="p-6 space-y-4">
+            <div>
+                <span class="text-xs text-slate-400 block mb-1">Sản phẩm:</span>
+                <p id="minStockProductName" class="font-bold text-slate-800 text-sm">iPhone 15 Pro Max 256GB</p>
+                <p id="minStockProductCode" class="text-xs text-blue-600 font-mono mt-0.5">SP_IP15PM_256</p>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Định Mức Tồn Kho Tối Thiểu (*)</label>
+                <input id="inputMinStock" type="number" min="0" max="1000" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-base font-bold text-blue-700">
+                <p class="text-[11px] text-slate-400 mt-1">Hệ thống sẽ kích hoạt cảnh báo khi số lượng tồn thực tế nhỏ hơn hoặc bằng định mức này.</p>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-3">
+            <button onclick="closeMinStockModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100">
+                Hủy
+            </button>
+            <button onclick="submitMinStock()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold">
+                Lưu Định Mức
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 2: XEM DANH SÁCH MÃ IMEI TRONG KHO CỦA SẢN PHẨM -->
+<div id="viewImeisModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+            <div>
+                <h3 id="viewImeisTitle" class="font-bold text-slate-800 text-base">Danh Sách IMEI Trong Kho</h3>
+                <p id="viewImeisSubtitle" class="text-xs text-slate-500">Mã máy vật lý sẵn sàng xuất bán</p>
+            </div>
+            <button onclick="closeViewImeisModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="p-6 overflow-y-auto space-y-3 custom-scrollbar flex-1">
+            <div id="imeisContainer" class="space-y-2">
+                <!-- JS render -->
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end">
+            <button onclick="closeViewImeisModal()" class="px-5 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold hover:bg-slate-900">
+                Đóng
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 3: LẬP PHIẾU KIỂM KÊ KHO HÀNG (UC 2.6.2.1, 2.6.2.2 & 2.6.2.3) -->
+<div id="createCheckModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-800 text-base">Lập Phiếu Kiểm Kê Kho Hàng Mới</h3>
+                    <p class="text-xs text-slate-500">Đối chiếu số lượng hệ thống vs thực tế, tính chênh lệch và cân bằng kho</p>
+                </div>
+            </div>
+            <button onclick="closeCreateCheckModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="p-6 overflow-y-auto space-y-4 custom-scrollbar flex-1">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Mã Phiếu Kiểm Kê</label>
+                    <input id="newCheckCode" type="text" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Người Kiểm Kê</label>
+                    <input id="newCheckStaff" type="text" value="NV001 (Đặng Hoàng Nam)" readonly class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-100 text-slate-600">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Hành Động Cân Bằng Kho</label>
+                    <select id="newCheckStatus" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-blue-700">
+                        <option value="Da_can_bang">Cân bằng kho ngay (Cập nhật tồn kho theo thực tế)</option>
+                        <option value="Cho_xu_ly">Chờ xử lý (Chưa điều chỉnh tồn kho)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Bảng đối chiếu số lượng -->
+            <div>
+                <h4 class="text-xs font-bold uppercase text-slate-600 tracking-wider mb-2">Bảng Đối Chiếu Số Lượng Tồn Kho (UC 2.6.2.2 & UC 2.6.2.3)</h4>
+                <div class="overflow-x-auto rounded-lg border border-slate-200">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-100 text-slate-600 uppercase text-xs font-semibold">
+                            <tr>
+                                <th class="p-3">Sản Phẩm</th>
+                                <th class="p-3 text-center">Tồn Hệ Thống</th>
+                                <th class="p-3 text-center">Thực Tế Đếm Được</th>
+                                <th class="p-3 text-center">Chênh Lệch</th>
+                                <th class="p-3">Lý Do Chênh Lệch (nếu có)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="checkItemsTableBody" class="divide-y divide-slate-200 bg-white">
+                            <!-- JS render rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Ghi Chú Đợt Kiểm Kê</label>
+                <textarea id="newCheckNote" rows="2" placeholder="Ví dụ: Kiểm kê định kỳ ngày 13/11, phát hiện 1 máy mang đi bảo hành..." class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></textarea>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-3">
+            <button onclick="closeCreateCheckModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100">
+                Hủy Bỏ
+            </button>
+            <button onclick="submitCreateInventoryCheck()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold shadow-md shadow-blue-500/20 flex items-center gap-2">
+                <i class="fa-solid fa-check"></i>
+                <span>Xác Nhận & Lưu Phiếu Kiểm</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 4: XEM CHI TIẾT PHIẾU KIỂM KÊ -->
+<div id="viewCheckModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+            <div>
+                <h3 id="viewCheckTitle" class="font-bold text-slate-800 text-base">Chi Tiết Phiếu Kiểm Kê</h3>
+                <p id="viewCheckSubtitle" class="text-xs text-slate-500">Đối chiếu chênh lệch hàng hóa</p>
+            </div>
+            <button onclick="closeViewCheckModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="p-6 overflow-y-auto space-y-4 custom-scrollbar flex-1">
+            <div id="viewCheckInfo" class="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+                <!-- JS render -->
+            </div>
+
+            <h4 class="font-bold text-xs uppercase text-slate-600 tracking-wider">Danh Sách Mặt Hàng Kiểm Kê</h4>
+            <div id="viewCheckItemsList" class="overflow-x-auto rounded-lg border border-slate-200">
+                <!-- JS render table -->
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end">
+            <button onclick="closeViewCheckModal()" class="px-5 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold hover:bg-slate-900">
+                Đóng
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="assets/js/config.js"></script>
+<script src="assets/js/warehouse.js"></script>
+</body>
+</html>

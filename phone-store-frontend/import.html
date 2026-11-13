@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Nhập Hàng & NCC - PhoneStore Pro</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            500: '#2563eb',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            900: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col lg:flex-row overflow-x-hidden">
+
+<!-- SIDEBAR BÊN TRÁI -->
+<aside class="w-full lg:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between shadow-xl min-h-screen">
+    <div>
+        <!-- Logo Cửa hàng -->
+        <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                <i class="fa-solid fa-mobile-screen-button text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-white text-base leading-tight">PhoneStore Pro</h1>
+                <span class="text-xs text-blue-400 font-medium">Hệ Thống SGU - Nhóm 05</span>
+            </div>
+        </div>
+
+        <!-- Profile vắn tắt -->
+        <div class="p-4 mx-3 my-3 bg-slate-800/60 rounded-xl border border-slate-700/50 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
+                ĐN
+            </div>
+            <div class="overflow-hidden">
+                <p class="text-sm font-semibold text-white truncate">Đặng Hoàng Nam</p>
+                <p class="text-xs text-emerald-400 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Quản lý Kho & Nhập
+                </p>
+            </div>
+        </div>
+
+        <!-- Menu Điều hướng -->
+        <nav class="px-3 space-y-1 text-sm font-medium">
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-chart-pie w-5 text-center text-blue-400"></i>
+                <span>Tổng quan (Dashboard)</span>
+            </a>
+            <a href="employee.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-users-gear w-5 text-center text-sky-400"></i>
+                <span>Quản lý nhân viên</span>
+            </a>
+            <a href="warehouse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-boxes-stacked w-5 text-center text-indigo-400"></i>
+                <span>Quản lý kho hàng</span>
+            </a>
+            <!-- Mục Quản lý nhập hàng đang chọn -->
+            <a href="import.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white shadow-md shadow-blue-600/30 font-semibold">
+                <i class="fa-solid fa-truck-ramp-box w-5 text-center text-white"></i>
+                <span>Quản lý nhập hàng</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Trạng thái CSDL -->
+    <div class="p-4 m-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs">
+        <div class="flex items-center justify-between mb-1">
+            <span class="text-slate-400">Backend API:</span>
+            <span id="apiStatusBadge" class="text-emerald-400 font-semibold flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Port 8080
+            </span>
+        </div>
+        <p class="text-slate-400 truncate">CSDL: <span class="text-white font-mono">quanly_cuahang_dienthoai</span></p>
+    </div>
+</aside>
+
+<!-- VÙNG NỘI DUNG CHÍNH -->
+<main class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto custom-scrollbar">
+    <!-- Top Header -->
+    <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between flex-shrink-0 sticky top-0 z-20">
+        <div>
+            <h2 class="text-lg font-bold text-slate-800">Quản Lý Nhập Hàng & Nhà Cung Cấp</h2>
+            <p class="text-xs text-slate-500">Phân hệ Quản lý Nhà cung cấp, Lập phiếu nhập kho và Quét mã IMEI sản phẩm</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="openCreateOrderModal()" class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition shadow-sm">
+                <i class="fa-solid fa-plus"></i>
+                <span>Lập Phiếu Nhập Mới</span>
+            </button>
+            <button onclick="openCreateSupplierModal()" class="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-sm font-semibold hover:bg-indigo-100 transition">
+                <i class="fa-solid fa-building-circle-plus"></i>
+                <span>Thêm NCC</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="p-6 space-y-6">
+        <!-- Thống kê nhanh phân hệ nhập hàng -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Tổng phiếu nhập</span>
+                    <h3 id="statTotalOrders" class="text-2xl font-bold text-slate-800 mt-1">3</h3>
+                    <span class="text-xs text-emerald-600 font-medium">Hoàn tất kiểm đếm</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Tổng giá trị nhập</span>
+                    <h3 id="statTotalValue" class="text-2xl font-bold text-slate-800 mt-1">277.7 Tr</h3>
+                    <span class="text-xs text-slate-500">Vốn hàng hóa đã nhập</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-sack-dollar"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Công nợ NCC còn lại</span>
+                    <h3 id="statTotalDebt" class="text-2xl font-bold text-amber-600 mt-1">25.0 Tr</h3>
+                    <span class="text-xs text-amber-600 font-medium">Cần thanh toán</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-scale-unbalanced"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Nhà cung cấp</span>
+                    <h3 id="statTotalSuppliers" class="text-2xl font-bold text-slate-800 mt-1">4</h3>
+                    <span class="text-xs text-blue-600 font-medium">Đang hợp tác</span>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-handshake"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab chuyển đổi giữa Phiếu Nhập và Nhà Cung Cấp -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="border-b border-slate-200 px-6 flex items-center justify-between">
+                <div class="flex gap-8">
+                    <button id="tabBtnOrders" onclick="switchTab('orders')" class="py-4 text-sm font-bold border-b-2 border-blue-600 text-blue-600 flex items-center gap-2">
+                        <i class="fa-solid fa-receipt"></i>
+                        <span>Danh Sách Phiếu Nhập Kho (UC 2.5.2)</span>
+                    </button>
+                    <button id="tabBtnSuppliers" onclick="switchTab('suppliers')" class="py-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-building"></i>
+                        <span>Quản Lý Nhà Cung Cấp (UC 2.5.1)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- PHẦN 1: BẢNG DANH SÁCH PHIẾU NHẬP -->
+            <div id="tabContentOrders" class="p-6 space-y-4">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="relative w-full sm:w-80">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
+                        <input id="searchOrderInput" onkeyup="filterOrders()" type="text" placeholder="Tìm theo mã phiếu nhập, NCC..." 
+                               class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-slate-500">
+                        <span class="w-3 h-3 rounded-full bg-emerald-500"></span> Hoàn thành
+                        <span class="w-3 h-3 rounded-full bg-amber-500 ml-3"></span> Có công nợ
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto rounded-lg border border-slate-200">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-100 text-slate-600 uppercase text-xs font-semibold">
+                            <tr>
+                                <th class="p-3">Mã Phiếu</th>
+                                <th class="p-3">Nhà Cung Cấp</th>
+                                <th class="p-3">Người Lập</th>
+                                <th class="p-3">Ngày Nhập</th>
+                                <th class="p-3 text-right">Tổng Tiền</th>
+                                <th class="p-3 text-right">Đã Trả</th>
+                                <th class="p-3 text-right">Công Nợ</th>
+                                <th class="p-3 text-center">Trạng Thái</th>
+                                <th class="p-3 text-center">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="purchaseOrdersTableBody" class="divide-y divide-slate-200 bg-white">
+                            <!-- Dữ liệu JS sẽ render -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PHẦN 2: BẢNG DANH SÁCH NHÀ CUNG CẤP -->
+            <div id="tabContentSuppliers" class="p-6 space-y-4 hidden">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="relative w-full sm:w-80">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
+                        <input id="searchSupplierInput" onkeyup="filterSuppliers()" type="text" placeholder="Tìm tên NCC, số điện thoại..." 
+                               class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <button onclick="openCreateSupplierModal()" class="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700">
+                        <i class="fa-solid fa-plus"></i> Thêm NCC Mới
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto rounded-lg border border-slate-200">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-100 text-slate-600 uppercase text-xs font-semibold">
+                            <tr>
+                                <th class="p-3">Mã NCC</th>
+                                <th class="p-3">Tên Nhà Cung Cấp</th>
+                                <th class="p-3">Số Điện Thoại</th>
+                                <th class="p-3">Email</th>
+                                <th class="p-3">Địa Chỉ</th>
+                                <th class="p-3 text-right">Công Nợ</th>
+                                <th class="p-3 text-center">Trạng Thái</th>
+                                <th class="p-3 text-center">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="suppliersTableBody" class="divide-y divide-slate-200 bg-white">
+                            <!-- Dữ liệu JS sẽ render -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- MODAL 1: LẬP PHIẾU NHẬP MỚI KÈM QUÉT MÃ IMEI (UC 2.5.2.1 & UC 2.5.2.1.1) -->
+<div id="createOrderModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center">
+                    <i class="fa-solid fa-truck-fast"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-800 text-base">Lập Phiếu Nhập Kho Mới</h3>
+                    <p class="text-xs text-slate-500">Ghi nhận thông tin nhập hàng, tính giá trị và quét mã IMEI sản phẩm</p>
+                </div>
+            </div>
+            <button onclick="closeCreateOrderModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="p-6 overflow-y-auto space-y-5 custom-scrollbar flex-1">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Mã Phiếu Nhập</label>
+                    <input id="newOrderCode" type="text" placeholder="Tự sinh nếu để trống" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nhà Cung Cấp (*)</label>
+                    <select id="newOrderSupplier" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm">
+                        <!-- JS nạp options -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nhân Viên Lập Phiếu</label>
+                    <input id="newOrderStaff" type="text" value="NV001 (Đặng Hoàng Nam)" readonly class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-100 text-slate-600">
+                </div>
+            </div>
+
+            <!-- Bảng Mặt hàng nhập -->
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="text-xs font-bold uppercase text-slate-600 tracking-wider">Danh Sách Mặt Hàng & Nhập Mã IMEI</h4>
+                    <button type="button" onclick="addOrderItemRow()" class="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-plus"></i> Thêm Mặt Hàng
+                    </button>
+                </div>
+
+                <div id="orderItemsContainer" class="space-y-4">
+                    <!-- Dynamic Rows -->
+                </div>
+            </div>
+
+            <!-- Thanh toán và Công nợ -->
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tổng Tiền Hàng</label>
+                    <input id="newOrderTotalDisplay" type="text" value="0 ₫" readonly class="w-full px-3 py-2 border border-slate-200 rounded-lg text-base font-bold text-blue-700 bg-white">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Số Tiền Đã Thanh Toán</label>
+                    <input id="newOrderPaid" oninput="calcOrderTotals()" type="number" value="0" min="0" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-base font-bold text-emerald-700 bg-white">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Công Nợ Ghi Nhận</label>
+                    <input id="newOrderDebtDisplay" type="text" value="0 ₫" readonly class="w-full px-3 py-2 border border-slate-200 rounded-lg text-base font-bold text-amber-600 bg-white">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Ghi Chú Phiếu Nhập</label>
+                <textarea id="newOrderNote" rows="2" placeholder="Ví dụ: Nhập hàng đợt 2, kiểm tra tem niêm phong nguyên vẹn..." class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"></textarea>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-3">
+            <button onclick="closeCreateOrderModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100">
+                Hủy Bỏ
+            </button>
+            <button onclick="submitCreatePurchaseOrder()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold shadow-md shadow-blue-500/20 flex items-center gap-2">
+                <i class="fa-solid fa-check"></i>
+                <span>Hoàn Tất & Lưu Kho</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 2: XEM CHI TIẾT PHIẾU NHẬP & DANH SÁCH IMEI (UC 2.5.2.2) -->
+<div id="viewOrderModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+            <div>
+                <h3 id="viewOrderTitle" class="font-bold text-slate-800 text-base">Chi Tiết Phiếu Nhập</h3>
+                <p id="viewOrderSubtitle" class="text-xs text-slate-500">Thông tin nhà cung cấp và danh sách máy đã quét IMEI</p>
+            </div>
+            <button onclick="closeViewOrderModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="p-6 overflow-y-auto space-y-4 custom-scrollbar flex-1">
+            <div id="viewOrderInfo" class="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+                <!-- JS render -->
+            </div>
+
+            <h4 class="font-bold text-xs uppercase text-slate-600 tracking-wider">Danh Sách Mặt Hàng & Mã IMEI Đã Quét</h4>
+            <div id="viewOrderItemsList" class="space-y-3">
+                <!-- JS render -->
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end">
+            <button onclick="closeViewOrderModal()" class="px-5 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold hover:bg-slate-900">
+                Đóng
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 3: THÊM / SỬA NHÀ CUNG CẤP (UC 2.5.1.1 & UC 2.5.1.2) -->
+<div id="supplierModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+            <h3 id="supplierModalTitle" class="font-bold text-slate-800 text-base">Thêm Nhà Cung Cấp Mới</h3>
+            <button onclick="closeSupplierModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="p-6 space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Mã Nhà Cung Cấp (*)</label>
+                <input id="supCode" type="text" placeholder="VD: NCC05" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Tên Nhà Cung Cấp (*)</label>
+                <input id="supName" type="text" placeholder="Tên công ty phân phối..." class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Số Điện Thoại (*)</label>
+                    <input id="supPhone" type="text" placeholder="0901234567" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Mã Số Thuế</label>
+                    <input id="supTax" type="text" placeholder="0301234567" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Email</label>
+                <input id="supEmail" type="email" placeholder="contact@supplier.com" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Địa Chỉ</label>
+                <input id="supAddress" type="text" placeholder="Địa chỉ trụ sở..." class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm">
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-3">
+            <button onclick="closeSupplierModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-100">
+                Hủy
+            </button>
+            <button onclick="submitSupplier()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold">
+                Lưu Nhà Cung Cấp
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="assets/js/config.js"></script>
+<script src="assets/js/import.js"></script>
+</body>
+</html>
