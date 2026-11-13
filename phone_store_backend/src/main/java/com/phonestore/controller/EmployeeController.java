@@ -1,50 +1,61 @@
 package com.phonestore.controller;
 
-import com.phonestore.dto.request.EmployeeCreateRequest;
-import com.phonestore.dto.request.EmployeeUpdateRequest;
-import com.phonestore.dto.response.EmployeeResponse;
+import com.phonestore.entity.Employee;
 import com.phonestore.service.EmployeeService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/employees")
+@RequestMapping("/api/employees")
 @CrossOrigin(origins = "*")
 public class EmployeeController {
 
-    private final EmployeeService employeeService;
+    @Autowired
+    private EmployeeService employeeService;
 
-    public EmployeeController(EmployeeService employeeService) {
-        this.employeeService = employeeService;
-    }
-
+    // 1. Lấy danh sách toàn bộ nhân viên
     @GetMapping
-    public ResponseEntity<List<EmployeeResponse>> getAllEmployees() {
-        return ResponseEntity.ok(employeeService.getAllEmployees());
+    public ResponseEntity<List<Employee>> getAllEmployees() {
+        List<Employee> employees = employeeService.getAllEmployees();
+        return ResponseEntity.ok(employees);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<EmployeeResponse> getEmployeeById(@PathVariable Long id) {
-        return ResponseEntity.ok(employeeService.getEmployeeById(id));
-    }
-
+    // 2. Thêm mới nhân viên
     @PostMapping
-    public ResponseEntity<EmployeeResponse> createEmployee(@RequestBody EmployeeCreateRequest request) {
-        return ResponseEntity.ok(employeeService.createEmployee(request));
+    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) {
+        Employee savedEmployee = employeeService.saveEmployee(employee);
+        return ResponseEntity.ok(savedEmployee);
     }
 
+    // 3. Cập nhật thông tin nhân viên
     @PutMapping("/{id}")
-    public ResponseEntity<EmployeeResponse> updateEmployee(
-            @PathVariable Long id,
-            @RequestBody EmployeeUpdateRequest request) {
-        return ResponseEntity.ok(employeeService.updateEmployee(id, request));
+    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee employeeDetails) {
+        return employeeService.getEmployeeById(id)
+                .map(employee -> {
+                    employee.setFullName(employeeDetails.getFullName());
+                    employee.setUsername(employeeDetails.getUsername());
+                    if (employeeDetails.getPassword() != null && !employeeDetails.getPassword().isEmpty()) {
+                        employee.setPassword(employeeDetails.getPassword());
+                    }
+                    employee.setRole(employeeDetails.getRole());
+                    employee.setActive(employeeDetails.getActive());
+
+                    Employee updatedEmployee = employeeService.saveEmployee(employee);
+                    return ResponseEntity.ok(updatedEmployee);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
+    // 4. Xóa nhân viên theo ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
-        employeeService.deleteEmployee(id);
-        return ResponseEntity.noContent().build();
+        if (employeeService.getEmployeeById(id).isPresent()) {
+            employeeService.deleteEmployee(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }

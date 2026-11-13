@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập - Hệ Thống Quản Lý Cửa Hàng Điện Thoại</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-900 text-slate-800 font-sans antialiased min-h-screen flex items-center justify-center p-4">
+
+<!-- Container Chính -->
+<div class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden p-8 border border-slate-100">
+
+    <!-- Logo & Tiêu đề -->
+    <div class="text-center mb-8">
+        <div class="inline-flex w-14 h-14 rounded-2xl bg-blue-600 items-center justify-center text-white text-2xl shadow-lg shadow-blue-500/30 mb-4">
+            <i class="fa-solid fa-mobile-screen-button"></i>
+        </div>
+        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">PhoneStore Pro</h1>
+        <p class="text-sm text-slate-500 mt-1">Đăng nhập hệ thống quản lý SGU - Nhóm 05</p>
+    </div>
+
+    <!-- Thông báo lỗi (Ẩn mặc định) -->
+    <div id="errorAlert" class="hidden mb-6 p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold flex items-center gap-2">
+        <i class="fa-solid fa-circle-exclamation text-base"></i>
+        <span id="errorMessage">Tài khoản hoặc mật khẩu không chính xác!</span>
+    </div>
+
+    <!-- Form Đăng Nhập -->
+    <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5">
+        <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Tên đăng nhập / Email</label>
+            <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                        <i class="fa-solid fa-user"></i>
+                    </span>
+                <input type="text" id="username" required placeholder="Nhập mã nhân viên hoặc username..."
+                       class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
+            </div>
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Mật khẩu</label>
+            <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">
+                        <i class="fa-solid fa-lock"></i>
+                    </span>
+                <input type="password" id="password" required placeholder="••••••••"
+                       class="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
+                <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-eye" id="eyeIcon"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                <span class="text-slate-600 font-medium">Nhớ tài khoản</span>
+            </label>
+            <a href="#" class="text-blue-600 font-semibold hover:underline">Quên mật khẩu?</a>
+        </div>
+
+        <button type="submit" id="submitBtn" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-2">
+            <span id="btnText">Đăng Nhập Hệ Thống</span>
+            <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
+        </button>
+    </form>
+
+    <!-- Footer thông tin đồ án -->
+    <div class="mt-8 pt-6 border-t border-slate-100 text-center text-xs text-slate-400">
+        <p>Đồ án PTTKHĐT - Đại học Sài Gòn (SGU)</p>
+        <p class="mt-1 font-mono text-slate-500">CSDL: quanly_cuahang_dienthoai</p>
+    </div>
+
+</div>
+
+<!-- Script xử lý -->
+<script src="assets/js/login.js"></script>
+</body>
+</html>

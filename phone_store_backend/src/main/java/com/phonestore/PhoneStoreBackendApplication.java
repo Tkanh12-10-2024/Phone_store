@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class PhongStoreBackendApplication {
+public class PhoneStoreBackendApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(PhongStoreBackendApplication.class, args);
+        SpringApplication.run(PhoneStoreBackendApplication.class, args);
         System.out.println("out");
     }
 
