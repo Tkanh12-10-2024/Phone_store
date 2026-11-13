@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Tổng Quan - Quản Lý Cửa Hàng Điện Thoại</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Quản Lý Thiết Bị Theo Mã IMEI / Serial - SUNO & POS365</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
@@ -18,15 +16,6 @@
                 extend: {
                     fontFamily: {
                         sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                    },
-                    colors: {
-                        brand: {
-                            50: '#eff6ff',
-                            500: '#2563eb',
-                            600: '#1d4ed8',
-                            700: '#1e40af',
-                            900: '#0f172a'
-                        }
                     }
                 }
             }
@@ -44,346 +33,254 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col lg:flex-row">
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
 
-<!-- SIDEBAR BÊN TRÁI (Chuẩn mô hình Sapo / KiotViet) -->
-<aside class="w-full lg:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between shadow-xl">
-    <div>
-        <!-- Logo Cửa hàng -->
-        <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
-            <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
-                <i class="fa-solid fa-mobile-screen-button text-xl"></i>
-            </div>
-            <div>
-                <h1 class="font-bold text-white text-base leading-tight">PhoneStore Pro</h1>
-                <span class="text-xs text-blue-400 font-medium">Hệ Thống SGU - Nhóm 05</span>
-            </div>
-        </div>
+    <!-- TOP NAVIGATION -->
+    <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="flex items-center gap-2.5 text-white hover:opacity-90 transition">
+                    <div class="w-9 h-9 rounded-lg bg-amber-500 flex items-center justify-center text-white shadow-md shadow-amber-500/30">
+                        <i class="fa-solid fa-barcode text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-base tracking-tight block">IMEI Master POS</span>
+                        <span class="text-xs text-amber-400 font-medium block">Mô hình SUNO / POS365</span>
+                    </div>
+                </a>
 
-        <!-- Profile vắn tắt -->
-        <div class="p-4 mx-3 my-3 bg-slate-800/60 rounded-xl border border-slate-700/50 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center text-white font-bold text-sm">
-                AD
-            </div>
-            <div class="overflow-hidden">
-                <p class="text-sm font-semibold text-white truncate">Lê Tạ Khánh</p>
-                <p class="text-xs text-emerald-400 flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Quản lý cửa hàng
-                </p>
-            </div>
-        </div>
-
-        <!-- Menu Điều hướng -->
-        <nav class="px-3 space-y-1 text-sm font-medium">
-            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white shadow-md shadow-blue-600/30">
-                <i class="fa-solid fa-chart-pie w-5 text-center"></i>
-                <span>Tổng quan (Dashboard)</span>
-            </a>
-            <a href="../giao_dien_3_ban_hang_pos/index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
-                <i class="fa-solid fa-cash-register w-5 text-center text-emerald-400"></i>
-                <span>Bán hàng nhanh POS</span>
-                <span class="ml-auto text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-semibold">Live</span>
-            </a>
-            <a href="../giao_dien_2_quan_ly_imei/index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
-                <i class="fa-solid fa-barcode w-5 text-center text-amber-400"></i>
-                <span>Quản lý IMEI & Serial</span>
-            </a>
-            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
-                <i class="fa-solid fa-boxes-stacked w-5 text-center text-indigo-400"></i>
-                <span>Kho hàng & Nhập kho</span>
-            </a>
-            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
-                <i class="fa-solid fa-users w-5 text-center text-sky-400"></i>
-                <span>Khách hàng & Bảo hành</span>
-            </a>
-            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
-                <i class="fa-solid fa-tags w-5 text-center text-pink-400"></i>
-                <span>Khuyến mãi / Voucher</span>
-            </a>
-            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
-                <i class="fa-solid fa-file-lines w-5 text-center text-purple-400"></i>
-                <span>Báo cáo & Thống kê</span>
-            </a>
-        </nav>
-    </div>
-
-    <!-- Trạng thái CSDL -->
-    <div class="p-4 m-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs">
-        <div class="flex items-center justify-between mb-2">
-            <span class="text-slate-400">Database XAMPP:</span>
-            <span class="text-emerald-400 font-semibold flex items-center gap-1">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Kết nối OK
-                </span>
-        </div>
-        <p class="text-slate-400 truncate">CSDL: <span class="text-white font-mono">quanly_cuahang_dienthoai</span></p>
-        <button onclick="reloadDashboardData()" class="mt-3 w-full py-1.5 px-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition font-medium flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-rotate text-xs"></i> Tải lại dữ liệu (Test Loading)
-        </button>
-    </div>
-</aside>
-
-<!-- MAIN CONTENT -->
-<main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
-    <!-- TOP HEADER -->
-    <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-30 shadow-sm">
-        <div class="flex items-center gap-4">
-            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                <i class="fa-solid fa-chart-line text-blue-600"></i>
-                Tổng quan hoạt động kinh doanh
-            </h2>
-            <span class="hidden md:inline-block px-2.5 py-1 text-xs font-semibold bg-blue-50 text-blue-700 rounded-full border border-blue-200">
-                    Mẫu 1: Dashboard KiotViet/Sapo
-                </span>
-        </div>
-
-        <!-- Actions Header -->
-        <div class="flex items-center gap-3">
-            <div class="relative hidden sm:block">
-                <select id="timeFilter" onchange="reloadDashboardData()" class="text-sm bg-slate-100 border border-slate-300 rounded-lg px-3 py-1.5 pr-8 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="today">Hôm nay (18/10/2026)</option>
-                    <option value="this_week">Tuần này</option>
-                    <option value="this_month" selected>Tháng này (Tháng 10/2026)</option>
-                    <option value="year">Cả năm 2026</option>
-                </select>
+                <div class="hidden md:flex items-center space-x-1 pl-6 border-l border-slate-700 text-sm">
+                    <a href="index.html" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">
+                        <i class="fa-solid fa-chart-pie mr-1 text-blue-400"></i> Dashboard
+                    </a>
+                    <a href="imei.html" class="px-3 py-1.5 rounded-lg bg-slate-800 text-white font-semibold">
+                        <i class="fa-solid fa-barcode mr-1 text-amber-400"></i> Quản lý IMEI
+                    </a>
+                    <a href="pos.html" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">
+                        <i class="fa-solid fa-cash-register mr-1 text-emerald-400"></i> Thu ngân POS
+                    </a>
+                    <a href="warehouse.html" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">
+                        <i class="fa-solid fa-boxes-stacked mr-1 text-indigo-400"></i> Kho hàng
+                    </a>
+                    <a href="import.html" class="px-3 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition">
+                        <i class="fa-solid fa-truck-ramp-box mr-1 text-sky-400"></i> Nhập hàng
+                    </a>
+                </div>
             </div>
 
-            <button onclick="reloadDashboardData()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm transition">
-                <i class="fa-solid fa-arrows-rotate"></i>
-                <span>Nạp lại</span>
-            </button>
+            <!-- Profile & Quick Actions -->
+            <div class="flex items-center gap-3">
+                <button onclick="openWarrantyModal()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg text-xs flex items-center gap-1.5 shadow-sm transition">
+                    <i class="fa-solid fa-shield-halved"></i> Tra cứu bảo hành
+                </button>
+                <button onclick="openAddImeiModal()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-xs flex items-center gap-1.5 shadow-sm transition">
+                    <i class="fa-solid fa-plus"></i> Quét nhập lô IMEI
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- BANNER THÔNG BÁO LOADING / READY -->
-    <div id="loadingStatusBanner" class="bg-blue-50 border-b border-blue-200 px-6 py-2.5 flex items-center justify-between text-xs text-blue-800 transition-all duration-300">
+    <!-- BANNER TRẠNG THÁI LOADING -->
+    <div id="loadingStatusBanner" class="bg-amber-50 border-b border-amber-200 px-6 py-2.5 flex items-center justify-between text-xs text-amber-900 transition-all duration-300">
         <div class="flex items-center gap-2 font-medium">
-            <i class="fa-solid fa-circle-notch fa-spin text-blue-600 text-sm" id="bannerSpinner"></i>
-            <span id="bannerText">Đang tải và đồng bộ dữ liệu từ CSDL MySQL `quanly_cuahang_dienthoai`...</span>
+            <i class="fa-solid fa-circle-notch fa-spin text-amber-600 text-sm" id="bannerSpinner"></i>
+            <span id="bannerText">Đang tải danh sách 12 mã IMEI từ bảng `imei_san_pham`...</span>
         </div>
-        <span class="text-slate-500 font-mono" id="syncTimestamp">Vừa cập nhật: Đang kết nối...</span>
+        <button onclick="reloadImeiData()" class="text-xs bg-white border border-amber-300 px-2.5 py-1 rounded-md text-amber-800 hover:bg-amber-100 font-semibold transition flex items-center gap-1">
+            <i class="fa-solid fa-rotate-right"></i> Tải lại CSDL
+        </button>
     </div>
 
-    <div class="p-6 space-y-6 max-w-7xl mx-auto w-full">
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
 
-        <!-- 1. CÁC THẺ CHỈ SỐ KPI (Cards) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-
-            <!-- Card 1: Doanh thu thuần -->
-            <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Doanh thu thuần</span>
-                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
-                        <i class="fa-solid fa-sack-dollar text-lg"></i>
+        <!-- THANH CÔNG CỤ TÌM KIẾM / QUÉT IMEI -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+                
+                <!-- Ô Quét Mã IMEI (Đặc trưng SUNO / POS365) -->
+                <div class="relative flex-1">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-barcode text-lg text-amber-500"></i>
                     </div>
-                </div>
-                <div class="mt-3">
-                    <div id="kpiRevenueSkeleton" class="skeleton h-8 w-36 rounded mb-1"></div>
-                    <h3 id="kpiRevenue" class="hidden text-2xl font-extrabold text-slate-900 tracking-tight">55.480.500 đ</h3>
-                    <p class="text-xs text-emerald-600 flex items-center gap-1 mt-1 font-semibold">
-                        <i class="fa-solid fa-arrow-trend-up"></i> +18.4% so với tháng trước
-                    </p>
-                </div>
-                <div class="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"></div>
-            </div>
-
-            <!-- Card 2: Đơn hàng hoàn tất -->
-            <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Đơn hàng thành công</span>
-                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
-                        <i class="fa-solid fa-receipt text-lg"></i>
-                    </div>
-                </div>
-                <div class="mt-3">
-                    <div id="kpiOrdersSkeleton" class="skeleton h-8 w-20 rounded mb-1"></div>
-                    <h3 id="kpiOrders" class="hidden text-2xl font-extrabold text-slate-900 tracking-tight">2 đơn</h3>
-                    <p class="text-xs text-slate-500 mt-1">
-                        100% thanh toán qua POS & QR
-                    </p>
-                </div>
-                <div class="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500"></div>
-            </div>
-
-            <!-- Card 3: Số điện thoại bán ra -->
-            <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Số máy đã xuất kho</span>
-                    <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
-                        <i class="fa-solid fa-mobile-screen text-lg"></i>
-                    </div>
-                </div>
-                <div class="mt-3">
-                    <div id="kpiPhonesSkeleton" class="skeleton h-8 w-24 rounded mb-1"></div>
-                    <h3 id="kpiPhones" class="hidden text-2xl font-extrabold text-slate-900 tracking-tight">2 thiết bị</h3>
-                    <p class="text-xs text-purple-600 font-semibold mt-1">
-                        Đã gán 2 mã IMEI hợp lệ
-                    </p>
-                </div>
-                <div class="absolute bottom-0 left-0 right-0 h-1 bg-purple-500"></div>
-            </div>
-
-            <!-- Card 4: Cảnh báo tồn kho an toàn -->
-            <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm relative overflow-hidden">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-amber-700 uppercase tracking-wider">Cảnh báo tồn kho</span>
-                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
-                        <i class="fa-solid fa-triangle-exclamation text-lg"></i>
-                    </div>
-                </div>
-                <div class="mt-3">
-                    <div id="kpiAlertSkeleton" class="skeleton h-8 w-28 rounded mb-1"></div>
-                    <h3 id="kpiAlert" class="hidden text-2xl font-extrabold text-amber-600 tracking-tight">4 dòng máy</h3>
-                    <p class="text-xs text-amber-700 font-medium mt-1">
-                        Cần lập phiếu nhập kho gấp
-                    </p>
-                </div>
-                <div class="absolute bottom-0 left-0 right-0 h-1 bg-amber-500"></div>
-            </div>
-
-        </div>
-
-        <!-- 2. KHU VỰC BIỂU ĐỒ (Chart.js) -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Biểu đồ Doanh thu (Chiếm 2 cột) -->
-            <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm lg:col-span-2">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 class="font-bold text-base text-slate-800">Biểu đồ tăng trưởng doanh thu (Tháng 10/2026)</h3>
-                        <p class="text-xs text-slate-500">Dữ liệu từ bảng <span class="font-mono text-blue-600">hoa_don</span> và View <span class="font-mono text-blue-600">v_thong_ke_doanh_thu</span></p>
-                    </div>
-                    <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 font-semibold text-xs rounded-lg border border-emerald-200">
-                            Đạt 110% chỉ tiêu
-                        </span>
-                </div>
-
-                <div id="chartSkeleton" class="skeleton h-72 w-full rounded-xl"></div>
-                <div id="chartContainer" class="hidden h-72">
-                    <canvas id="revenueChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Biểu đồ Cơ cấu doanh số theo Hãng (1 cột) -->
-            <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 class="font-bold text-base text-slate-800">Tỷ trọng theo hãng</h3>
-                        <p class="text-xs text-slate-500">Apple vs Samsung vs Khác</p>
-                    </div>
-                </div>
-
-                <div id="doughnutSkeleton" class="skeleton h-56 w-full rounded-xl"></div>
-                <div id="doughnutContainer" class="hidden h-56 flex items-center justify-center">
-                    <canvas id="brandDoughnutChart"></canvas>
-                </div>
-
-                <div class="mt-4 pt-3 border-t border-slate-100 flex justify-around text-xs font-medium">
-                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-500"></span> Apple (51.3%)</span>
-                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-indigo-500"></span> Samsung (48.7%)</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. DANH SÁCH BẢNG CHI TIẾT (Best Sellers & Cảnh báo tồn kho) -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-            <!-- Bảng 1: Top sản phẩm bán chạy (Best-Seller - Use Case 2.16.1.1) -->
-            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-                <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm">
-                            <i class="fa-solid fa-fire"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-sm text-slate-900">Sản phẩm bán chạy nhất</h3>
-                            <p class="text-xs text-slate-500">Dữ liệu từ View: <code class="text-blue-600">v_top_san_pham_ban_chay</code></p>
-                        </div>
-                    </div>
-                    <span class="text-xs text-blue-600 font-semibold cursor-pointer hover:underline">Xem tất cả</span>
-                </div>
-
-                <!-- Skeleton loader -->
-                <div id="tableBestSellerSkeleton" class="p-5 space-y-3">
-                    <div class="skeleton h-10 w-full rounded-lg"></div>
-                    <div class="skeleton h-10 w-full rounded-lg"></div>
-                    <div class="skeleton h-10 w-full rounded-lg"></div>
-                </div>
-
-                <!-- Real Data Table -->
-                <div id="tableBestSellerContent" class="hidden overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-xs">
-                        <thead class="bg-slate-100/75 text-slate-600 uppercase font-semibold">
-                        <tr>
-                            <th class="py-3 px-4">Tên sản phẩm</th>
-                            <th class="py-3 px-3 text-center">Hãng</th>
-                            <th class="py-3 px-3 text-center">Đã bán</th>
-                            <th class="py-3 px-3 text-right">Doanh thu</th>
-                            <th class="py-3 px-4 text-center">Tồn kho</th>
-                        </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 font-medium text-slate-700" id="bestSellerTbody">
-                        <!-- Rendered by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Bảng 2: Cảnh báo tồn kho an toàn (Use Case 2.6.1.2 & 2.16.3.2) -->
-            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-                <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-amber-50/40">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-sm">
-                            <i class="fa-solid fa-bell"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-sm text-amber-900">Cảnh báo tồn kho chạm định mức</h3>
-                            <p class="text-xs text-slate-500">Dữ liệu từ View: <code class="text-amber-600">v_canh_bao_ton_kho</code></p>
-                        </div>
-                    </div>
-                    <button class="px-2.5 py-1 bg-amber-600 text-white text-xs font-semibold rounded-lg hover:bg-amber-700 transition">
-                        <i class="fa-solid fa-plus mr-1"></i> Nhập hàng
+                    <input 
+                        type="text" 
+                        id="imeiSearchInput" 
+                        oninput="handleSearchImei(this.value)"
+                        placeholder="Quét mã vạch hoặc gõ 15 số IMEI (VD: 358941091234561)..." 
+                        class="w-full pl-11 pr-24 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-mono text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition"
+                    >
+                    <button class="absolute inset-y-1.5 right-1.5 px-3 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-lg text-xs flex items-center gap-1 transition">
+                        <i class="fa-solid fa-camera"></i> Quét
                     </button>
                 </div>
 
-                <!-- Skeleton loader -->
-                <div id="tableStockAlertSkeleton" class="p-5 space-y-3">
-                    <div class="skeleton h-10 w-full rounded-lg"></div>
-                    <div class="skeleton h-10 w-full rounded-lg"></div>
-                    <div class="skeleton h-10 w-full rounded-lg"></div>
+                <!-- Thống kê nhanh trạng thái -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 text-xs font-semibold">
+                    <button onclick="filterStatus('all')" id="btnFilterAll" class="px-3 py-2 rounded-xl bg-slate-900 text-white shadow-sm transition">
+                        Tất cả (<span id="countAll">12</span>)
+                    </button>
+                    <button onclick="filterStatus('Trong_kho')" id="btnFilterInStock" class="px-3 py-2 rounded-xl bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition">
+                        <i class="fa-solid fa-box-archive mr-1"></i> Trong kho (<span id="countInStock">10</span>)
+                    </button>
+                    <button onclick="filterStatus('Da_ban')" id="btnFilterSold" class="px-3 py-2 rounded-xl bg-blue-100 text-blue-800 hover:bg-blue-200 transition">
+                        <i class="fa-solid fa-bag-shopping mr-1"></i> Đã bán (<span id="countSold">2</span>)
+                    </button>
+                    <button onclick="filterStatus('Dang_bao_hanh')" id="btnFilterWarranty" class="px-3 py-2 rounded-xl bg-amber-100 text-amber-800 hover:bg-amber-200 transition">
+                        <i class="fa-solid fa-wrench mr-1"></i> Bảo hành (<span id="countWarranty">1</span>)
+                    </button>
                 </div>
 
-                <!-- Real Data Table -->
-                <div id="tableStockAlertContent" class="hidden overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-xs">
-                        <thead class="bg-slate-100/75 text-slate-600 uppercase font-semibold">
+            </div>
+
+            <!-- Gợi ý Use Case nghiệp vụ -->
+            <div class="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-200/60">
+                <i class="fa-solid fa-circle-info text-blue-500"></i>
+                <span><strong>Nghiệp vụ Use Case 2.5.2.1.1 & 2.13.1.1:</strong> Quản lý danh tính từng chiếc máy. Mỗi khi bán hoặc tiếp nhận sửa chữa, hệ thống kiểm tra trạng thái IMEI tức thì.</span>
+            </div>
+        </div>
+
+        <!-- BẢNG DANH SÁCH MÃ IMEI (DATA TABLE) -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            
+            <!-- Skeleton Loading Table -->
+            <div id="tableSkeleton" class="p-6 space-y-4">
+                <div class="skeleton h-10 w-full rounded-lg"></div>
+                <div class="skeleton h-12 w-full rounded-lg"></div>
+                <div class="skeleton h-12 w-full rounded-lg"></div>
+                <div class="skeleton h-12 w-full rounded-lg"></div>
+                <div class="skeleton h-12 w-full rounded-lg"></div>
+            </div>
+
+            <!-- Real Data Table -->
+            <div id="tableContent" class="hidden overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead class="bg-slate-100 text-slate-700 uppercase font-bold tracking-wider">
                         <tr>
-                            <th class="py-3 px-4">Tên dòng máy</th>
-                            <th class="py-3 px-3 text-center">Tồn hiện tại</th>
-                            <th class="py-3 px-3 text-center">Định mức</th>
-                            <th class="py-3 px-4 text-center">Tình trạng</th>
+                            <th class="py-3.5 px-4">Mã IMEI (15 số)</th>
+                            <th class="py-3.5 px-4">Sản phẩm / Dòng máy</th>
+                            <th class="py-3.5 px-3 text-center">Màu sắc / ROM</th>
+                            <th class="py-3.5 px-3 text-center">Trạng thái</th>
+                            <th class="py-3.5 px-3 text-center">Phiếu nhập</th>
+                            <th class="py-3.5 px-3 text-center">Hóa đơn bán</th>
+                            <th class="py-3.5 px-3 text-center">Hạn bảo hành</th>
+                            <th class="py-3.5 px-4 text-center">Hành động</th>
                         </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 font-medium text-slate-700" id="stockAlertTbody">
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 font-medium text-slate-700" id="imeiTbody">
                         <!-- Rendered by JS -->
-                        </tbody>
-                    </table>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden py-16 text-center text-slate-400 space-y-3">
+                <i class="fa-solid fa-barcode text-5xl text-slate-300"></i>
+                <p class="text-sm font-semibold">Không tìm thấy mã IMEI nào phù hợp với bộ lọc!</p>
+                <button onclick="handleSearchImei(''); document.getElementById('imeiSearchInput').value='';" class="text-xs text-blue-600 hover:underline">
+                    Xóa điều kiện tìm kiếm
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL 1: TRA CỨU BẢO HÀNH THEO IMEI (Use Case 2.13.1.1) -->
+    <div id="warrantyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in zoom-in duration-200">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3 class="font-bold text-base text-slate-900">Tra cứu thông tin bảo hành máy</h3>
+                </div>
+                <button onclick="closeWarrantyModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <label class="block text-xs font-bold text-slate-700 uppercase">Nhập mã IMEI hoặc Số điện thoại mua hàng</label>
+                <div class="flex gap-2">
+                    <input type="text" id="warrantySearchInput" value="358941091234561" placeholder="Nhập mã IMEI..." class="flex-1 px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-mono text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    <button onclick="doCheckWarranty()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 font-bold text-slate-950 rounded-xl text-xs transition">
+                        Kiểm tra
+                    </button>
                 </div>
             </div>
 
+            <!-- Kết quả tra cứu -->
+            <div id="warrantyResultBox" class="bg-slate-50 rounded-xl p-4 border border-slate-200 text-xs space-y-2.5">
+                <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                    <span class="font-bold text-slate-700" id="resModel">iPhone 15 Pro Max 256GB</span>
+                    <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800" id="resStatusBadge">Còn hạn bảo hành</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-slate-600">
+                    <div>Mã IMEI: <span class="font-mono font-bold text-slate-900" id="resImei">358941091234561</span></div>
+                    <div>Màu sắc: <span class="font-semibold text-slate-900" id="resColor">Titan Tự Nhiên</span></div>
+                    <div>Khách hàng: <span class="font-semibold text-slate-900" id="resCustomer">Trần Văn An</span></div>
+                    <div>Hóa đơn mua: <span class="font-semibold text-blue-600" id="resInvoice">HD20261012_001</span></div>
+                    <div>Ngày mua: <span class="font-semibold text-slate-900" id="resBuyDate">12/10/2026</span></div>
+                    <div>Hạn BH đến: <span class="font-semibold text-rose-600" id="resExpireDate">12/10/2027 (12 tháng)</span></div>
+                </div>
+
+                <!-- Lịch sử bảo hành gần nhất -->
+                <div class="mt-3 pt-2.5 border-t border-slate-200">
+                    <span class="font-bold text-slate-800 block mb-1">Phiếu bảo hành đang xử lý:</span>
+                    <div class="p-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-900">
+                        <div class="flex justify-between font-semibold">
+                            <span>Mã PBH: PBH20261016_01</span>
+                            <span class="text-amber-700">Chờ trả khách</span>
+                        </div>
+                        <p class="mt-0.5 text-slate-600">Lỗi: Loa trong bị rè - Đã vệ sinh màng loa âm tầng.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeWarrantyModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs transition">
+                    Đóng
+                </button>
+            </div>
         </div>
-
-        <!-- FOOTER ĐỒ ÁN -->
-        <footer class="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
-            <p>Đồ án PTTKHĐT - Đại học Sài Gòn (SGU) | GVHD: Thầy Hoàng Mạnh Hà | Nhóm 05</p>
-            <p class="flex items-center gap-2">
-                <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-                Phiên bản thử nghiệm giao diện Dashboard kết nối CSDL MySQL XAMPP
-            </p>
-        </footer>
-
     </div>
-</main>
 
-<!-- SCRIPT XỬ LÝ LOADING STATE VÀ DỮ LIỆU TỪ CSDL -->
-<script src="script.js"></script>
+    <!-- MODAL 2: QUÉT NHẬP LÔ IMEI (Use Case 2.5.2.1.1) -->
+    <div id="addImeiModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-base text-slate-900">Quét / Nhập danh sách mã IMEI mới</h3>
+                <button onclick="closeAddImeiModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Chọn sản phẩm nhập kho</label>
+                    <select class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option>iPhone 15 Pro Max 256GB Titan Tự Nhiên</option>
+                        <option>Samsung Galaxy S24 Ultra 256GB Xám Titan</option>
+                        <option>Xiaomi 14 256GB Trắng Tuyết</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Mã phiếu nhập</label>
+                    <input type="text" value="PN20261018_NEW" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-xl font-mono text-slate-600">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Quét mã IMEI (Mỗi dòng 1 mã 15 số)</label>
+                    <textarea rows="4" placeholder="358941091234570&#10;358941091234571" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button onclick="closeAddImeiModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs">Hủy</button>
+                <button onclick="alert('Đã giả lập nạp mã IMEI vào CSDL!'); closeAddImeiModal();" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-xs">Lưu vào kho</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT CHỨC NĂNG -->
+    <script src="assets/js/imei.js"></script>
 </body>
 </html>
