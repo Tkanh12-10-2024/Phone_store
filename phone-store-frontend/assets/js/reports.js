@@ -51,7 +51,6 @@
         });
     }
 
-    // Accessible Tabs management with hidden="until-found"
     function activateTab(tabId) {
         state.activeTab = tabId;
         const tabs = document.querySelectorAll('button[role="tab"]');
@@ -68,7 +67,12 @@
         if (tabId === 'tab-revenue') loadRevenueStats();
         else if (tabId === 'tab-products') loadProductStats();
         else if (tabId === 'tab-inventory') loadInventoryStats();
-        else if (tabId === 'tab-export') loadReportHistory();
+        else if (tabId === 'tab-export') {
+            loadReportHistory();
+            if (!state.lastPreview) {
+                handlePreviewReport(null, false);
+            }
+        }
     }
 
     async function loadSharedDropdowns() {
@@ -94,7 +98,7 @@
         }
     }
 
-    // ================= UC-25 REVENUE =================
+    // ================= REVENUE STATISTICS =================
     async function loadRevenueStats() {
         const from = $('revFromDate').value;
         const to = $('revToDate').value;
@@ -208,7 +212,7 @@
         }).join('');
     }
 
-    // ================= UC-26 PRODUCT STATS =================
+    // ================= PRODUCT STATS =================
     async function loadProductStats() {
         const brand = $('prodBrandFilter').value;
         const from = $('prodFromDate').value;
@@ -304,7 +308,7 @@
         }).join('');
     }
 
-    // ================= UC-27 INVENTORY STATS =================
+    // ================= INVENTORY STATS =================
     async function loadInventoryStats() {
         const qs = new URLSearchParams();
         if ($('invBrand').value) qs.set('maThuongHieu', $('invBrand').value);
@@ -402,7 +406,7 @@
         }).join('');
     }
 
-    // ================= UC-28 REPORT BUILDER & EXPORT =================
+    // ================= REPORT BUILDER & A4 PREVIEW =================
     function buildReportPayload(format) {
         return {
             loaiBaoCao: $('repTemplate').value,
@@ -415,7 +419,7 @@
         };
     }
 
-    async function handlePreviewReport(e) {
+    async function handlePreviewReport(e, shouldOpenModal = true) {
         if (e) e.preventDefault();
         try {
             const preview = await apiRequest('/reports/preview', {
@@ -424,6 +428,10 @@
             });
             state.lastPreview = preview;
             renderInlinePreview(preview);
+            if (shouldOpenModal) {
+                openA4Modal();
+                showStatus(`Đã tổng hợp thành công: ${preview.tieuDeBaoCao}`);
+            }
         } catch (err) {
             showStatus(err.message, true);
         }
@@ -433,15 +441,18 @@
         $('inlinePreviewBox').classList.remove('hidden');
         $('previewTitle').textContent = p.tieuDeBaoCao;
         $('previewMeta').textContent = `${p.phamViLoc} • Người lập: ${p.nguoiLap} • Ngày lập: ${new Date(p.ngayLap).toLocaleString('vi-VN')}`;
+        if ($('previewStaffSign')) {
+            $('previewStaffSign').textContent = p.nguoiLap || 'Hoàng Mạnh Hà';
+        }
 
         $('previewThead').innerHTML = `
-            <tr class="bg-slate-900 text-white text-xs uppercase">
-                ${(p.columns || []).map((c) => `<th scope="col" class="px-4 py-3 font-bold">${escapeHtml(c)}</th>`).join('')}
+            <tr class="bg-slate-800 text-white text-xs uppercase">
+                ${(p.columns || []).map((c) => `<th scope="col" class="border border-slate-700 px-3.5 py-2.5 font-bold">${escapeHtml(c)}</th>`).join('')}
             </tr>`;
 
         const rows = p.rows || [];
         $('previewTbody').innerHTML = rows.length
-            ? rows.map((line) => `<tr class="hover:bg-slate-50">${line.map((cell) => `<td class="px-4 py-2.5">${escapeHtml(cell)}</td>`).join('')}</tr>`).join('')
+            ? rows.map((line) => `<tr class="hover:bg-slate-50">${line.map((cell) => `<td class="border border-slate-200 px-3.5 py-2">${escapeHtml(cell)}</td>`).join('')}</tr>`).join('')
             : `<tr><td colspan="${(p.columns || []).length || 1}" class="px-4 py-8 text-center text-slate-400">Không có dữ liệu phát sinh trong kỳ báo cáo.</td></tr>`;
 
         const summaryEntries = Object.entries(p.summary || {});
@@ -452,28 +463,27 @@
             </div>`).join('');
     }
 
-    function openA4Modal() {
-        const p = state.lastPreview;
-        if (!p) return;
+    function buildA4SheetHtml(p) {
         const rows = p.rows || [];
-        $('a4DialogBody').innerHTML = `
+        return `
             <div class="flex justify-between items-start border-b-2 border-slate-900 pb-4">
                 <div>
                     <h3 class="text-base font-extrabold text-blue-800">CỬA HÀNG ĐIỆN THOẠI PHONESTORE PRO</h3>
-                    <p class="text-xs text-slate-600">273 An Dương Vương, Q.5, TP.HCM • Hotline: 1900 8888</p>
+                    <p class="text-xs text-slate-600">273 An Dương Vương, Quận 5, TP.HCM • Hotline: 1900 8888</p>
                 </div>
-                <div class="text-right text-xs text-slate-600">
-                    <p>Mẫu: <strong>${escapeHtml(p.loaiBaoCao)}</strong></p>
-                    <p>Ngày in: ${new Date(p.ngayLap).toLocaleString('vi-VN')}</p>
+                <div class="text-right text-xs text-slate-700">
+                    <p class="font-bold">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
+                    <p class="italic">Độc lập - Tự do - Hạnh phúc</p>
+                    <p class="text-[11px] text-slate-500 mt-1">Ngày xuất: ${new Date(p.ngayLap).toLocaleString('vi-VN')}</p>
                 </div>
             </div>
-            <div class="text-center space-y-1">
+            <div class="text-center space-y-1 my-4">
                 <h3 class="text-lg font-extrabold text-slate-900 uppercase">${escapeHtml(p.tieuDeBaoCao)}</h3>
                 <p class="text-xs text-slate-600">${escapeHtml(p.phamViLoc)}</p>
             </div>
-            <table class="w-full border-collapse border border-slate-300 text-xs">
+            <table class="w-full border-collapse border border-slate-300 text-xs my-4">
                 <thead>
-                <tr class="bg-slate-100">
+                <tr class="bg-slate-100 text-slate-800">
                     ${(p.columns || []).map((c) => `<th class="border border-slate-300 px-2.5 py-2 text-left font-bold">${escapeHtml(c)}</th>`).join('')}
                 </tr>
                 </thead>
@@ -483,7 +493,7 @@
                     : `<tr><td colspan="${(p.columns || []).length || 1}" class="border border-slate-300 px-4 py-6 text-center text-slate-400">Không có dữ liệu</td></tr>`}
                 </tbody>
             </table>
-            <div class="border border-slate-300 rounded-lg p-3 bg-slate-50 space-y-1 text-xs">
+            <div class="border border-slate-300 rounded-lg p-3 bg-slate-50 space-y-1 text-xs my-4">
                 ${Object.entries(p.summary || {}).map(([k, v]) => `<div class="flex justify-between"><span>${escapeHtml(k)}:</span><strong>${escapeHtml(v)}</strong></div>`).join('')}
             </div>
             <div class="grid grid-cols-2 gap-8 pt-6 text-center text-xs">
@@ -498,7 +508,48 @@
                     <p class="mt-12 text-slate-500">Ngày ..... tháng ..... năm .....</p>
                 </div>
             </div>`;
+    }
+
+    function openA4Modal() {
+        const p = state.lastPreview;
+        if (!p) return;
+        $('a4DialogBody').innerHTML = buildA4SheetHtml(p);
         $('a4PreviewDialog').showModal();
+    }
+
+    function printCleanA4Sheet() {
+        const p = state.lastPreview;
+        if (!p) {
+            handlePreviewReport(null, true);
+            return;
+        }
+        const sheetHtml = buildA4SheetHtml(p);
+        const printWin = window.open('', '_blank', 'width=900,height=780');
+        if (!printWin) {
+            window.print();
+            return;
+        }
+        printWin.document.write(`<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>${escapeHtml(p.tieuDeBaoCao)}</title>
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <style>
+        @page { size: A4; margin: 15mm; }
+        body { font-family: Arial, sans-serif; background: #ffffff; color: #0f172a; padding: 16px; }
+    </style>
+</head>
+<body>
+    ${sheetHtml}
+    <script>
+        window.onload = function() {
+            setTimeout(function() { window.print(); }, 300);
+        };
+    <\/script>
+</body>
+</html>`);
+        printWin.document.close();
     }
 
     async function downloadBinaryReport(type) {
@@ -620,7 +671,6 @@
         $('repFromDate').value = toIsoDate(sixtyDaysAgo);
         $('repToDate').value = toIsoDate(today);
 
-        // Tabs click & keyboard arrow support
         const tabButtons = Array.from(document.querySelectorAll('button[role="tab"]'));
         tabButtons.forEach((btn, idx) => {
             btn.addEventListener('click', () => activateTab(btn.id));
@@ -646,9 +696,18 @@
         $('prodBrandFilter').addEventListener('change', loadProductStats);
         $('invFilterForm').addEventListener('submit', (e) => { e.preventDefault(); loadInventoryStats(); });
         $('invOnlyAlert').addEventListener('change', loadInventoryStats);
-        $('reportConfigForm').addEventListener('submit', handlePreviewReport);
+
+        // Clicking "Tổng hợp & Xem trước A4" synthesizes data AND opens the A4 Preview Modal immediately
+        $('reportConfigForm').addEventListener('submit', (e) => handlePreviewReport(e, true));
+        $('repTemplate').addEventListener('change', () => handlePreviewReport(null, false));
         $('btnOpenA4Modal').addEventListener('click', openA4Modal);
         $('btnCloseA4Modal').addEventListener('click', () => $('a4PreviewDialog').close());
+        if ($('btnPrintInlineA4')) {
+            $('btnPrintInlineA4').addEventListener('click', printCleanA4Sheet);
+        }
+        if ($('btnPrintModalA4')) {
+            $('btnPrintModalA4').addEventListener('click', printCleanA4Sheet);
+        }
         $('btnExportExcel').addEventListener('click', () => downloadBinaryReport('excel'));
         $('btnExportPdf').addEventListener('click', () => downloadBinaryReport('pdf'));
 
@@ -659,7 +718,6 @@
 
         await loadSharedDropdowns();
         await loadRevenueStats();
-        await handlePreviewReport();
+        await handlePreviewReport(null, false);
     });
 })();
-

@@ -556,6 +556,18 @@
         $('btnCloseVoucherError').addEventListener('click', () => $('voucherErrorDialog').close());
         $('btnCloseInvoiceModal').addEventListener('click', () => $('invoiceModal').close());
         $('btnDoneInvoiceModal').addEventListener('click', () => $('invoiceModal').close());
+        if ($('btnPrintInvoice')) {
+            $('btnPrintInvoice').addEventListener('click', () => {
+                const html = $('invoiceDetails').innerHTML;
+                const w = window.open('', '_blank', 'width=800,height=700');
+                if (!w) { window.print(); return; }
+                w.document.write(`<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><title>In hóa đơn</title>
+                    <script src="https://cdn.tailwindcss.com"><\/script>
+                    <style>body{font-family:sans-serif;padding:24px;color:#0f172a;background:#fff;}</style>
+                    </head><body>${html}<script>window.onload=()=>{setTimeout(()=>{window.print();},250);};<\/script></body></html>`);
+                w.document.close();
+            });
+        }
         $('btnRecentInvoices').addEventListener('click', openRecentInvoicesModal);
         $('btnCloseRecentInvoices').addEventListener('click', () => $('recentInvoicesDialog').close());
 

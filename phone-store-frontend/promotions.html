@@ -6,9 +6,25 @@
     <title>Quản Lý Khuyến Mãi &amp; Voucher - PhoneStore Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#2563eb',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            900: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .table-scroll { overflow-x: auto; }
         .table-scroll:focus-visible,
         button:focus-visible,
@@ -21,210 +37,241 @@
         }
         dialog:modal {
             overscroll-behavior: contain;
+            margin: auto;
         }
         dialog::backdrop {
             background: rgba(15, 23, 42, 0.55);
-            backdrop-filter: blur(3px);
             overflow: hidden;
             overscroll-behavior: contain;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased overflow-x-hidden">
-<div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col fixed inset-y-0 left-0 z-30 shrink-0 shadow-2xl">
-        <div class="h-16 flex items-center px-6 bg-slate-950 border-b border-slate-800/80 gap-3">
-            <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-blue-600/30">
-                <i class="fa-solid fa-mobile-screen-button text-lg"></i>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col lg:flex-row">
+
+<!-- SIDEBAR BÊN TRÁI (Đồng nhất 100% với Dashboard) -->
+<aside class="w-full lg:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between shadow-xl">
+    <div>
+        <!-- Logo Cửa hàng -->
+        <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                <i class="fa-solid fa-mobile-screen-button text-xl"></i>
             </div>
             <div>
-                <span class="text-white font-bold text-lg tracking-tight">PhoneStore</span>
-                <span class="text-[10px] bg-blue-500/20 text-blue-400 font-bold px-1.5 py-0.5 rounded ml-1 uppercase">Pro</span>
+                <p class="font-bold text-white text-base leading-tight">PhoneStore Pro</p>
+                <span class="text-xs text-blue-400 font-medium">Hệ Thống SGU - Nhóm 05</span>
             </div>
         </div>
 
-        <nav aria-label="Menu chính" class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
-            <div class="px-3 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Tổng quan</div>
-            <a href="index.html" class="flex items-center gap-3 px-3.5 py-2.5 text-slate-400 hover:bg-slate-800/70 hover:text-white rounded-xl font-medium transition-colors">
+        <!-- Profile vắn tắt -->
+        <div class="p-4 mx-3 my-3 bg-slate-800/60 rounded-xl border border-slate-700/50 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center text-white font-bold text-sm">
+                AD
+            </div>
+            <div class="overflow-hidden">
+                <p class="text-sm font-semibold text-white truncate">Lê Tạ Khánh</p>
+                <p class="text-xs text-emerald-400 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Quản lý cửa hàng
+                </p>
+            </div>
+        </div>
+
+        <!-- Menu Điều hướng -->
+        <nav aria-label="Menu chính" class="px-3 space-y-1 text-sm font-medium">
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
                 <i class="fa-solid fa-chart-pie w-5 text-center"></i>
-                <span>Dashboard</span>
+                <span>Tổng quan (Dashboard)</span>
             </a>
-
-            <div class="px-3 mt-6 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Bán hàng &amp; Nghiệp vụ</div>
-            <a href="pos.html" class="flex items-center gap-3 px-3.5 py-2.5 text-slate-400 hover:bg-slate-800/70 hover:text-white rounded-xl font-medium transition-colors">
-                <i class="fa-solid fa-cash-register w-5 text-center"></i>
-                <span>Bán hàng (POS)</span>
+            <a href="pos.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-cash-register w-5 text-center text-emerald-400"></i>
+                <span>Bán hàng nhanh POS</span>
+                <span class="ml-auto text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-semibold">Live</span>
             </a>
-            <a href="imei.html" class="flex items-center gap-3 px-3.5 py-2.5 text-slate-400 hover:bg-slate-800/70 hover:text-white rounded-xl font-medium transition-colors">
-                <i class="fa-solid fa-barcode w-5 text-center"></i>
-                <span>Tra cứu IMEI &amp; BH</span>
+            <a href="imei.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-barcode w-5 text-center text-amber-400"></i>
+                <span>Quản lý IMEI &amp; Serial</span>
             </a>
-
-            <div class="px-3 mt-6 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Kho &amp; Sản phẩm</div>
-            <a href="warehouse.html" class="flex items-center gap-3 px-3.5 py-2.5 text-slate-400 hover:bg-slate-800/70 hover:text-white rounded-xl font-medium transition-colors">
-                <i class="fa-solid fa-boxes-stacked w-5 text-center"></i>
-                <span>Quản lý Kho</span>
+            <a href="warehouse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-boxes-stacked w-5 text-center text-indigo-400"></i>
+                <span>Quản lý kho hàng</span>
             </a>
-            <a href="import.html" class="flex items-center gap-3 px-3.5 py-2.5 text-slate-400 hover:bg-slate-800/70 hover:text-white rounded-xl font-medium transition-colors">
-                <i class="fa-solid fa-truck-ramp-box w-5 text-center"></i>
-                <span>Nhập hàng &amp; NCC</span>
+            <a href="import.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-truck-ramp-box w-5 text-center text-amber-400"></i>
+                <span>Quản lý nhập hàng</span>
             </a>
-
-            <div class="px-3 mt-6 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Quản trị</div>
-            <a href="promotions.html" aria-current="page" class="flex items-center gap-3 px-3.5 py-2.5 bg-blue-600 text-white rounded-xl font-semibold shadow-md shadow-blue-600/20">
-                <i class="fa-solid fa-tags w-5 text-center"></i>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-users w-5 text-center text-sky-400"></i>
+                <span>Khách hàng &amp; Bảo hành</span>
+            </a>
+            <a href="promotions.html" aria-current="page" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white shadow-md shadow-blue-600/30">
+                <i class="fa-solid fa-tags w-5 text-center text-white"></i>
                 <span>Khuyến mãi / Voucher</span>
             </a>
-            <a href="employee.html" class="flex items-center gap-3 px-3.5 py-2.5 text-slate-400 hover:bg-slate-800/70 hover:text-white rounded-xl font-medium transition-colors">
-                <i class="fa-solid fa-users-gear w-5 text-center"></i>
-                <span>Nhân viên &amp; Quyền</span>
+            <a href="employee.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-users-gear w-5 text-center text-purple-400"></i>
+                <span>Quản lý nhân viên</span>
             </a>
-            <a href="reports.html" class="flex items-center gap-3 px-3.5 py-2.5 text-slate-400 hover:bg-slate-800/70 hover:text-white rounded-xl font-medium transition-colors">
-                <i class="fa-solid fa-file-invoice-dollar w-5 text-center"></i>
+            <a href="reports.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-file-lines w-5 text-center text-purple-400"></i>
                 <span>Báo cáo &amp; Thống kê</span>
             </a>
         </nav>
-    </aside>
-
-    <!-- Main workspace -->
-    <div class="flex-1 ml-64 flex flex-col min-h-screen min-w-0">
-        <header class="h-16 bg-white/90 backdrop-blur border-b border-slate-200 px-8 flex items-center justify-between sticky top-0 z-20">
-            <div>
-                <h1 class="text-xl font-extrabold text-slate-900">Quản Lý Chương Trình Khuyến Mãi &amp; Voucher</h1>
-                <p class="text-xs text-slate-500">UC-23 • Tạo mã giảm giá, thiết lập điều kiện &amp; theo dõi cảnh báo hết hạn/hết lượt</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <button type="button" id="btnRefreshPromos"
-                        class="min-h-[38px] px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-semibold transition flex items-center gap-2">
-                    <i class="fa-solid fa-rotate"></i>
-                    <span>Làm mới</span>
-                </button>
-                <button type="button" id="btnOpenCreateModal"
-                        class="min-h-[38px] px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-600/20 transition flex items-center gap-2">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Tạo khuyến mãi mới</span>
-                </button>
-            </div>
-        </header>
-
-        <main class="p-8 space-y-6 flex-1">
-            <!-- Single status announcement region -->
-            <div id="promoLiveStatus" role="status" aria-live="polite"
-                 class="hidden rounded-xl px-4 py-3 text-sm font-medium border"></div>
-
-            <!-- Auto Alert Banner (UC 2.14.1.4) -->
-            <section id="promoAlertSection" aria-labelledby="promoAlertTitle" class="hidden">
-                <div class="bg-gradient-to-r from-red-50 via-amber-50 to-orange-50 border border-red-200 rounded-2xl p-5 shadow-sm">
-                    <div class="flex items-center justify-between gap-4 mb-3">
-                        <div class="flex items-center gap-3">
-                            <span class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-sm">
-                                <i class="fa-solid fa-bell"></i>
-                            </span>
-                            <div>
-                                <h2 id="promoAlertTitle" class="text-sm font-extrabold text-red-900 uppercase tracking-wide">
-                                    Cảnh báo chương trình khuyến mãi sắp hết hạn / sắp hết số lượng
-                                </h2>
-                                <p class="text-xs text-red-700">Các mã đang kích hoạt còn dưới 24 giờ hiệu lực hoặc dưới 5% số lượng phát hành</p>
-                            </div>
-                        </div>
-                        <span id="alertCountBadge" class="px-3 py-1 rounded-full bg-red-600 text-white text-xs font-bold">0 cảnh báo</span>
-                    </div>
-                    <div id="promoAlertCards" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-                </div>
-            </section>
-
-            <!-- KPI Cards -->
-            <section aria-label="Tổng quan khuyến mãi" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Tổng CTKM</p>
-                    <p id="kpiTotalPromos" class="text-2xl font-extrabold text-slate-900 mt-1">0</p>
-                </div>
-                <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Đang diễn ra</p>
-                    <p id="kpiActivePromos" class="text-2xl font-extrabold text-emerald-600 mt-1">0</p>
-                </div>
-                <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Cảnh báo (&lt;24h / &lt;5%)</p>
-                    <p id="kpiAlertPromos" class="text-2xl font-extrabold text-red-600 mt-1">0</p>
-                </div>
-                <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-                    <p class="text-xs font-semibold text-slate-500 uppercase">Tổng lượt đã áp dụng</p>
-                    <p id="kpiTotalUsed" class="text-2xl font-extrabold text-blue-600 mt-1">0</p>
-                </div>
-            </section>
-
-            <!-- Search & Filters -->
-            <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-                <search>
-                    <form id="promoFilterForm" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                        <div class="md:col-span-5">
-                            <label for="filterKeyword" class="block text-xs font-bold text-slate-700 mb-1.5">Tìm theo mã voucher hoặc tên chương trình</label>
-                            <input id="filterKeyword" type="search" placeholder="VD: CHAOTHU26, FLASH12H, iPhone..."
-                                   class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
-                        </div>
-                        <div class="md:col-span-3">
-                            <label for="filterStatus" class="block text-xs font-bold text-slate-700 mb-1.5">Trạng thái</label>
-                            <select id="filterStatus" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
-                                <option value="ALL">Tất cả trạng thái</option>
-                                <option value="Dang_dien_ra">Đang diễn ra</option>
-                                <option value="Tam_dung">Tạm dừng</option>
-                                <option value="Het_han">Hết hạn / Đã dừng</option>
-                            </select>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label for="filterType" class="block text-xs font-bold text-slate-700 mb-1.5">Loại ưu đãi</label>
-                            <select id="filterType" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
-                                <option value="ALL">Tất cả loại</option>
-                                <option value="Phan_tram">Giảm %</option>
-                                <option value="Tien_mat">Giảm tiền mặt</option>
-                                <option value="Qua_tang">Quà tặng / Combo</option>
-                            </select>
-                        </div>
-                        <div class="md:col-span-2 flex gap-2">
-                            <button type="submit" class="w-full min-h-[42px] bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-bold transition">
-                                <i class="fa-solid fa-magnifying-glass mr-1"></i> Lọc
-                            </button>
-                        </div>
-                    </form>
-                </search>
-            </section>
-
-            <!-- Promotions Table -->
-            <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                    <h2 id="promoTableHeading" class="text-base font-bold text-slate-900">Danh sách chương trình khuyến mãi</h2>
-                    <span id="promoCountText" class="text-xs font-semibold text-slate-500">0 chương trình</span>
-                </div>
-                <div class="table-scroll" tabindex="0" role="region" aria-labelledby="promoTableHeading">
-                    <table class="w-full text-left border-collapse min-w-[980px]">
-                        <caption class="sr-only">Bảng quản lý chương trình khuyến mãi và mã voucher</caption>
-                        <thead>
-                        <tr class="bg-slate-50 text-slate-600 text-xs uppercase border-b border-slate-200">
-                            <th scope="col" class="px-5 py-3.5 font-bold">Mã Voucher &amp; Tên CTKM</th>
-                            <th scope="col" class="px-4 py-3.5 font-bold">Hình thức &amp; Giá trị</th>
-                            <th scope="col" class="px-4 py-3.5 font-bold">Điều kiện áp dụng</th>
-                            <th scope="col" class="px-4 py-3.5 font-bold">Số lượng còn / Phát hành</th>
-                            <th scope="col" class="px-4 py-3.5 font-bold">Thời gian hiệu lực</th>
-                            <th scope="col" class="px-4 py-3.5 font-bold">Trạng thái</th>
-                            <th scope="col" class="px-5 py-3.5 font-bold text-right">Thao tác</th>
-                        </tr>
-                        </thead>
-                        <tbody id="promoTableBody" class="divide-y divide-slate-100 text-sm">
-                        <tr>
-                            <td colspan="7" class="px-6 py-10 text-center text-slate-400">Đang tải dữ liệu khuyến mãi...</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </main>
     </div>
+
+    <!-- Trạng thái CSDL -->
+    <div class="p-4 m-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-slate-400">Database XAMPP:</span>
+            <span class="text-emerald-400 font-semibold flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Kết nối OK
+            </span>
+        </div>
+        <p class="text-slate-400 truncate">CSDL: <span class="text-white font-mono">quanly_cuahang_dienthoai</span></p>
+        <button type="button" onclick="document.getElementById('btnRefreshPromos')?.click()" class="mt-3 w-full py-1.5 px-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition font-medium flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-rotate text-xs"></i> Tải lại dữ liệu
+        </button>
+    </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+        <div>
+            <h1 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-tags text-pink-500"></i>
+                <span>Quản Lý Chương Trình Khuyến Mãi &amp; Voucher</span>
+            </h1>
+            <p class="text-xs text-slate-500">Tạo mã giảm giá, thiết lập điều kiện &amp; theo dõi cảnh báo hết hạn / hết lượt</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button type="button" id="btnRefreshPromos"
+                    class="min-h-[38px] px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                <i class="fa-solid fa-rotate"></i>
+                <span>Làm mới</span>
+            </button>
+            <button type="button" id="btnOpenCreateModal"
+                    class="min-h-[38px] px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-600/20 transition flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i>
+                <span>Tạo khuyến mãi mới</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="p-6 space-y-6 flex-1">
+        <!-- Single status announcement region -->
+        <div id="promoLiveStatus" role="status" aria-live="polite"
+             class="hidden rounded-xl px-4 py-3 text-sm font-medium border"></div>
+
+        <!-- Auto Alert Banner -->
+        <section id="promoAlertSection" aria-labelledby="promoAlertTitle" class="hidden">
+            <div class="bg-gradient-to-r from-red-50 via-amber-50 to-orange-50 border border-red-200 rounded-2xl p-5 shadow-sm">
+                <div class="flex items-center justify-between gap-4 mb-3">
+                    <div class="flex items-center gap-3">
+                        <span class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-sm">
+                            <i class="fa-solid fa-bell"></i>
+                        </span>
+                        <div>
+                            <h2 id="promoAlertTitle" class="text-sm font-extrabold text-red-900 uppercase tracking-wide">
+                                Cảnh báo chương trình khuyến mãi sắp hết hạn / sắp hết số lượng
+                            </h2>
+                            <p class="text-xs text-red-700">Các mã đang kích hoạt còn dưới 24 giờ hiệu lực hoặc dưới 5% số lượng phát hành</p>
+                        </div>
+                    </div>
+                    <span id="alertCountBadge" class="px-3 py-1 rounded-full bg-red-600 text-white text-xs font-bold">0 cảnh báo</span>
+                </div>
+                <div id="promoAlertCards" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+            </div>
+        </section>
+
+        <!-- KPI Cards -->
+        <section aria-label="Tổng quan khuyến mãi" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                <p class="text-xs font-semibold text-slate-500 uppercase">Tổng CTKM</p>
+                <p id="kpiTotalPromos" class="text-2xl font-extrabold text-slate-900 mt-1">0</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                <p class="text-xs font-semibold text-slate-500 uppercase">Đang diễn ra</p>
+                <p id="kpiActivePromos" class="text-2xl font-extrabold text-emerald-600 mt-1">0</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                <p class="text-xs font-semibold text-slate-500 uppercase">Cảnh báo (&lt;24h / &lt;5%)</p>
+                <p id="kpiAlertPromos" class="text-2xl font-extrabold text-red-600 mt-1">0</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                <p class="text-xs font-semibold text-slate-500 uppercase">Tổng lượt đã áp dụng</p>
+                <p id="kpiTotalUsed" class="text-2xl font-extrabold text-blue-600 mt-1">0</p>
+            </div>
+        </section>
+
+        <!-- Search & Filters -->
+        <section class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <search>
+                <form id="promoFilterForm" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                    <div class="md:col-span-5">
+                        <label for="filterKeyword" class="block text-xs font-bold text-slate-700 mb-1.5">Tìm theo mã voucher hoặc tên chương trình</label>
+                        <input id="filterKeyword" type="search" placeholder="VD: CHAOTHU26, FLASH12H, iPhone..."
+                               class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
+                    </div>
+                    <div class="md:col-span-3">
+                        <label for="filterStatus" class="block text-xs font-bold text-slate-700 mb-1.5">Trạng thái</label>
+                        <select id="filterStatus" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
+                            <option value="ALL">Tất cả trạng thái</option>
+                            <option value="Dang_dien_ra">Đang diễn ra</option>
+                            <option value="Tam_dung">Tạm dừng</option>
+                            <option value="Het_han">Hết hạn / Đã dừng</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="filterType" class="block text-xs font-bold text-slate-700 mb-1.5">Loại ưu đãi</label>
+                        <select id="filterType" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
+                            <option value="ALL">Tất cả loại</option>
+                            <option value="Phan_tram">Giảm %</option>
+                            <option value="Tien_mat">Giảm tiền mặt</option>
+                            <option value="Qua_tang">Quà tặng / Combo</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2 flex gap-2">
+                        <button type="submit" class="w-full min-h-[42px] bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-bold transition">
+                            <i class="fa-solid fa-magnifying-glass mr-1"></i> Lọc
+                        </button>
+                    </div>
+                </form>
+            </search>
+        </section>
+
+        <!-- Promotions Table -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h2 id="promoTableHeading" class="text-base font-bold text-slate-900">Danh sách chương trình khuyến mãi</h2>
+                <span id="promoCountText" class="text-xs font-semibold text-slate-500">0 chương trình</span>
+            </div>
+            <div class="table-scroll" tabindex="0" role="region" aria-labelledby="promoTableHeading">
+                <table class="w-full text-left border-collapse min-w-[980px]">
+                    <caption class="sr-only">Bảng quản lý chương trình khuyến mãi và mã voucher</caption>
+                    <thead>
+                    <tr class="bg-slate-50 text-slate-600 text-xs uppercase border-b border-slate-200">
+                        <th scope="col" class="px-5 py-3.5 font-bold">Mã Voucher &amp; Tên CTKM</th>
+                        <th scope="col" class="px-4 py-3.5 font-bold">Hình thức &amp; Giá trị</th>
+                        <th scope="col" class="px-4 py-3.5 font-bold">Điều kiện áp dụng</th>
+                        <th scope="col" class="px-4 py-3.5 font-bold">Số lượng còn / Phát hành</th>
+                        <th scope="col" class="px-4 py-3.5 font-bold">Thời gian hiệu lực</th>
+                        <th scope="col" class="px-4 py-3.5 font-bold">Trạng thái</th>
+                        <th scope="col" class="px-5 py-3.5 font-bold text-right">Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody id="promoTableBody" class="divide-y divide-slate-100 text-sm">
+                    <tr>
+                        <td colspan="7" class="px-6 py-10 text-center text-slate-400">Đang tải dữ liệu khuyến mãi...</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
 </div>
 
-<!-- Native Dialog: Create / Edit Conditions (UC 2.14.1.1 & 2.14.1.2) -->
+<!-- Native Dialog: Create / Edit Conditions -->
 <dialog id="promoModal" aria-labelledby="promoModalTitle"
-        class="w-full max-w-3xl rounded-2xl p-0 border border-slate-200 shadow-2xl bg-white backdrop:bg-slate-900/60">
+        class="w-full max-w-3xl rounded-2xl p-0 border border-slate-200 shadow-2xl bg-white">
     <form id="promoForm" class="flex flex-col max-h-[90vh]" novalidate>
         <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between rounded-t-2xl">
             <div>
@@ -318,7 +365,7 @@
             </div>
 
             <fieldset class="border border-slate-200 rounded-xl p-4 bg-slate-50/70 space-y-3">
-                <legend class="px-2 text-xs font-extrabold text-slate-700 uppercase">Phạm vi &amp; Điều kiện áp dụng (UC 2.14.1.2)</legend>
+                <legend class="px-2 text-xs font-extrabold text-slate-700 uppercase">Phạm vi &amp; Điều kiện áp dụng</legend>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                     <div>
                         <label for="inputThuongHieu" class="block text-xs font-semibold text-slate-600 mb-1">Hãng sản xuất</label>
@@ -343,8 +390,8 @@
                         <select id="inputDoiTuong" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm">
                             <option value="Tat_ca">Tất cả khách hàng</option>
                             <option value="Khach_moi">Khách mới</option>
-                            <option value="Thanh_vien">Thành viên (>= 50 điểm)</option>
-                            <option value="Khach_VIP">Khách VIP (>= 200 điểm)</option>
+                            <option value="Thanh_vien">Thành viên (&gt;= 50 điểm)</option>
+                            <option value="Khach_VIP">Khách VIP (&gt;= 200 điểm)</option>
                         </select>
                     </div>
                 </div>
@@ -369,9 +416,9 @@
     </form>
 </dialog>
 
-<!-- Native Dialog: Confirm Stop / Delete (UC 2.14.1.3) -->
+<!-- Native Dialog: Confirm Stop / Delete -->
 <dialog id="confirmDeleteModal" aria-labelledby="confirmDeleteTitle"
-        class="w-full max-w-md rounded-2xl p-0 border border-slate-200 shadow-2xl bg-white backdrop:bg-slate-900/60">
+        class="w-full max-w-md rounded-2xl p-0 border border-slate-200 shadow-2xl bg-white">
     <div class="p-6 space-y-4">
         <div class="flex items-start gap-3">
             <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0">
@@ -399,4 +446,3 @@
 <script src="assets/js/promotions.js"></script>
 </body>
 </html>
-
