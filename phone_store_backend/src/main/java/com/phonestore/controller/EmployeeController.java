@@ -32,7 +32,7 @@ public class EmployeeController {
 
     // 3. Cập nhật thông tin nhân viên
     @PutMapping("/{id}")
-    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee employeeDetails) {
+    public ResponseEntity<Employee> updateEmployee(@PathVariable String id, @RequestBody Employee employeeDetails) {
         return employeeService.getEmployeeById(id)
                 .map(employee -> {
                     employee.setFullName(employeeDetails.getFullName());
@@ -51,7 +51,7 @@ public class EmployeeController {
 
     // 4. Xóa nhân viên theo ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteEmployee(@PathVariable String id) {
         if (employeeService.getEmployeeById(id).isPresent()) {
             employeeService.deleteEmployee(id);
             return ResponseEntity.ok().build();

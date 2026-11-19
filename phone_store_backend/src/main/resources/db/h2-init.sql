@@ -18,7 +18,9 @@ CREATE TABLE IF NOT EXISTS nhan_vien (
     chuc_vu VARCHAR(50) NOT NULL,
     ngay_vao_lam DATE NOT NULL DEFAULT CURRENT_DATE,
     luong_co_ban DECIMAL(12,2) DEFAULT 0,
-    trang_thai VARCHAR(30) NOT NULL DEFAULT 'Dang_lam_viec'
+    trang_thai VARCHAR(30) NOT NULL DEFAULT 'Dang_lam_viec',
+    mat_khau VARCHAR(255) DEFAULT '123456',
+    ten_dang_nhap VARCHAR(50)
 );
 
 CREATE TABLE IF NOT EXISTS tai_khoan (
@@ -241,8 +243,8 @@ CREATE TABLE IF NOT EXISTS chi_tiet_hoa_don (
 
 CREATE TABLE IF NOT EXISTS phieu_bao_hanh (
     ma_phieu_bao_hanh VARCHAR(30) PRIMARY KEY,
-    ma_imei VARCHAR(30) NOT NULL,
-    ma_san_pham VARCHAR(20) NOT NULL,
+    ma_imei VARCHAR(30),
+    ma_san_pham VARCHAR(20),
     ma_khach_hang VARCHAR(20) NOT NULL,
     ma_hoa_don VARCHAR(30),
     ma_nhan_vien_tiep_nhan VARCHAR(20) NOT NULL,
@@ -291,12 +293,12 @@ MERGE INTO vai_tro (ma_vai_tro, ten_vai_tro, mo_ta) KEY(ma_vai_tro) VALUES
 (3, 'Nhân viên bán hàng', 'Thu ngân & POS'),
 (4, 'Nhân viên kho', 'Quản lý nhập kho & kiểm kê');
 
-MERGE INTO nhan_vien (ma_nhan_vien, ho_ten, gioi_tinh, so_dien_thoai, email, chuc_vu, luong_co_ban, trang_thai) KEY(ma_nhan_vien) VALUES
-('NV001', 'Hoàng Mạnh Hà', 'Nam', '0901234567', 'admin@cuahangdienthoai.vn', 'Quản lý', 25000000, 'Dang_lam_viec'),
-('NV002', 'Lê Tạ Khánh', 'Nam', '0912345678', 'khanh.lt@cuahangdienthoai.vn', 'Quản lý', 18000000, 'Dang_lam_viec'),
-('NV003', 'Đặng Hoàng Nam', 'Nam', '0923456789', 'nam.dh@cuahangdienthoai.vn', 'Bán hàng', 11000000, 'Dang_lam_viec'),
-('NV004', 'Nguyễn Thành Sáng', 'Nam', '0934567890', 'sang.nt@cuahangdienthoai.vn', 'Kho', 12000000, 'Dang_lam_viec'),
-('NV006', 'Huỳnh Trọng Duy', 'Nam', '0956789012', 'duy.ht@cuahangdienthoai.vn', 'Bán hàng', 10500000, 'Dang_lam_viec');
+MERGE INTO nhan_vien (ma_nhan_vien, ho_ten, gioi_tinh, so_dien_thoai, email, chuc_vu, luong_co_ban, trang_thai, ten_dang_nhap, mat_khau) KEY(ma_nhan_vien) VALUES
+('NV001', 'Hoàng Mạnh Hà', 'Nam', '0901234567', 'admin@cuahangdienthoai.vn', 'Quản lý', 25000000, 'Dang_lam_viec', 'admin', '123456'),
+('NV002', 'Lê Tạ Khánh', 'Nam', '0912345678', 'khanh.lt@cuahangdienthoai.vn', 'Quản lý', 18000000, 'Dang_lam_viec', 'quanly', 'quanly123'),
+('NV003', 'Đặng Hoàng Nam', 'Nam', '0923456789', 'nam.dh@cuahangdienthoai.vn', 'Bán hàng', 11000000, 'Dang_lam_viec', 'banhang_nam', '123456'),
+('NV004', 'Nguyễn Thành Sáng', 'Nam', '0934567890', 'sang.nt@cuahangdienthoai.vn', 'Kho', 12000000, 'Dang_lam_viec', 'kho_sang', '123456'),
+('NV006', 'Huỳnh Trọng Duy', 'Nam', '0956789012', 'duy.ht@cuahangdienthoai.vn', 'Bán hàng', 10500000, 'Dang_lam_viec', 'duy_banhang', '123456');
 
 MERGE INTO tai_khoan (ma_tai_khoan, ma_nhan_vien, ten_dang_nhap, mat_khau, ma_vai_tro, trang_thai) KEY(ma_tai_khoan) VALUES
 (1, 'NV001', 'admin', 'admin123', 1, 'Hoat_dong'),
@@ -435,4 +437,56 @@ MERGE INTO chi_tiet_kiem_ke (ma_chi_tiet_kiem_ke, ma_phieu_kiem_ke, ma_san_pham,
 MERGE INTO nhat_ky_bao_cao (ma_bao_cao, loai_bao_cao, ma_nhan_vien_lap, ngay_lap, tu_ngay, den_ngay, dinh_dang_xuat, duong_dan_file, tieu_chi_loc, ghi_chu) KEY(ma_bao_cao) VALUES
 (1, 'Doanh_thu', 'NV001', DATEADD('DAY', -2, CURRENT_TIMESTAMP), DATEADD('DAY', -30, CURRENT_DATE), CURRENT_DATE, 'EXCEL', 'bao_cao_doanh_thu_thang.xlsx', 'Thương hiệu: Tất cả | Kỳ: 30 ngày', 'Tổng hợp doanh thu định kỳ'),
 (2, 'Kiem_ke_kho', 'NV004', DATEADD('DAY', -1, CURRENT_TIMESTAMP), DATEADD('DAY', -14, CURRENT_DATE), CURRENT_DATE, 'PDF', 'bao_cao_ton_kho_tuan.pdf', 'Cảnh báo định mức tồn kho', 'Báo cáo tồn kho & cảnh báo nhập hàng');
+
+-- Bảng invoices tương thích entity Invoice (dùng cho DashboardController)
+CREATE TABLE IF NOT EXISTS invoices (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    invoice_code VARCHAR(100) NOT NULL UNIQUE,
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    total_amount DOUBLE,
+    status VARCHAR(50) DEFAULT 'COMPLETED'
+);
+
+MERGE INTO invoices (id, invoice_code, created_date, total_amount, status) KEY(id) VALUES
+(1, 'HD20260918_001', CURRENT_TIMESTAMP, 22990000, 'COMPLETED'),
+(2, 'HD20261012_001', CURRENT_TIMESTAMP, 29990000, 'COMPLETED'),
+(3, 'HD20261014_002', CURRENT_TIMESTAMP, 27990000, 'COMPLETED'),
+(4, 'HD20261025_003', CURRENT_TIMESTAMP, 34990000, 'COMPLETED'),
+(5, 'HD20261105_004', CURRENT_TIMESTAMP, 29490000, 'COMPLETED'),
+(6, 'HD20261110_005', CURRENT_TIMESTAMP, 33980000, 'COMPLETED'),
+(7, 'HD20261112_006', CURRENT_TIMESTAMP, 28490500, 'COMPLETED'),
+(8, 'HD20261113_007', CURRENT_TIMESTAMP, 27990000, 'COMPLETED');
+
+-- Bảng roles & users tương thích Spring Security và User entity
+CREATE TABLE IF NOT EXISTS roles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    status BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS user_roles (
+    user_id BIGINT NOT NULL,
+    role_id INT NOT NULL,
+    PRIMARY KEY (user_id, role_id)
+);
+
+MERGE INTO roles (id, name) KEY(id) VALUES (1, 'ROLE_ADMIN'), (2, 'ROLE_STAFF');
+MERGE INTO users (id, username, password, status) KEY(id) VALUES (1, 'admin', '123456', true);
+MERGE INTO user_roles (user_id, role_id) KEY(user_id, role_id) VALUES (1, 1);
+
+-- =====================================================
+-- DỮ LIỆU MẪU BẢO HÀNH (UC 2.13)
+-- =====================================================
+MERGE INTO phieu_bao_hanh (ma_phieu_bao_hanh, ma_imei, ma_san_pham, ma_khach_hang, ma_hoa_don, ma_nhan_vien_tiep_nhan, ma_ky_thuat_vien, ngay_tiep_nhan, tinh_trang_tiep_nhan, loi_khach_phan_anh, chan_doan_ky_thuat, noi_dung_sua_chua, chi_phi_sua_chua, ngay_hen_tra, trang_thai, ghi_chu) KEY(ma_phieu_bao_hanh) VALUES
+('PBH20261016_01', '358941091234561', 'SP_IP15PM_256TN', 'KH001', 'HD20261012_001', 'NV003', 'NV005', DATEADD('DAY', -15, CURRENT_TIMESTAMP), 'Máy còn đẹp 99%, không trầy cấn', 'Loa trong bị rè khi đàm thoại', 'Bụi bẩn bám màng loa', 'Đã vệ sinh màng loa âm tầng', 0.00, CURRENT_DATE, 'Cho_tra_khach', 'Bảo hành miễn phí theo chính sách'),
+('PBH20261101_02', '864219082345671', 'SP_SS_S24U_256AM', 'KH002', 'HD20261025_003', 'NV003', 'NV005', DATEADD('DAY', -5, CURRENT_TIMESTAMP), 'Máy nguyên vẹn không trầy xước', 'Camera sau chụp bị mờ, lóa sáng', 'Lỗi cảm biến chống rung', 'Đang chờ linh kiện thay thế', 0.00, DATEADD('DAY', 2, CURRENT_DATE), 'Dang_sua_chua', 'Chờ linh kiện chính hãng'),
+('PBH20261110_03', '865123073456791', 'SP_MI_14_256TRANG', 'KH003', 'HD20260918_001', 'NV006', 'NV005', DATEADD('DAY', -1, CURRENT_TIMESTAMP), 'Viền máy có vết trầy nhẹ', 'Pin hao nhanh, sạc nóng máy', 'Pin chai cell số 2', 'Đang tiến hành kiểm tra mạch sạc', 0.00, DATEADD('DAY', 3, CURRENT_DATE), 'Dang_kiem_tra', 'Kiểm tra nguồn');
+
 

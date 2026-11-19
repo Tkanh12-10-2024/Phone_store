@@ -39,7 +39,7 @@ public class Employee {
     private Double basicSalary;
 
     @Column(name = "trang_thai")
-    private Integer active; // Trong DB đang lưu số 1 hoặc 0
+    private String active; // 'Dang_lam_viec', 'Da_nghi_viec' hoặc 1/0
 
     @Column(name = "mat_khau")
     private String password;
@@ -65,8 +65,8 @@ public class Employee {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 
-    public Integer getActive() { return active; }
-    public void setActive(Integer active) { this.active = active; }
+    public String getActive() { return active; }
+    public void setActive(String active) { this.active = active; }
 
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
