@@ -43,6 +43,8 @@ public final class DaoJdbcHelper {
                 ps.setInt(idx, n);
             } else if (val instanceof Long l) {
                 ps.setLong(idx, l);
+            } else if (val instanceof Boolean b) {
+                ps.setBoolean(idx, b);
             } else if (val instanceof Timestamp ts) {
                 ps.setTimestamp(idx, ts);
             } else if (val instanceof LocalDateTime ldt) {
