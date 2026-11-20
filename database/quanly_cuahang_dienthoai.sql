@@ -97,6 +97,18 @@ CREATE TABLE san_pham (
     CONSTRAINT fk_sanpham_danhmuc FOREIGN KEY (ma_danh_muc) REFERENCES danh_muc(ma_danh_muc) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 6.1 Bảng Thư viện ảnh sản phẩm (Galleries)
+CREATE TABLE hinh_anh_san_pham (
+    ma_hinh_anh INT AUTO_INCREMENT PRIMARY KEY,
+    ma_san_pham VARCHAR(20) NOT NULL,
+    duong_dan_anh VARCHAR(500) NOT NULL,
+    la_anh_chinh TINYINT(1) NOT NULL DEFAULT 0,
+    thu_tu INT NOT NULL DEFAULT 0,
+    ngay_tao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_hasp_sanpham (ma_san_pham),
+    CONSTRAINT fk_hasp_sanpham FOREIGN KEY (ma_san_pham) REFERENCES san_pham(ma_san_pham) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- =================================================================================================
 -- PHÂN HỆ 3: NHÀ CUNG CẤP & NHẬP HÀNG (Use Case 2.2.3, 2.5)
 -- =================================================================================================

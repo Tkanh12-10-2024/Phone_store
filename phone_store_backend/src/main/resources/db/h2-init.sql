@@ -76,6 +76,16 @@ CREATE TABLE IF NOT EXISTS san_pham (
     CONSTRAINT fk_sp_dm FOREIGN KEY (ma_danh_muc) REFERENCES danh_muc(ma_danh_muc)
 );
 
+CREATE TABLE IF NOT EXISTS hinh_anh_san_pham (
+    ma_hinh_anh INT AUTO_INCREMENT PRIMARY KEY,
+    ma_san_pham VARCHAR(20) NOT NULL,
+    duong_dan_anh VARCHAR(500) NOT NULL,
+    la_anh_chinh BOOLEAN NOT NULL DEFAULT FALSE,
+    thu_tu INT NOT NULL DEFAULT 0,
+    ngay_tao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_hasp_sp FOREIGN KEY (ma_san_pham) REFERENCES san_pham(ma_san_pham) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS nha_cung_cap (
     ma_nha_cung_cap VARCHAR(20) PRIMARY KEY,
     ten_nha_cung_cap VARCHAR(150) NOT NULL,
@@ -488,5 +498,26 @@ MERGE INTO phieu_bao_hanh (ma_phieu_bao_hanh, ma_imei, ma_san_pham, ma_khach_han
 ('PBH20261016_01', '358941091234561', 'SP_IP15PM_256TN', 'KH001', 'HD20261012_001', 'NV003', 'NV005', DATEADD('DAY', -15, CURRENT_TIMESTAMP), 'Máy còn đẹp 99%, không trầy cấn', 'Loa trong bị rè khi đàm thoại', 'Bụi bẩn bám màng loa', 'Đã vệ sinh màng loa âm tầng', 0.00, CURRENT_DATE, 'Cho_tra_khach', 'Bảo hành miễn phí theo chính sách'),
 ('PBH20261101_02', '864219082345671', 'SP_SS_S24U_256AM', 'KH002', 'HD20261025_003', 'NV003', 'NV005', DATEADD('DAY', -5, CURRENT_TIMESTAMP), 'Máy nguyên vẹn không trầy xước', 'Camera sau chụp bị mờ, lóa sáng', 'Lỗi cảm biến chống rung', 'Đang chờ linh kiện thay thế', 0.00, DATEADD('DAY', 2, CURRENT_DATE), 'Dang_sua_chua', 'Chờ linh kiện chính hãng'),
 ('PBH20261110_03', '865123073456791', 'SP_MI_14_256TRANG', 'KH003', 'HD20260918_001', 'NV006', 'NV005', DATEADD('DAY', -1, CURRENT_TIMESTAMP), 'Viền máy có vết trầy nhẹ', 'Pin hao nhanh, sạc nóng máy', 'Pin chai cell số 2', 'Đang tiến hành kiểm tra mạch sạc', 0.00, DATEADD('DAY', 3, CURRENT_DATE), 'Dang_kiem_tra', 'Kiểm tra nguồn');
+
+-- =====================================================
+-- DỮ LIỆU MẪU HÌNH ẢNH SẢN PHẨM (PHÂN HỆ 2 - TV2)
+-- =====================================================
+UPDATE san_pham SET hinh_anh = '/uploads/products/iphone-15-pro-max.svg'
+WHERE ma_san_pham IN ('SP_IP15PM_256TN', 'SP_IP15PM_512DEN') AND hinh_anh IS NULL;
+
+UPDATE san_pham SET hinh_anh = '/uploads/products/galaxy-s24-ultra.svg'
+WHERE ma_san_pham IN ('SP_SS_S24U_256AM', 'SP_SS_ZFLIP5_256') AND hinh_anh IS NULL;
+
+UPDATE san_pham SET hinh_anh = '/uploads/products/xiaomi-14.svg'
+WHERE ma_san_pham IN ('SP_MI_14_256TRANG', 'SP_XIAOMI_14U_OUT') AND hinh_anh IS NULL;
+
+UPDATE san_pham SET hinh_anh = '/uploads/products/oppo-reno11.svg'
+WHERE ma_san_pham IN ('SP_OPPO_RENO11_256', 'SP_OPPO_FINDN3') AND hinh_anh IS NULL;
+
+INSERT INTO hinh_anh_san_pham (ma_san_pham, duong_dan_anh, la_anh_chinh, thu_tu)
+SELECT sp.ma_san_pham, sp.hinh_anh, TRUE, 1
+FROM san_pham sp
+WHERE sp.hinh_anh IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM hinh_anh_san_pham ha WHERE ha.ma_san_pham = sp.ma_san_pham);
 
 
