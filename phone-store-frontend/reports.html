@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Cáo &amp; Thống Kê Kinh Doanh - PhoneStore Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#2563eb',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            900: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .table-scroll { overflow-x: auto; }
+        .table-scroll:focus-visible,
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+        }
+        [role="tablist"] {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            scrollbar-width: none;
+            gap: 0.25rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        [role="tablist"]::-webkit-scrollbar { display: none; }
+        button[role="tab"] {
+            position: relative;
+            white-space: nowrap;
+            flex-shrink: 0;
+            padding: 0.85rem 1.25rem;
+            font-weight: 600;
+            color: #475569;
+        }
+        button[role="tab"][aria-selected="true"] {
+            color: #1d4ed8;
+            font-weight: 700;
+        }
+        button[role="tab"][aria-selected="true"]::after {
+            content: "";
+            position: absolute;
+            left: 0.75rem;
+            right: 0.75rem;
+            bottom: 0;
+            height: 3px;
+            background: #2563eb;
+            border-radius: 999px;
+        }
+        dialog:modal {
+            overscroll-behavior: contain;
+            margin: auto;
+        }
+        dialog::backdrop {
+            background: rgba(15, 23, 42, 0.55);
+            overflow: hidden;
+            overscroll-behavior: contain;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col lg:flex-row">
+
+<!-- SIDEBAR BÊN TRÁI (Đồng nhất 100% với Dashboard) -->
+<aside class="w-full lg:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between shadow-xl">
+    <div>
+        <!-- Logo Cửa hàng -->
+        <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                <i class="fa-solid fa-mobile-screen-button text-xl"></i>
+            </div>
+            <div>
+                <p class="font-bold text-white text-base leading-tight">PhoneStore Pro</p>
+                <span class="text-xs text-blue-400 font-medium">Hệ Thống SGU - Nhóm 05</span>
+            </div>
+        </div>
+
+        <!-- Profile vắn tắt -->
+        <div class="p-4 mx-3 my-3 bg-slate-800/60 rounded-xl border border-slate-700/50 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center text-white font-bold text-sm">
+                AD
+            </div>
+            <div class="overflow-hidden">
+                <p class="text-sm font-semibold text-white truncate">Lê Tạ Khánh</p>
+                <p class="text-xs text-emerald-400 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Quản lý cửa hàng
+                </p>
+            </div>
+        </div>
+
+        <!-- Menu Điều hướng -->
+        <nav aria-label="Menu chính" class="px-3 space-y-1 text-sm font-medium">
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                <span>Tổng quan (Dashboard)</span>
+            </a>
+            <a href="pos.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-cash-register w-5 text-center text-emerald-400"></i>
+                <span>Bán hàng nhanh POS</span>
+                <span class="ml-auto text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-semibold">Live</span>
+            </a>
+            <a href="imei.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-barcode w-5 text-center text-amber-400"></i>
+                <span>Quản lý IMEI &amp; Serial</span>
+            </a>
+            <a href="warehouse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-boxes-stacked w-5 text-center text-indigo-400"></i>
+                <span>Quản lý kho hàng</span>
+            </a>
+            <a href="import.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-truck-ramp-box w-5 text-center text-amber-400"></i>
+                <span>Quản lý nhập hàng</span>
+            </a>
+            <a href="customers.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-users w-5 text-center text-blue-400"></i>
+                <span>Quản lý khách hàng</span>
+            </a>
+            <a href="warranty.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-shield-halved w-5 text-center text-emerald-400"></i>
+                <span>Quản lý bảo hành</span>
+            </a>
+            <a href="promotions.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-tags w-5 text-center text-pink-400"></i>
+                <span>Khuyến mãi / Voucher</span>
+            </a>
+            <a href="employee.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-users-gear w-5 text-center text-purple-400"></i>
+                <span>Quản lý nhân viên</span>
+            </a>
+            <a href="reports.html" aria-current="page" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white shadow-md shadow-blue-600/30">
+                <i class="fa-solid fa-file-lines w-5 text-center text-white"></i>
+                <span>Báo cáo &amp; Thống kê</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Trạng thái CSDL -->
+    <div class="p-4 m-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-slate-400">Database XAMPP:</span>
+            <span class="text-emerald-400 font-semibold flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Kết nối OK
+            </span>
+        </div>
+        <p class="text-slate-400 truncate">CSDL: <span class="text-white font-mono">quanly_cuahang_dienthoai</span></p>
+        <button type="button" onclick="document.getElementById('btnReloadActiveTab')?.click()" class="mt-3 w-full py-1.5 px-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition font-medium flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-rotate text-xs"></i> Tải lại dữ liệu
+        </button>
+    </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+        <div>
+            <h1 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-file-invoice-dollar text-purple-600"></i>
+                <span>Trung Tâm Thống Kê &amp; Lập Báo Cáo</span>
+            </h1>
+            <p class="text-xs text-slate-500">Thống kê Doanh thu • Sản phẩm • Tồn kho &amp; Cảnh báo • Xuất báo cáo Excel / PDF A4</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button type="button" id="btnReloadActiveTab"
+                    class="min-h-[38px] px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                <i class="fa-solid fa-rotate"></i>
+                <span>Làm mới số liệu</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="p-6 space-y-6 flex-1 min-w-0">
+        <div id="reportsLiveStatus" role="status" aria-live="polite"
+             class="hidden rounded-xl px-4 py-3 text-sm font-semibold border"></div>
+
+        <!-- Accessible Single-Row Tab Navigation -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div role="tablist" aria-label="Phân hệ thống kê và báo cáo" focusgroup="tablist nomemory" class="px-4 bg-white">
+                <button type="button" role="tab" id="tab-revenue" aria-controls="panel-revenue" aria-selected="true" class="text-sm">
+                    <i class="fa-solid fa-chart-line mr-1.5"></i> Thống kê doanh thu
+                </button>
+                <button type="button" role="tab" id="tab-products" aria-controls="panel-products" aria-selected="false" class="text-sm">
+                    <i class="fa-solid fa-ranking-star mr-1.5"></i> Sản phẩm bán chạy &amp; Tồn đọng
+                </button>
+                <button type="button" role="tab" id="tab-inventory" aria-controls="panel-inventory" aria-selected="false" class="text-sm">
+                    <i class="fa-solid fa-warehouse mr-1.5"></i> Tồn kho &amp; Cảnh báo
+                </button>
+                <button type="button" role="tab" id="tab-export" aria-controls="panel-export" aria-selected="false" class="text-sm">
+                    <i class="fa-solid fa-file-export mr-1.5"></i> Lập &amp; Xuất báo cáo
+                </button>
+            </div>
+
+            <!-- TAB PANEL 1: Revenue Statistics -->
+            <div role="tabpanel" id="panel-revenue" aria-labelledby="tab-revenue">
+                <div class="p-6 space-y-6">
+                    <search>
+                        <form id="revFilterForm" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <div class="md:col-span-3">
+                                <label for="revGroupBy" class="block text-xs font-bold text-slate-700 mb-1">Nhóm theo thời gian</label>
+                                <select id="revGroupBy" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-sm font-medium">
+                                    <option value="DAY">Theo Ngày</option>
+                                    <option value="MONTH">Theo Tháng</option>
+                                    <option value="YEAR">Theo Năm</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-3">
+                                <label for="revFromDate" class="block text-xs font-bold text-slate-700 mb-1">Từ ngày</label>
+                                <input id="revFromDate" type="date" aria-describedby="revDateError"
+                                       class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-sm">
+                            </div>
+                            <div class="md:col-span-3">
+                                <label for="revToDate" class="block text-xs font-bold text-slate-700 mb-1">Đến ngày</label>
+                                <input id="revToDate" type="date" aria-describedby="revDateError"
+                                       class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-sm">
+                            </div>
+                            <div class="md:col-span-3 flex gap-2">
+                                <button type="submit" class="w-full min-h-[40px] bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition">
+                                    Xem doanh thu
+                                </button>
+                            </div>
+                            <p id="revDateError" class="hidden md:col-span-12 text-xs font-semibold text-red-600"></p>
+                        </form>
+                    </search>
+
+                    <div id="revEmptyAlert" class="hidden rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm font-semibold text-amber-800"></div>
+
+                    <!-- Revenue KPIs -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white">
+                            <p class="text-xs font-bold text-slate-500 uppercase">Doanh thu thực thu</p>
+                            <p id="revNetKpi" class="text-2xl font-extrabold text-blue-700 mt-1">0 đ</p>
+                            <p id="revGrowthKpi" class="text-xs font-bold mt-1 text-slate-500">So với kỳ trước: 0%</p>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white">
+                            <p class="text-xs font-bold text-slate-500 uppercase">Doanh thu gộp / Giảm giá</p>
+                            <p id="revGrossKpi" class="text-2xl font-extrabold text-slate-900 mt-1">0 đ</p>
+                            <p id="revDiscountKpi" class="text-xs font-semibold text-emerald-700 mt-1">Chiết khấu KM: 0 đ</p>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white">
+                            <p class="text-xs font-bold text-slate-500 uppercase">Tiền vốn (COGS)</p>
+                            <p id="revCogsKpi" class="text-2xl font-extrabold text-slate-900 mt-1">0 đ</p>
+                            <p id="revOrderCountKpi" class="text-xs font-semibold text-slate-500 mt-1">0 hóa đơn • 0 máy</p>
+                        </div>
+                        <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50">
+                            <p class="text-xs font-bold text-emerald-800 uppercase">Lợi nhuận gộp</p>
+                            <p id="revProfitKpi" class="text-2xl font-extrabold text-emerald-700 mt-1">0 đ</p>
+                            <p class="text-xs font-medium text-emerald-700 mt-1">Doanh thu thuần - Tiền vốn</p>
+                        </div>
+                    </div>
+
+                    <!-- Revenue Growth Chart -->
+                    <div class="bg-white rounded-xl border border-slate-200 p-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-sm font-extrabold text-slate-900">Biểu đồ tăng trưởng doanh thu &amp; lợi nhuận</h2>
+                            <span class="text-xs text-slate-500">Di chuột vào cột để xem chi tiết % tăng trưởng</span>
+                        </div>
+                        <div class="h-72 relative">
+                            <canvas id="revenueGrowthChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Sortable Revenue Detail Table -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden">
+                        <div class="px-5 py-3 bg-slate-50 border-b border-slate-200">
+                            <h2 id="revTableHeading" class="text-sm font-bold text-slate-900">Chi tiết doanh thu theo kỳ</h2>
+                        </div>
+                        <div class="table-scroll" tabindex="0" role="region" aria-labelledby="revTableHeading">
+                            <table id="revDetailTable" class="w-full text-left border-collapse min-w-[760px]">
+                                <caption class="sr-only">Bảng chi tiết doanh thu và lợi nhuận theo kỳ</caption>
+                                <thead>
+                                <tr class="bg-slate-50 text-xs uppercase text-slate-600 border-b border-slate-200">
+                                    <th scope="col" class="px-4 py-3" aria-sort="none"><button type="button" data-sort-table="revDetailTable" data-col="0" class="font-bold flex items-center gap-1">Thời gian</button></th>
+                                    <th scope="col" class="px-4 py-3 text-right" aria-sort="none"><button type="button" data-sort-table="revDetailTable" data-col="1" class="font-bold ml-auto flex items-center gap-1">Số HĐ</button></th>
+                                    <th scope="col" class="px-4 py-3 text-right" aria-sort="none"><button type="button" data-sort-table="revDetailTable" data-col="2" class="font-bold ml-auto flex items-center gap-1">Doanh thu gộp</button></th>
+                                    <th scope="col" class="px-4 py-3 text-right" aria-sort="none"><button type="button" data-sort-table="revDetailTable" data-col="3" class="font-bold ml-auto flex items-center gap-1">Chiết khấu</button></th>
+                                    <th scope="col" class="px-4 py-3 text-right" aria-sort="none"><button type="button" data-sort-table="revDetailTable" data-col="4" class="font-bold ml-auto flex items-center gap-1">Thực thu</button></th>
+                                    <th scope="col" class="px-4 py-3 text-right" aria-sort="none"><button type="button" data-sort-table="revDetailTable" data-col="5" class="font-bold ml-auto flex items-center gap-1">Tiền vốn</button></th>
+                                    <th scope="col" class="px-4 py-3 text-right" aria-sort="none"><button type="button" data-sort-table="revDetailTable" data-col="6" class="font-bold ml-auto flex items-center gap-1">Lợi nhuận</button></th>
+                                    <th scope="col" class="px-4 py-3 text-right">Tăng trưởng</th>
+                                </tr>
+                                </thead>
+                                <tbody id="revTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB PANEL 2: Product Statistics -->
+            <div role="tabpanel" id="panel-products" aria-labelledby="tab-products" hidden="until-found">
+                <div class="p-6 space-y-6">
+                    <search>
+                        <form id="prodFilterForm" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <div class="md:col-span-4">
+                                <label for="prodBrandFilter" class="block text-xs font-bold text-slate-700 mb-1">Nhóm / Thương hiệu sản phẩm</label>
+                                <select id="prodBrandFilter" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-sm font-medium">
+                                    <option value="">Tất cả thương hiệu</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-3">
+                                <label for="prodFromDate" class="block text-xs font-bold text-slate-700 mb-1">Từ ngày</label>
+                                <input id="prodFromDate" type="date" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-sm">
+                            </div>
+                            <div class="md:col-span-3">
+                                <label for="prodToDate" class="block text-xs font-bold text-slate-700 mb-1">Đến ngày</label>
+                                <input id="prodToDate" type="date" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-sm">
+                            </div>
+                            <div class="md:col-span-2">
+                                <button type="submit" class="w-full min-h-[40px] bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold">
+                                    Lọc sản phẩm
+                                </button>
+                            </div>
+                        </form>
+                    </search>
+
+                    <div id="prodEmptyAlert" class="hidden rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm font-semibold text-amber-800"></div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="lg:col-span-5 bg-white border border-slate-200 rounded-xl p-5">
+                            <h2 class="text-sm font-extrabold text-slate-900 mb-3">Biểu đồ Top sản phẩm bán chạy</h2>
+                            <div class="h-72 relative">
+                                <canvas id="topProductsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-7 border border-slate-200 rounded-xl overflow-hidden bg-white">
+                            <div class="px-5 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                                <h2 id="bestSellerHeading" class="text-sm font-bold text-slate-900">Xếp hạng sản phẩm bán chạy</h2>
+                                <span id="prodTotalSummary" class="text-xs font-bold text-blue-700"></span>
+                            </div>
+                            <div class="table-scroll" tabindex="0" role="region" aria-labelledby="bestSellerHeading">
+                                <table class="w-full text-left border-collapse min-w-[600px]">
+                                    <caption class="sr-only">Bảng xếp hạng sản phẩm bán chạy</caption>
+                                    <thead>
+                                    <tr class="bg-slate-50 text-xs uppercase text-slate-600 border-b border-slate-200">
+                                        <th scope="col" class="px-4 py-3">Top</th>
+                                        <th scope="col" class="px-4 py-3">Thiết bị &amp; Hãng</th>
+                                        <th scope="col" class="px-4 py-3 text-right">Đã bán</th>
+                                        <th scope="col" class="px-4 py-3 text-right">Doanh thu</th>
+                                        <th scope="col" class="px-4 py-3 text-right">Lợi nhuận</th>
+                                        <th scope="col" class="px-4 py-3 text-right">Tồn kho</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="bestSellerBody" class="divide-y divide-slate-100 text-sm"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stagnant Inventory (> 60 days) -->
+                    <div class="border border-amber-200 rounded-xl overflow-hidden bg-white">
+                        <div class="px-5 py-3.5 bg-amber-50 border-b border-amber-200 flex items-center justify-between">
+                            <h2 id="stagnantHeading" class="text-sm font-extrabold text-amber-900">
+                                <i class="fa-solid fa-hourglass-half mr-1.5"></i> Danh sách sản phẩm bán chậm / Tồn kho lâu (&gt; 60 ngày chưa xuất)
+                            </h2>
+                            <span class="text-xs font-semibold text-amber-800">Gợi ý tạo mã giảm giá kích cầu</span>
+                        </div>
+                        <div class="table-scroll" tabindex="0" role="region" aria-labelledby="stagnantHeading">
+                            <table class="w-full text-left border-collapse min-w-[700px]">
+                                <caption class="sr-only">Bảng sản phẩm bán chậm và tồn kho trên 60 ngày</caption>
+                                <thead>
+                                <tr class="bg-slate-50 text-xs uppercase text-slate-600 border-b border-slate-200">
+                                    <th scope="col" class="px-4 py-3">Sản phẩm</th>
+                                    <th scope="col" class="px-4 py-3">Hãng / Dòng</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Tồn kho</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Số ngày lưu kho</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Đã bán trong kỳ</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Giá trị đọng vốn</th>
+                                </tr>
+                                </thead>
+                                <tbody id="stagnantBody" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB PANEL 3: Inventory Statistics & Low Stock Alerts -->
+            <div role="tabpanel" id="panel-inventory" aria-labelledby="tab-inventory" hidden="until-found">
+                <div class="p-6 space-y-6">
+                    <!-- Auto Alert Box -->
+                    <section id="invAlertSection" class="hidden bg-red-50 border border-red-200 rounded-xl p-4 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-sm font-extrabold text-red-900">
+                                <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Cảnh báo định mức tồn kho tối thiểu
+                            </h2>
+                            <a href="import.html" class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold">
+                                + Tạo phiếu nhập hàng
+                            </a>
+                        </div>
+                        <div id="invAlertList" class="grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+                    </section>
+
+                    <!-- KPI Strip -->
+                    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white">
+                            <p class="text-xs font-bold text-slate-500">Tổng mã SP</p>
+                            <p id="invKpiModels" class="text-xl font-extrabold text-slate-900 mt-1">0</p>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white">
+                            <p class="text-xs font-bold text-slate-500">Tồn thực tế</p>
+                            <p id="invKpiStock" class="text-xl font-extrabold text-blue-700 mt-1">0</p>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white">
+                            <p class="text-xs font-bold text-slate-500">Đang giữ chỗ</p>
+                            <p id="invKpiReserved" class="text-xl font-extrabold text-amber-600 mt-1">0</p>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white">
+                            <p class="text-xs font-bold text-slate-500">Khả dụng bán</p>
+                            <p id="invKpiAvailable" class="text-xl font-extrabold text-emerald-600 mt-1">0</p>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white">
+                            <p class="text-xs font-bold text-slate-500">Tổng giá trị kho</p>
+                            <p id="invKpiValue" class="text-xl font-extrabold text-slate-900 mt-1">0 đ</p>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Attribute Filters -->
+                    <search>
+                        <form id="invFilterForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3 items-end bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <div>
+                                <label for="invBrand" class="block text-xs font-bold text-slate-700 mb-1">Thương hiệu</label>
+                                <select id="invBrand" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm">
+                                    <option value="">Tất cả</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="invLine" class="block text-xs font-bold text-slate-700 mb-1">Dòng máy</label>
+                                <select id="invLine" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm">
+                                    <option value="">Tất cả</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="invRam" class="block text-xs font-bold text-slate-700 mb-1">RAM</label>
+                                <select id="invRam" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm">
+                                    <option value="">Tất cả</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="invRom" class="block text-xs font-bold text-slate-700 mb-1">Dung lượng ROM</label>
+                                <select id="invRom" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm">
+                                    <option value="">Tất cả</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="invColor" class="block text-xs font-bold text-slate-700 mb-1">Màu sắc</label>
+                                <select id="invColor" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm">
+                                    <option value="">Tất cả</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="invKeyword" class="block text-xs font-bold text-slate-700 mb-1">Từ khóa</label>
+                                <input id="invKeyword" type="search" placeholder="Tên / Mã SP..."
+                                       class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm">
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="inline-flex items-center gap-1.5 text-xs font-bold text-red-700">
+                                    <input id="invOnlyAlert" type="checkbox" class="rounded"> Chỉ hiện cảnh báo
+                                </label>
+                                <button type="submit" class="w-full min-h-[38px] bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold">
+                                    Tra cứu kho
+                                </button>
+                            </div>
+                        </form>
+                    </search>
+
+                    <!-- Inventory Breakdown Table -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-white">
+                        <div class="px-5 py-3 bg-slate-50 border-b border-slate-200">
+                            <h2 id="invTableHeading" class="text-sm font-bold text-slate-900">Chi tiết tồn kho theo model, dung lượng &amp; màu sắc</h2>
+                        </div>
+                        <div class="table-scroll" tabindex="0" role="region" aria-labelledby="invTableHeading">
+                            <table class="w-full text-left border-collapse min-w-[900px]">
+                                <caption class="sr-only">Bảng tồn kho chi tiết theo cấu hình và màu sắc</caption>
+                                <thead>
+                                <tr class="bg-slate-50 text-xs uppercase text-slate-600 border-b border-slate-200">
+                                    <th scope="col" class="px-4 py-3">Sản phẩm</th>
+                                    <th scope="col" class="px-4 py-3">Dòng máy &amp; Cấu hình</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Thực tế</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Giữ chỗ</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Khả dụng</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Định mức tối thiểu</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Giá trị tồn</th>
+                                    <th scope="col" class="px-4 py-3">Trạng thái</th>
+                                </tr>
+                                </thead>
+                                <tbody id="invTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Stock Movements History -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-white">
+                        <div class="px-5 py-3 bg-slate-50 border-b border-slate-200">
+                            <h2 id="movementHeading" class="text-sm font-bold text-slate-900">Lịch sử biến động xuất - nhập kho gần đây</h2>
+                        </div>
+                        <div class="table-scroll" tabindex="0" role="region" aria-labelledby="movementHeading">
+                            <table class="w-full text-left border-collapse min-w-[780px]">
+                                <caption class="sr-only">Lịch sử nhập kho và xuất bán</caption>
+                                <thead>
+                                <tr class="bg-slate-50 text-xs uppercase text-slate-600 border-b border-slate-200">
+                                    <th scope="col" class="px-4 py-3">Thời gian</th>
+                                    <th scope="col" class="px-4 py-3">Loại</th>
+                                    <th scope="col" class="px-4 py-3">Chứng từ</th>
+                                    <th scope="col" class="px-4 py-3">Sản phẩm</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Số lượng</th>
+                                    <th scope="col" class="px-4 py-3">Nhân viên</th>
+                                    <th scope="col" class="px-4 py-3">Ghi chú</th>
+                                </tr>
+                                </thead>
+                                <tbody id="invMovementsBody" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB PANEL 4: Report Builder & Export -->
+            <div role="tabpanel" id="panel-export" aria-labelledby="tab-export" hidden="until-found">
+                <div class="p-6 space-y-6">
+                    <form id="reportConfigForm" class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                            <div class="md:col-span-4">
+                                <label for="repTemplate" class="block text-xs font-bold text-slate-700 mb-1">Bước 1: Chọn mẫu báo cáo</label>
+                                <select id="repTemplate" class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-semibold">
+                                    <option value="Tong_hop">Báo cáo Tổng hợp (Bán hàng - KM - Xuất/Nhập/Tồn)</option>
+                                    <option value="Doanh_thu">Báo cáo Doanh thu &amp; Lợi nhuận</option>
+                                    <option value="SanPham_BanChay">Báo cáo Sản phẩm bán chạy</option>
+                                    <option value="Kiem_ke_kho">Báo cáo Kiểm kê &amp; Tồn kho</option>
+                                    <option value="Bao_hanh">Báo cáo Tình hình Bảo hành</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="repFromDate" class="block text-xs font-bold text-slate-700 mb-1">Từ ngày</label>
+                                <input id="repFromDate" type="date" class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-sm">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="repToDate" class="block text-xs font-bold text-slate-700 mb-1">Đến ngày</label>
+                                <input id="repToDate" type="date" class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-sm">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="repBrand" class="block text-xs font-bold text-slate-700 mb-1">Phạm vi hãng</label>
+                                <select id="repBrand" class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-sm">
+                                    <option value="">Tất cả thương hiệu</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="repNote" class="block text-xs font-bold text-slate-700 mb-1">Ghi chú xuất</label>
+                                <input id="repNote" type="text" placeholder="VD: Báo cáo tuần..."
+                                       class="w-full px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-sm">
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-200">
+                            <p class="text-xs text-slate-600">Bước 2 &amp; 3: Tổng hợp dữ liệu thời gian thực, xem trước bản in A4 và xuất tệp chuẩn Excel/PDF.</p>
+                            <div class="flex flex-wrap gap-2.5">
+                                <button type="submit" id="btnPreviewA4"
+                                        class="min-h-[40px] px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm">
+                                    <i class="fa-solid fa-eye"></i> Tổng hợp &amp; Xem trước A4
+                                </button>
+                                <button type="button" id="btnExportExcel"
+                                        class="min-h-[40px] px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm">
+                                    <i class="fa-solid fa-file-excel"></i> Xuất Excel (.xlsx)
+                                </button>
+                                <button type="button" id="btnExportPdf"
+                                        class="min-h-[40px] px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm">
+                                    <i class="fa-solid fa-file-pdf"></i> Xuất PDF (.pdf)
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Inline A4 Sheet Preview -->
+                    <section id="inlinePreviewBox" class="hidden border border-slate-300 rounded-2xl bg-slate-100 p-6 shadow-inner space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                <i class="fa-solid fa-file-lines text-blue-600 mr-1"></i> Trang giấy xem trước chuẩn khổ A4
+                            </span>
+                            <div class="flex items-center gap-2">
+                                <button type="button" id="btnOpenA4Modal"
+                                        class="min-h-[36px] px-3.5 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 rounded-xl text-xs font-bold shadow-sm">
+                                    <i class="fa-solid fa-expand mr-1"></i> Phóng to toàn trang A4
+                                </button>
+                                <button type="button" id="btnPrintInlineA4"
+                                        class="min-h-[36px] px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-sm">
+                                    <i class="fa-solid fa-print mr-1"></i> In ngay bản A4
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="inlineA4Paper" class="bg-white border border-slate-300 shadow-lg rounded-xl p-8 max-w-4xl mx-auto space-y-5">
+                            <div class="flex justify-between items-start border-b-2 border-slate-800 pb-4">
+                                <div>
+                                    <p class="text-xs font-extrabold text-blue-700 uppercase">CỬA HÀNG ĐIỆN THOẠI PHONESTORE PRO</p>
+                                    <p class="text-xs text-slate-500">273 An Dương Vương, Quận 5, TP.HCM • Hotline: 1900 8888</p>
+                                </div>
+                                <div class="text-right text-xs text-slate-600">
+                                    <p class="font-bold text-slate-800">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
+                                    <p class="italic">Độc lập - Tự do - Hạnh phúc</p>
+                                </div>
+                            </div>
+
+                            <div class="text-center space-y-1">
+                                <h2 id="previewTitle" class="text-xl font-extrabold text-slate-900 uppercase"></h2>
+                                <p id="previewMeta" class="text-xs text-slate-600"></p>
+                            </div>
+
+                            <div class="table-scroll" tabindex="0" role="region" aria-labelledby="previewTitle">
+                                <table class="w-full text-left border-collapse border border-slate-300 min-w-[680px]">
+                                    <caption class="sr-only">Bảng xem trước dữ liệu báo cáo</caption>
+                                    <thead id="previewThead"></thead>
+                                    <tbody id="previewTbody" class="divide-y divide-slate-200 text-sm"></tbody>
+                                </table>
+                            </div>
+
+                            <div id="previewSummaryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-3 border-t border-slate-200"></div>
+
+                            <div class="grid grid-cols-2 gap-8 pt-6 text-center text-xs border-t border-slate-200">
+                                <div>
+                                    <p class="font-bold text-slate-800">Người lập báo cáo</p>
+                                    <p class="text-slate-500 italic">(Ký, ghi rõ họ tên)</p>
+                                    <p id="previewStaffSign" class="mt-12 font-bold text-slate-900">Hoàng Mạnh Hà</p>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-800">Quản lý phê duyệt</p>
+                                    <p class="text-slate-500 italic">(Ký, đóng dấu)</p>
+                                    <p class="mt-12 text-slate-500">Ngày ..... tháng ..... năm .....</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Export Audit Log -->
+                    <section class="border border-slate-200 rounded-xl overflow-hidden bg-white">
+                        <div class="px-5 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                            <h2 id="reportLogHeading" class="text-sm font-bold text-slate-900">Nhật ký xuất báo cáo</h2>
+                            <span class="text-xs text-slate-500">Tự động lưu lịch sử mỗi lần tải Excel / PDF</span>
+                        </div>
+                        <div class="table-scroll" tabindex="0" role="region" aria-labelledby="reportLogHeading">
+                            <table class="w-full text-left border-collapse min-w-[780px]">
+                                <caption class="sr-only">Lịch sử xuất báo cáo</caption>
+                                <thead>
+                                <tr class="bg-slate-50 text-xs uppercase text-slate-600 border-b border-slate-200">
+                                    <th scope="col" class="px-4 py-3">ID</th>
+                                    <th scope="col" class="px-4 py-3">Mẫu báo cáo</th>
+                                    <th scope="col" class="px-4 py-3">Định dạng</th>
+                                    <th scope="col" class="px-4 py-3">Người lập</th>
+                                    <th scope="col" class="px-4 py-3">Kỳ báo cáo &amp; Bộ lọc</th>
+                                    <th scope="col" class="px-4 py-3">Tên file</th>
+                                    <th scope="col" class="px-4 py-3">Thời gian xuất</th>
+                                </tr>
+                                </thead>
+                                <tbody id="reportHistoryBody" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Native Dialog: Printable A4 Preview -->
+<dialog id="a4PreviewDialog" aria-labelledby="a4DialogTitle"
+        class="w-full max-w-4xl rounded-2xl p-0 border border-slate-300 shadow-2xl bg-white">
+    <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between rounded-t-2xl">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-file-pdf text-red-400"></i>
+            <h2 id="a4DialogTitle" class="text-base font-bold">Bản xem trước mẫu in khổ A4</h2>
+        </div>
+        <div class="flex items-center gap-2">
+            <button type="button" id="btnPrintModalA4"
+                    class="min-h-[34px] px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-print"></i> In A4 / Lưu PDF
+            </button>
+            <button type="button" id="btnCloseA4Modal" aria-label="Đóng xem trước"
+                    class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    </div>
+    <div id="a4DialogBody" class="p-8 text-sm space-y-6 max-h-[82vh] overflow-y-auto bg-white"></div>
+</dialog>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/reports.js"></script>
+</body>
+</html>
