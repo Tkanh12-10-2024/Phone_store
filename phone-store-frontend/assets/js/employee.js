@@ -52,8 +52,8 @@ function renderEmployeeTable(employees) {
                 </span>
             </td>
             <td class="py-3 px-4 text-center">
-                <span class="px-2.5 py-0.5 ${emp.active !== 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'} rounded-md font-semibold text-[11px]">
-                    ${emp.active !== 0 ? 'Hoạt động' : 'Đã khóa'}
+                <span class="px-2.5 py-0.5 ${(emp.active !== 0 && emp.active !== '0' && emp.active !== 'Da_nghi_viec') ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'} rounded-md font-semibold text-[11px]">
+                    ${(emp.active !== 0 && emp.active !== '0' && emp.active !== 'Da_nghi_viec') ? 'Hoạt động' : 'Đã khóa'}
                 </span>
             </td>
             <td class="py-3 px-6 text-center">

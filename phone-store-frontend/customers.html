@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Khách Hàng - PhoneStore Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: { brand: { 50:'#eff6ff',500:'#2563eb',600:'#1d4ed8',700:'#1e40af',900:'#0f172a' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .modal-overlay { backdrop-filter: blur(4px); }
+        .status-badge { @apply px-2.5 py-0.5 rounded-full text-xs font-semibold; }
+        .slide-panel { transition: transform 0.3s ease; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col lg:flex-row overflow-hidden">
+
+<!-- SIDEBAR -->
+<aside class="w-full lg:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between shadow-xl">
+    <div>
+        <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                <i class="fa-solid fa-mobile-screen-button text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-white text-base leading-tight">PhoneStore Pro</h1>
+                <span class="text-xs text-blue-400 font-medium">Hệ Thống SGU - Nhóm 05</span>
+            </div>
+        </div>
+        <div class="p-4 mx-3 my-3 bg-slate-800/60 rounded-xl border border-slate-700/50 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center text-white font-bold text-sm">AD</div>
+            <div class="overflow-hidden">
+                <p class="text-sm font-semibold text-white truncate">Quản trị viên</p>
+                <p class="text-xs text-emerald-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Quản lý cửa hàng</p>
+            </div>
+        </div>
+        <nav class="px-3 space-y-1 text-sm font-medium">
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fa-solid fa-chart-pie w-5 text-center"></i><span>Tổng quan (Dashboard)</span></a>
+            <a href="pos.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fa-solid fa-cash-register w-5 text-center text-emerald-400"></i><span>Bán hàng nhanh POS</span></a>
+            <a href="imei.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fa-solid fa-barcode w-5 text-center text-amber-400"></i><span>Quản lý IMEI & Serial</span></a>
+            <a href="warehouse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fa-solid fa-boxes-stacked w-5 text-center text-indigo-400"></i><span>Quản lý kho hàng</span></a>
+            <a href="import.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fa-solid fa-truck-ramp-box w-5 text-center text-amber-400"></i><span>Quản lý nhập hàng</span></a>
+            <a href="employee.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fa-solid fa-users-gear w-5 text-center text-sky-400"></i><span>Quản lý nhân viên</span></a>
+            <a href="customers.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white shadow-md shadow-blue-600/30 font-semibold"><i class="fa-solid fa-users w-5 text-center text-white"></i><span>Quản lý khách hàng</span></a>
+            <a href="warranty.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fa-solid fa-shield-halved w-5 text-center text-green-400"></i><span>Quản lý bảo hành</span></a>
+            <a href="promotions.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fa-solid fa-tags w-5 text-center text-pink-400"></i><span>Khuyến mãi / Voucher</span></a>
+            <a href="reports.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition"><i class="fa-solid fa-file-lines w-5 text-center text-purple-400"></i><span>Báo cáo & Thống kê</span></a>
+        </nav>
+    </div>
+    <div class="p-4 m-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-slate-400">Backend H2:</span>
+            <span class="text-emerald-400 font-semibold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Kết nối OK</span>
+        </div>
+        <p class="text-slate-400 truncate">CSDL: <span class="text-white font-mono">quanly_cuahang_dienthoai</span></p>
+    </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="flex-1 flex flex-col h-screen overflow-y-auto">
+    <!-- Top Navbar -->
+    <header class="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between sticky top-0 z-20 shadow-sm">
+        <div class="flex items-center gap-4">
+            <h1 class="text-lg font-bold text-slate-800 tracking-tight flex items-center gap-2">
+                <i class="fa-solid fa-users text-blue-600"></i> Quản Lý Khách Hàng
+            </h1>
+            <span class="hidden sm:inline-block px-2.5 py-0.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-200">UC 2.12</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="openAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-4 py-2 rounded-xl shadow-sm transition flex items-center gap-2">
+                <i class="fa-solid fa-user-plus"></i> Thêm Khách Hàng
+            </button>
+        </div>
+    </header>
+
+    <!-- Status Banner -->
+    <div id="statusBanner" class="bg-blue-50 border-b border-blue-200 px-8 py-2.5 flex items-center justify-between text-xs text-blue-800">
+        <div class="flex items-center gap-2 font-medium">
+            <i id="bannerSpinner" class="fa-solid fa-circle-notch fa-spin text-blue-600 text-sm"></i>
+            <span id="bannerText">Đang tải danh sách khách hàng...</span>
+        </div>
+        <span id="syncTimestamp" class="text-slate-500 font-mono">Đang kết nối...</span>
+    </div>
+
+    <!-- Search & Filters -->
+    <div class="px-8 py-4 bg-white border-b border-slate-100 flex flex-wrap items-center gap-3">
+        <div class="relative flex-1 min-w-56">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input id="searchInput" type="text" placeholder="Tìm theo tên, số điện thoại, email..." 
+                class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-slate-50"
+                oninput="debounceSearch()">
+        </div>
+        <div class="flex gap-2">
+            <select id="statusFilter" onchange="loadCustomers()" class="text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50">
+                <option value="">Tất cả trạng thái</option>
+                <option value="Hoat_dong">Hoạt động</option>
+                <option value="Ngung_hoat_dong">Ngừng hoạt động</option>
+            </select>
+            <button onclick="loadCustomers()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-xl transition flex items-center gap-2">
+                <i class="fa-solid fa-rotate-right"></i> Làm mới
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="px-8 py-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-medium text-slate-500">Tổng khách hàng</span>
+                <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center"><i class="fa-solid fa-users text-blue-600 text-sm"></i></div>
+            </div>
+            <p id="statTotal" class="text-2xl font-bold text-slate-800">--</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-medium text-slate-500">Đang hoạt động</span>
+                <div class="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center"><i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i></div>
+            </div>
+            <p id="statActive" class="text-2xl font-bold text-emerald-600">--</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-medium text-slate-500">Có phiếu bảo hành</span>
+                <div class="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center"><i class="fa-solid fa-shield-halved text-orange-600 text-sm"></i></div>
+            </div>
+            <p id="statWarranty" class="text-2xl font-bold text-orange-600">--</p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-medium text-slate-500">Có lịch sử mua</span>
+                <div class="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center"><i class="fa-solid fa-receipt text-purple-600 text-sm"></i></div>
+            </div>
+            <p id="statBuyers" class="text-2xl font-bold text-purple-600">--</p>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="px-8 pb-8 flex-1">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide w-28">Mã KH</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Họ tên</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide w-36">Số điện thoại</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Email</th>
+                            <th class="text-center px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide w-24">HĐ / BH</th>
+                            <th class="text-center px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide w-28">Trạng thái</th>
+                            <th class="text-center px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide w-44">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customerTableBody">
+                        <tr><td colspan="7" class="text-center py-16 text-slate-400"><i class="fa-solid fa-circle-notch fa-spin text-2xl mb-3 block"></i>Đang tải...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- MODAL THÊM / SỬA KHÁCH HÀNG -->
+<div id="customerModal" class="fixed inset-0 z-50 hidden modal-overlay bg-slate-900/60 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg animate-bounce-in">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+            <h2 id="modalTitle" class="text-base font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-user-plus text-blue-600"></i> Thêm Khách Hàng Mới</h2>
+            <button onclick="closeModal()" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition"><i class="fa-solid fa-xmark text-slate-500"></i></button>
+        </div>
+        <form id="customerForm" onsubmit="submitCustomer(event)" class="p-6 space-y-4">
+            <input type="hidden" id="editId">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Họ và tên <span class="text-red-500">*</span></label>
+                    <input id="f_hoTen" type="text" required placeholder="Nguyễn Văn A" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Số điện thoại <span class="text-red-500">*</span></label>
+                    <input id="f_soDienThoai" type="tel" required placeholder="0901234567" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Email</label>
+                    <input id="f_email" type="email" placeholder="email@example.com" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Địa chỉ</label>
+                    <input id="f_diaChi" type="text" placeholder="Địa chỉ..." class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            <div id="modalError" class="hidden bg-red-50 border border-red-200 text-red-700 text-xs px-4 py-3 rounded-xl flex items-center gap-2">
+                <i class="fa-solid fa-circle-exclamation"></i><span id="modalErrorMsg"></span>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeModal()" class="flex-1 py-2.5 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition">Hủy bỏ</button>
+                <button type="submit" id="submitBtn" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Lưu
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- PANEL LỊCH SỬ MUA HÀNG -->
+<div id="historyPanel" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-slate-900/50" onclick="closeHistoryPanel()"></div>
+    <div class="absolute right-0 top-0 h-full w-full max-w-2xl bg-white shadow-2xl flex flex-col slide-panel" style="transform: translateX(100%);" id="historyPanelContent">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
+            <div>
+                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-purple-600"></i> Lịch Sử Mua Hàng</h2>
+                <p id="historyCustomerName" class="text-xs text-slate-500 mt-0.5"></p>
+            </div>
+            <button onclick="closeHistoryPanel()" class="w-8 h-8 rounded-lg bg-slate-200 hover:bg-slate-300 flex items-center justify-center"><i class="fa-solid fa-xmark text-slate-600"></i></button>
+        </div>
+        <div id="historyContent" class="flex-1 overflow-y-auto p-6">
+            <div class="text-center py-16 text-slate-400"><i class="fa-solid fa-circle-notch fa-spin text-2xl"></i><p class="mt-3">Đang tải...</p></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = 'http://localhost:8080/api';
+let searchTimer = null;
+let allCustomers = [];
+
+// ========= Khởi động =========
+document.addEventListener('DOMContentLoaded', loadCustomers);
+
+function debounceSearch() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(loadCustomers, 400);
+}
+
+// ========= UC 2.12.1 - Load & Tìm kiếm =========
+async function loadCustomers() {
+    const keyword = document.getElementById('searchInput').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    setBanner('loading', 'Đang tải danh sách khách hàng...');
+    try {
+        const params = new URLSearchParams();
+        if (keyword) params.set('keyword', keyword);
+        const res = await fetch(`${API}/customers?${params}`);
+        if (!res.ok) throw new Error('Không thể kết nối backend');
+        allCustomers = await res.json();
+
+        // Lọc theo status filter
+        let filtered = allCustomers;
+        if (statusFilter) filtered = allCustomers.filter(c => c.trangThai === statusFilter);
+
+        renderTable(filtered);
+        updateStats(allCustomers);
+        setBanner('success', `Đã tải ${filtered.length} khách hàng`, new Date().toLocaleTimeString('vi-VN'));
+    } catch (err) {
+        setBanner('error', 'Lỗi kết nối: ' + err.message);
+        document.getElementById('customerTableBody').innerHTML = `
+            <tr><td colspan="7" class="text-center py-16 text-red-400">
+                <i class="fa-solid fa-circle-exclamation text-3xl mb-3 block"></i>
+                Không thể tải dữ liệu. Hãy kiểm tra backend đang chạy.<br>
+                <code class="text-xs mt-2 block">java -jar target/phong_store_backend-0.0.1-SNAPSHOT.jar</code>
+            </td></tr>`;
+    }
+}
+
+function renderTable(customers) {
+    const tbody = document.getElementById('customerTableBody');
+    if (!customers.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-16 text-slate-400"><i class="fa-solid fa-users-slash text-3xl mb-3 block"></i>Không tìm thấy khách hàng nào</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = customers.map(c => `
+        <tr class="border-b border-slate-50 hover:bg-slate-50 transition group">
+            <td class="px-4 py-3">
+                <span class="font-mono text-xs text-blue-700 bg-blue-50 px-2 py-1 rounded-lg">${c.maKhachHang}</span>
+            </td>
+            <td class="px-4 py-3">
+                <div class="font-semibold text-slate-800">${c.hoTen}</div>
+                <div class="text-xs text-slate-400">${c.diaChi || ''}</div>
+            </td>
+            <td class="px-4 py-3 text-sm text-slate-600 font-mono">${c.soDienThoai}</td>
+            <td class="px-4 py-3 text-sm text-slate-500">${c.email || '<span class="text-slate-300">—</span>'}</td>
+            <td class="px-4 py-3 text-center">
+                <div class="flex items-center justify-center gap-2 text-xs">
+                    <span class="flex items-center gap-1 text-purple-600"><i class="fa-solid fa-receipt"></i> ${c.soHoaDon || 0}</span>
+                    <span class="text-slate-200">|</span>
+                    <span class="flex items-center gap-1 text-orange-500"><i class="fa-solid fa-shield-halved"></i> ${c.soPhieuBaoHanh || 0}</span>
+                </div>
+            </td>
+            <td class="px-4 py-3 text-center">
+                ${c.trangThai === 'Hoat_dong'
+                    ? '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700"><i class="fa-solid fa-circle-check mr-1"></i>Hoạt động</span>'
+                    : '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-500"><i class="fa-solid fa-ban mr-1"></i>Vô hiệu</span>'}
+            </td>
+            <td class="px-4 py-3">
+                <div class="flex items-center justify-center gap-1.5">
+                    <button onclick="showHistory('${c.maKhachHang}', '${c.hoTen}')" title="Lịch sử mua hàng"
+                        class="w-8 h-8 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-600 flex items-center justify-center transition text-xs">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </button>
+                    <button onclick="openEditModal(${JSON.stringify(c).replace(/"/g,'&quot;')})" title="Sửa"
+                        class="w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition text-xs">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button onclick="deleteCustomer('${c.maKhachHang}', '${c.hoTen}', ${c.soHoaDon || 0}, ${c.soPhieuBaoHanh || 0})" title="Xóa / Vô hiệu hóa"
+                        class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center transition text-xs">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function updateStats(customers) {
+    document.getElementById('statTotal').textContent = customers.length;
+    document.getElementById('statActive').textContent = customers.filter(c => c.trangThai === 'Hoat_dong').length;
+    document.getElementById('statWarranty').textContent = customers.filter(c => (c.soPhieuBaoHanh || 0) > 0).length;
+    document.getElementById('statBuyers').textContent = customers.filter(c => (c.soHoaDon || 0) > 0).length;
+}
+
+// ========= UC 2.12.2 - Thêm mới =========
+function openAddModal() {
+    document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-user-plus text-blue-600"></i> Thêm Khách Hàng Mới';
+    document.getElementById('editId').value = '';
+    document.getElementById('f_hoTen').value = '';
+    document.getElementById('f_soDienThoai').value = '';
+    document.getElementById('f_email').value = '';
+    document.getElementById('f_diaChi').value = '';
+    hideModalError();
+    document.getElementById('customerModal').classList.remove('hidden');
+}
+
+// ========= UC 2.12.3 - Sửa =========
+function openEditModal(customer) {
+    document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen text-blue-600"></i> Cập Nhật Khách Hàng';
+    document.getElementById('editId').value = customer.maKhachHang;
+    document.getElementById('f_hoTen').value = customer.hoTen || '';
+    document.getElementById('f_soDienThoai').value = customer.soDienThoai || '';
+    document.getElementById('f_email').value = customer.email || '';
+    document.getElementById('f_diaChi').value = customer.diaChi || '';
+    hideModalError();
+    document.getElementById('customerModal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('customerModal').classList.add('hidden');
+}
+
+async function submitCustomer(e) {
+    e.preventDefault();
+    const id = document.getElementById('editId').value;
+    const body = {
+        hoTen: document.getElementById('f_hoTen').value.trim(),
+        soDienThoai: document.getElementById('f_soDienThoai').value.trim(),
+        email: document.getElementById('f_email').value.trim(),
+        diaChi: document.getElementById('f_diaChi').value.trim(),
+    };
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang lưu...';
+    try {
+        const url = id ? `${API}/customers/${id}` : `${API}/customers`;
+        const method = id ? 'PUT' : 'POST';
+        const res = await fetch(url, { method, headers: {'Content-Type': 'application/json; charset=utf-8'}, body: JSON.stringify(body) });
+        const data = await res.json();
+        if (!res.ok) { showModalError(data.message || 'Có lỗi xảy ra.'); return; }
+        closeModal();
+        setBanner('success', id ? 'Cập nhật khách hàng thành công!' : 'Thêm khách hàng thành công!');
+        loadCustomers();
+    } catch (err) {
+        showModalError('Lỗi kết nối: ' + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Lưu';
+    }
+}
+
+// ========= UC 2.12.4 - Xóa =========
+async function deleteCustomer(id, hoTen, soHD, soBH) {
+    const hasHistory = soHD > 0 || soBH > 0;
+    const confirmMsg = hasHistory
+        ? `Khách hàng "${hoTen}" có ${soHD} hóa đơn và ${soBH} phiếu bảo hành.\nHệ thống sẽ VÔ HIỆU HÓA (không xóa dữ liệu).\n\nBạn xác nhận?`
+        : `Bạn có chắc muốn XÓA khách hàng "${hoTen}"?`;
+    if (!confirm(confirmMsg)) return;
+    try {
+        const res = await fetch(`${API}/customers/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (!res.ok) { alert(data.message || 'Có lỗi xảy ra'); return; }
+        setBanner('success', data.message);
+        loadCustomers();
+    } catch (err) {
+        alert('Lỗi: ' + err.message);
+    }
+}
+
+// ========= UC 2.12.5 - Lịch sử mua hàng =========
+async function showHistory(maKH, hoTen) {
+    document.getElementById('historyCustomerName').textContent = `Khách hàng: ${hoTen} (${maKH})`;
+    document.getElementById('historyContent').innerHTML = '<div class="text-center py-16 text-slate-400"><i class="fa-solid fa-circle-notch fa-spin text-2xl"></i><p class="mt-3">Đang tải...</p></div>';
+    document.getElementById('historyPanel').classList.remove('hidden');
+    setTimeout(() => { document.getElementById('historyPanelContent').style.transform = 'translateX(0)'; }, 10);
+    try {
+        const res = await fetch(`${API}/customers/${maKH}/history`);
+        const history = await res.json();
+        renderHistory(history);
+    } catch (err) {
+        document.getElementById('historyContent').innerHTML = `<div class="text-center py-8 text-red-400">Lỗi tải lịch sử: ${err.message}</div>`;
+    }
+}
+
+function renderHistory(history) {
+    if (!history.length) {
+        document.getElementById('historyContent').innerHTML = `
+            <div class="text-center py-16 text-slate-400">
+                <i class="fa-solid fa-receipt text-4xl mb-4 block opacity-30"></i>
+                <p class="font-medium">Chưa có lịch sử mua hàng</p>
+            </div>`;
+        return;
+    }
+    document.getElementById('historyContent').innerHTML = `
+        <div class="space-y-4">
+            ${history.map(h => {
+                const isInWarranty = h.hanBaoHanh && new Date(h.hanBaoHanh) > new Date();
+                const hanBH = h.hanBaoHanh ? new Date(h.hanBaoHanh).toLocaleDateString('vi-VN') : '—';
+                return `
+                <div class="border border-slate-100 rounded-2xl p-4 hover:border-blue-200 transition bg-white shadow-sm">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <span class="font-mono text-xs text-blue-700 bg-blue-50 px-2 py-1 rounded-lg">${h.maHoaDon}</span>
+                            <p class="font-semibold text-slate-800 mt-1.5">${h.tenSanPham}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-emerald-600">${(h.giaBan || 0).toLocaleString('vi-VN')}₫</p>
+                            <p class="text-xs text-slate-400 mt-0.5">${h.ngayMua ? new Date(h.ngayMua).toLocaleDateString('vi-VN') : '—'}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs text-slate-500">
+                        <div class="flex items-center gap-1.5"><i class="fa-solid fa-barcode text-slate-400"></i> IMEI: <span class="font-mono text-slate-700">${h.maImei || '—'}</span></div>
+                        <div class="flex items-center gap-1.5"><i class="fa-solid fa-clock text-slate-400"></i> BH: ${h.thoiGianBaoHanhThang || 0} tháng</div>
+                        <div class="col-span-2 flex items-center gap-1.5">
+                            <i class="fa-solid fa-calendar-check text-slate-400"></i>
+                            Hạn BH: <span class="font-semibold ${isInWarranty ? 'text-emerald-600' : 'text-red-500'}">${hanBH}</span>
+                            ${isInWarranty
+                                ? '<span class="ml-2 px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-semibold">Còn BH</span>'
+                                : '<span class="ml-2 px-2 py-0.5 bg-red-100 text-red-600 rounded-full font-semibold">Hết BH</span>'}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('')}
+        </div>
+        <p class="text-center text-xs text-slate-400 mt-4">Tổng: ${history.length} giao dịch</p>
+    `;
+}
+
+function closeHistoryPanel() {
+    document.getElementById('historyPanelContent').style.transform = 'translateX(100%)';
+    setTimeout(() => { document.getElementById('historyPanel').classList.add('hidden'); }, 300);
+}
+
+// ========= UI Helpers =========
+function setBanner(type, text, time) {
+    const banner = document.getElementById('statusBanner');
+    const spinner = document.getElementById('bannerSpinner');
+    const bannerText = document.getElementById('bannerText');
+    const ts = document.getElementById('syncTimestamp');
+    banner.className = 'border-b px-8 py-2.5 flex items-center justify-between text-xs';
+    if (type === 'loading') {
+        banner.classList.add('bg-blue-50', 'border-blue-200', 'text-blue-800');
+        spinner.className = 'fa-solid fa-circle-notch fa-spin text-blue-600 text-sm';
+    } else if (type === 'success') {
+        banner.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
+        spinner.className = 'fa-solid fa-circle-check text-emerald-600 text-sm';
+    } else {
+        banner.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
+        spinner.className = 'fa-solid fa-circle-exclamation text-red-600 text-sm';
+    }
+    bannerText.textContent = text;
+    if (time) ts.textContent = 'Cập nhật: ' + time;
+}
+
+function showModalError(msg) {
+    document.getElementById('modalError').classList.remove('hidden');
+    document.getElementById('modalErrorMsg').textContent = msg;
+}
+function hideModalError() {
+    document.getElementById('modalError').classList.add('hidden');
+}
+</script>
+</body>
+</html>
