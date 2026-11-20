@@ -18,15 +18,27 @@ public class EmployeeService {
         return employeeRepository.findAll();
     }
 
-    public Optional<Employee> getEmployeeById(Long id) {
-        return employeeRepository.findById(id);
+    public Optional<Employee> getEmployeeById(String id) {
+        return employeeRepository.findById(Long.valueOf(id));
+    }
+
+    public void deleteEmployee(String id) {
+        employeeRepository.deleteById(Long.valueOf(id));
     }
 
     public Employee saveEmployee(Employee employee) {
-        return employeeRepository.save(employee);
-    }
+        // Nếu là thêm mới (id chưa có hoặc trống), tự động sinh mã NV00x tiếp theo
+        if (employee.getId() == null || employee.getId().trim().isEmpty()) {
+            long count = employeeRepository.count();
+            String generatedId = String.format("NV%03d", count + 1);
 
-    public void deleteEmployee(Long id) {
-        employeeRepository.deleteById(id);
+            // Đảm bảo không bị trùng lặp nếu có mã bị xóa trước đó (Truyền String trực tiếp)
+            while (employeeRepository.existsById(Long.valueOf(generatedId))) {
+                count++;
+                generatedId = String.format("NV%03d", count + 1);
+            }
+            employee.setId(generatedId);
+        }
+        return employeeRepository.save(employee);
     }
 }
