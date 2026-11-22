@@ -48,7 +48,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col lg:flex-row">
 
-<!-- SIDEBAR BÊN TRÁI (Đồng nhất 100% với Dashboard) -->
+<!-- SIDEBAR BÊN TRÁI (Đồng bộ với Dashboard) -->
 <aside class="w-full lg:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between shadow-xl">
     <div>
         <!-- Logo Cửa hàng -->
@@ -106,7 +106,8 @@
                 <i class="fa-solid fa-shield-halved w-5 text-center text-emerald-400"></i>
                 <span>Quản lý bảo hành</span>
             </a>
-            <a href="promotions.html" aria-current="page" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white shadow-md shadow-blue-600/30">
+            <!-- Mục Khuyến mãi / Voucher đang chọn -->
+            <a href="promotions.html" aria-current="page" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white shadow-md shadow-blue-600/30 font-semibold">
                 <i class="fa-solid fa-tags w-5 text-center text-white"></i>
                 <span>Khuyến mãi / Voucher</span>
             </a>
@@ -131,7 +132,7 @@
         </div>
         <p class="text-slate-400 truncate">CSDL: <span class="text-white font-mono">quanly_cuahang_dienthoai</span></p>
         <button type="button" onclick="document.getElementById('btnRefreshPromos')?.click()" class="mt-3 w-full py-1.5 px-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition font-medium flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-rotate text-xs"></i> Tải lại dữ liệu
+            <i class="fa-solid fa-rotate text-xs"></i> Tải lại dữ liệu (Test Loading)
         </button>
     </div>
 </aside>

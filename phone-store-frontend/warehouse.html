@@ -39,8 +39,8 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col lg:flex-row overflow-x-hidden">
 
-<!-- SIDEBAR BÊN TRÁI -->
-<aside class="w-full lg:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between shadow-xl min-h-screen">
+<!-- SIDEBAR BÊN TRÁI (Đồng bộ với Dashboard) -->
+<aside class="w-full lg:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between shadow-xl">
     <div>
         <!-- Logo Cửa hàng -->
         <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
@@ -55,13 +55,13 @@
 
         <!-- Profile vắn tắt -->
         <div class="p-4 mx-3 my-3 bg-slate-800/60 rounded-xl border border-slate-700/50 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
-                ĐN
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center text-white font-bold text-sm">
+                AD
             </div>
             <div class="overflow-hidden">
-                <p class="text-sm font-semibold text-white truncate">Đặng Hoàng Nam</p>
+                <p class="text-sm font-semibold text-white truncate">Lê Tạ Khánh</p>
                 <p class="text-xs text-emerald-400 flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Quản lý Kho & Nhập
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Quản lý cửa hàng
                 </p>
             </div>
         </div>
@@ -69,12 +69,17 @@
         <!-- Menu Điều hướng -->
         <nav class="px-3 space-y-1 text-sm font-medium">
             <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
-                <i class="fa-solid fa-chart-pie w-5 text-center text-blue-400"></i>
+                <i class="fa-solid fa-chart-pie w-5 text-center"></i>
                 <span>Tổng quan (Dashboard)</span>
             </a>
-            <a href="employee.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
-                <i class="fa-solid fa-users-gear w-5 text-center text-sky-400"></i>
-                <span>Quản lý nhân viên</span>
+            <a href="pos.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-cash-register w-5 text-center text-emerald-400"></i>
+                <span>Bán hàng nhanh POS</span>
+                <span class="ml-auto text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-semibold">Live</span>
+            </a>
+            <a href="imei.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-barcode w-5 text-center text-amber-400"></i>
+                <span>Quản lý IMEI & Serial</span>
             </a>
             <!-- Mục Quản lý kho hàng đang chọn -->
             <a href="warehouse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white shadow-md shadow-blue-600/30 font-semibold">
@@ -96,6 +101,10 @@
             <a href="promotions.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
                 <i class="fa-solid fa-tags w-5 text-center text-pink-400"></i>
                 <span>Khuyến mãi / Voucher</span>
+            </a>
+            <a href="employee.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-users-gear w-5 text-center text-purple-400"></i>
+                <span>Quản lý nhân viên</span>
             </a>
             <a href="reports.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
                 <i class="fa-solid fa-file-lines w-5 text-center text-purple-400"></i>
@@ -218,7 +227,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="relative w-full sm:w-80">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
-                        <input id="searchProductInput" onkeyup="filterProducts()" type="text" placeholder="Tìm tên máy, mã sản phẩm, màu sắc..." 
+                        <input id="searchProductInput" onkeyup="filterProducts()" type="text" placeholder="Tìm tên máy, mã sản phẩm, màu sắc..."
                                class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div class="flex items-center gap-2">
@@ -234,20 +243,20 @@
                 <div class="overflow-x-auto rounded-lg border border-slate-200">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-slate-100 text-slate-600 uppercase text-xs font-semibold">
-                            <tr>
-                                <th class="p-3">Mã SP</th>
-                                <th class="p-3">Tên Điện Thoại</th>
-                                <th class="p-3">Dòng Máy & Màu</th>
-                                <th class="p-3">Cấu Hình</th>
-                                <th class="p-3 text-right">Giá Nhập</th>
-                                <th class="p-3 text-center">Tồn Kho</th>
-                                <th class="p-3 text-center">Định Mức Tối Thiểu</th>
-                                <th class="p-3 text-center">Tình Trạng</th>
-                                <th class="p-3 text-center">Thao Tác</th>
-                            </tr>
+                        <tr>
+                            <th class="p-3">Mã SP</th>
+                            <th class="p-3">Tên Điện Thoại</th>
+                            <th class="p-3">Dòng Máy & Màu</th>
+                            <th class="p-3">Cấu Hình</th>
+                            <th class="p-3 text-right">Giá Nhập</th>
+                            <th class="p-3 text-center">Tồn Kho</th>
+                            <th class="p-3 text-center">Định Mức Tối Thiểu</th>
+                            <th class="p-3 text-center">Tình Trạng</th>
+                            <th class="p-3 text-center">Thao Tác</th>
+                        </tr>
                         </thead>
                         <tbody id="productsTableBody" class="divide-y divide-slate-200 bg-white">
-                            <!-- JS render -->
+                        <!-- JS render -->
                         </tbody>
                     </table>
                 </div>
@@ -258,7 +267,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="relative w-full sm:w-80">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
-                        <input id="searchCheckInput" onkeyup="filterChecks()" type="text" placeholder="Tìm theo mã phiếu kiểm kê, người kiểm..." 
+                        <input id="searchCheckInput" onkeyup="filterChecks()" type="text" placeholder="Tìm theo mã phiếu kiểm kê, người kiểm..."
                                class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <button onclick="openCreateCheckModal()" class="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700">
@@ -269,17 +278,17 @@
                 <div class="overflow-x-auto rounded-lg border border-slate-200">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-slate-100 text-slate-600 uppercase text-xs font-semibold">
-                            <tr>
-                                <th class="p-3">Mã Phiếu Kiểm</th>
-                                <th class="p-3">Nhân Viên Kiểm Kê</th>
-                                <th class="p-3">Ngày Kiểm Kê</th>
-                                <th class="p-3">Ghi Chú Đợt Kiểm</th>
-                                <th class="p-3 text-center">Trạng Thái</th>
-                                <th class="p-3 text-center">Chi Tiết</th>
-                            </tr>
+                        <tr>
+                            <th class="p-3">Mã Phiếu Kiểm</th>
+                            <th class="p-3">Nhân Viên Kiểm Kê</th>
+                            <th class="p-3">Ngày Kiểm Kê</th>
+                            <th class="p-3">Ghi Chú Đợt Kiểm</th>
+                            <th class="p-3 text-center">Trạng Thái</th>
+                            <th class="p-3 text-center">Chi Tiết</th>
+                        </tr>
                         </thead>
                         <tbody id="checksTableBody" class="divide-y divide-slate-200 bg-white">
-                            <!-- JS render -->
+                        <!-- JS render -->
                         </tbody>
                     </table>
                 </div>
@@ -392,16 +401,16 @@
                 <div class="overflow-x-auto rounded-lg border border-slate-200">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-slate-100 text-slate-600 uppercase text-xs font-semibold">
-                            <tr>
-                                <th class="p-3">Sản Phẩm</th>
-                                <th class="p-3 text-center">Tồn Hệ Thống</th>
-                                <th class="p-3 text-center">Thực Tế Đếm Được</th>
-                                <th class="p-3 text-center">Chênh Lệch</th>
-                                <th class="p-3">Lý Do Chênh Lệch (nếu có)</th>
-                            </tr>
+                        <tr>
+                            <th class="p-3">Sản Phẩm</th>
+                            <th class="p-3 text-center">Tồn Hệ Thống</th>
+                            <th class="p-3 text-center">Thực Tế Đếm Được</th>
+                            <th class="p-3 text-center">Chênh Lệch</th>
+                            <th class="p-3">Lý Do Chênh Lệch (nếu có)</th>
+                        </tr>
                         </thead>
                         <tbody id="checkItemsTableBody" class="divide-y divide-slate-200 bg-white">
-                            <!-- JS render rows -->
+                        <!-- JS render rows -->
                         </tbody>
                     </table>
                 </div>

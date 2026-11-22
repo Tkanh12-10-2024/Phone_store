@@ -39,8 +39,8 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col lg:flex-row overflow-x-hidden">
 
-<!-- SIDEBAR BÊN TRÁI -->
-<aside class="w-full lg:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between shadow-xl min-h-screen">
+<!-- SIDEBAR BÊN TRÁI (Đồng bộ với Dashboard) -->
+<aside class="w-full lg:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between shadow-xl">
     <div>
         <!-- Logo Cửa hàng -->
         <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
@@ -55,13 +55,13 @@
 
         <!-- Profile vắn tắt -->
         <div class="p-4 mx-3 my-3 bg-slate-800/60 rounded-xl border border-slate-700/50 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
-                ĐN
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center text-white font-bold text-sm">
+                AD
             </div>
             <div class="overflow-hidden">
-                <p class="text-sm font-semibold text-white truncate">Đặng Hoàng Nam</p>
+                <p class="text-sm font-semibold text-white truncate">Lê Tạ Khánh</p>
                 <p class="text-xs text-emerald-400 flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Quản lý Kho & Nhập
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Quản lý cửa hàng
                 </p>
             </div>
         </div>
@@ -69,12 +69,17 @@
         <!-- Menu Điều hướng -->
         <nav class="px-3 space-y-1 text-sm font-medium">
             <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
-                <i class="fa-solid fa-chart-pie w-5 text-center text-blue-400"></i>
+                <i class="fa-solid fa-chart-pie w-5 text-center"></i>
                 <span>Tổng quan (Dashboard)</span>
             </a>
-            <a href="employee.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
-                <i class="fa-solid fa-users-gear w-5 text-center text-sky-400"></i>
-                <span>Quản lý nhân viên</span>
+            <a href="pos.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-cash-register w-5 text-center text-emerald-400"></i>
+                <span>Bán hàng nhanh POS</span>
+                <span class="ml-auto text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-semibold">Live</span>
+            </a>
+            <a href="imei.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-barcode w-5 text-center text-amber-400"></i>
+                <span>Quản lý IMEI & Serial</span>
             </a>
             <a href="warehouse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
                 <i class="fa-solid fa-boxes-stacked w-5 text-center text-indigo-400"></i>
@@ -96,6 +101,10 @@
             <a href="promotions.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
                 <i class="fa-solid fa-tags w-5 text-center text-pink-400"></i>
                 <span>Khuyến mãi / Voucher</span>
+            </a>
+            <a href="employee.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
+                <i class="fa-solid fa-users-gear w-5 text-center text-purple-400"></i>
+                <span>Quản lý nhân viên</span>
             </a>
             <a href="reports.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition">
                 <i class="fa-solid fa-file-lines w-5 text-center text-purple-400"></i>
@@ -204,7 +213,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="relative w-full sm:w-80">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
-                        <input id="searchOrderInput" onkeyup="filterOrders()" type="text" placeholder="Tìm theo mã phiếu nhập, NCC..." 
+                        <input id="searchOrderInput" onkeyup="filterOrders()" type="text" placeholder="Tìm theo mã phiếu nhập, NCC..."
                                class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div class="flex items-center gap-2 text-xs text-slate-500">
@@ -216,20 +225,20 @@
                 <div class="overflow-x-auto rounded-lg border border-slate-200">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-slate-100 text-slate-600 uppercase text-xs font-semibold">
-                            <tr>
-                                <th class="p-3">Mã Phiếu</th>
-                                <th class="p-3">Nhà Cung Cấp</th>
-                                <th class="p-3">Người Lập</th>
-                                <th class="p-3">Ngày Nhập</th>
-                                <th class="p-3 text-right">Tổng Tiền</th>
-                                <th class="p-3 text-right">Đã Trả</th>
-                                <th class="p-3 text-right">Công Nợ</th>
-                                <th class="p-3 text-center">Trạng Thái</th>
-                                <th class="p-3 text-center">Thao Tác</th>
-                            </tr>
+                        <tr>
+                            <th class="p-3">Mã Phiếu</th>
+                            <th class="p-3">Nhà Cung Cấp</th>
+                            <th class="p-3">Người Lập</th>
+                            <th class="p-3">Ngày Nhập</th>
+                            <th class="p-3 text-right">Tổng Tiền</th>
+                            <th class="p-3 text-right">Đã Trả</th>
+                            <th class="p-3 text-right">Công Nợ</th>
+                            <th class="p-3 text-center">Trạng Thái</th>
+                            <th class="p-3 text-center">Thao Tác</th>
+                        </tr>
                         </thead>
                         <tbody id="purchaseOrdersTableBody" class="divide-y divide-slate-200 bg-white">
-                            <!-- Dữ liệu JS sẽ render -->
+                        <!-- Dữ liệu JS sẽ render -->
                         </tbody>
                     </table>
                 </div>
@@ -240,7 +249,7 @@
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="relative w-full sm:w-80">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
-                        <input id="searchSupplierInput" onkeyup="filterSuppliers()" type="text" placeholder="Tìm tên NCC, số điện thoại..." 
+                        <input id="searchSupplierInput" onkeyup="filterSuppliers()" type="text" placeholder="Tìm tên NCC, số điện thoại..."
                                class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <button onclick="openCreateSupplierModal()" class="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700">
@@ -251,19 +260,19 @@
                 <div class="overflow-x-auto rounded-lg border border-slate-200">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-slate-100 text-slate-600 uppercase text-xs font-semibold">
-                            <tr>
-                                <th class="p-3">Mã NCC</th>
-                                <th class="p-3">Tên Nhà Cung Cấp</th>
-                                <th class="p-3">Số Điện Thoại</th>
-                                <th class="p-3">Email</th>
-                                <th class="p-3">Địa Chỉ</th>
-                                <th class="p-3 text-right">Công Nợ</th>
-                                <th class="p-3 text-center">Trạng Thái</th>
-                                <th class="p-3 text-center">Thao Tác</th>
-                            </tr>
+                        <tr>
+                            <th class="p-3">Mã NCC</th>
+                            <th class="p-3">Tên Nhà Cung Cấp</th>
+                            <th class="p-3">Số Điện Thoại</th>
+                            <th class="p-3">Email</th>
+                            <th class="p-3">Địa Chỉ</th>
+                            <th class="p-3 text-right">Công Nợ</th>
+                            <th class="p-3 text-center">Trạng Thái</th>
+                            <th class="p-3 text-center">Thao Tác</th>
+                        </tr>
                         </thead>
                         <tbody id="suppliersTableBody" class="divide-y divide-slate-200 bg-white">
-                            <!-- Dữ liệu JS sẽ render -->
+                        <!-- Dữ liệu JS sẽ render -->
                         </tbody>
                     </table>
                 </div>
