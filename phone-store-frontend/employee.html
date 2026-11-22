@@ -154,7 +154,7 @@
                 <span class="hidden sm:inline">Nạp lại</span>
             </button>
 
-            <button onclick="openModal()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm transition">
+            <button onclick="openCreateModal()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm transition">
                 <i class="fa-solid fa-user-plus text-xs"></i>
                 <span>Thêm nhân viên</span>
             </button>
@@ -170,8 +170,8 @@
         <span id="syncTimestamp" class="text-slate-500 font-mono">Vừa cập nhật: Đang kết nối...</span>
     </div>
 
-    <!-- CONTENT BODY (Gọn gàng, vừa khung hình) -->
-    <div class="p-5 sm:p-6 max-w-7xl mx-auto w-full flex-1 space-y-5">
+    <!-- CONTENT BODY -->
+    <div class="p-5 sm:p-6 max-w-5xl mx-auto w-full flex-1 space-y-5">
 
         <!-- Thống kê nhanh gọn trên 1 hàng -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -206,18 +206,18 @@
             </div>
         </div>
 
-        <!-- Table Container Card -->
+        <!-- Table Container Card (Chỉ hiển thị Tên nhân viên trên bảng, bấm Xem để mở chi tiết) -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
                 <div>
-                    <h3 class="font-bold text-slate-800 text-sm">Danh sách nhân viên hệ thống</h3>
-                    <p class="text-xs text-slate-500">Đồng bộ trực tiếp với bảng <code class="text-blue-600">nhan_vien</code></p>
+                    <h3 class="font-bold text-slate-800 text-sm">Danh sách nhân viên</h3>
+                    <p class="text-xs text-slate-500">Bấm <strong>Xem</strong> để hiển thị thông tin chi tiết hoặc <strong>Sửa</strong> để cập nhật</p>
                 </div>
                 <div class="relative w-full sm:w-64">
                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                         <i class="fa-solid fa-search text-xs"></i>
                     </span>
-                    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Tìm kiếm tên, tài khoản..." class="w-full pl-9 pr-3.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Tìm theo tên nhân viên..." class="w-full pl-9 pr-3.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
 
@@ -225,11 +225,9 @@
                 <table class="w-full text-left border-collapse">
                     <thead class="sticky top-0 z-10">
                     <tr class="bg-slate-100 text-slate-600 font-semibold text-[11px] uppercase tracking-wider border-b border-slate-200">
-                        <th class="py-3 px-5">Họ và Tên</th>
-                        <th class="py-3 px-4">Tên Đăng Nhập</th>
-                        <th class="py-3 px-4 text-center">Chức Vụ</th>
-                        <th class="py-3 px-4 text-center">Trạng Thái</th>
-                        <th class="py-3 px-5 text-center">Hành Động</th>
+                        <th class="py-3 px-5 w-14 text-center">STT</th>
+                        <th class="py-3 px-5">Tên nhân viên</th>
+                        <th class="py-3 px-5 text-right">Hành động</th>
                     </tr>
                     </thead>
                     <tbody id="employeeTableBody" class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
@@ -251,11 +249,57 @@
     </div>
 </main>
 
-<!-- MODAL THÊM NHÂN VIÊN MỚI -->
+<!-- MODAL XEM CHI TIẾT NHÂN VIÊN -->
+<div id="detailModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-md mx-4 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+            <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-id-card text-blue-600"></i> Chi Tiết Nhân Viên
+            </h3>
+            <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600 text-sm">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+        </div>
+
+        <div class="p-6 space-y-3 text-xs">
+            <div class="flex items-center justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500 font-medium">Mã nhân viên</span>
+                <span id="detailId" class="font-mono font-bold text-slate-800">--</span>
+            </div>
+            <div class="flex items-center justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500 font-medium">Họ và tên</span>
+                <span id="detailFullName" class="font-bold text-slate-900 text-sm">--</span>
+            </div>
+            <div class="flex items-center justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500 font-medium">Tên đăng nhập</span>
+                <span id="detailUsername" class="font-mono text-slate-700">--</span>
+            </div>
+            <div class="flex items-center justify-between py-2 border-b border-slate-100">
+                <span class="text-slate-500 font-medium">Chức vụ</span>
+                <span id="detailRole" class="px-2.5 py-0.5 rounded-md font-semibold">--</span>
+            </div>
+            <div class="flex items-center justify-between py-2">
+                <span class="text-slate-500 font-medium">Trạng thái</span>
+                <span id="detailStatus" class="px-2.5 py-0.5 rounded-md font-semibold">--</span>
+            </div>
+        </div>
+
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2.5">
+            <button type="button" id="detailEditBtn" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-pen-to-square"></i> Sửa thông tin
+            </button>
+            <button type="button" onclick="closeDetailModal()" class="px-4 py-2 border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold transition">
+                Đóng
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL THÊM / SỬA NHÂN VIÊN -->
 <div id="employeeModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-md mx-4 overflow-hidden transform transition-all">
         <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-            <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+            <h3 id="modalTitle" class="font-bold text-slate-800 text-sm flex items-center gap-2">
                 <i class="fa-solid fa-user-plus text-blue-600"></i> Thêm Tài Khoản Nhân Viên Mới
             </h3>
             <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-sm">
@@ -263,7 +307,14 @@
             </button>
         </div>
 
-        <form id="employeeForm" onsubmit="handleCreateEmployee(event)" class="p-6 space-y-4">
+        <form id="employeeForm" onsubmit="handleSaveEmployee(event)" class="p-6 space-y-4">
+            <input type="hidden" id="editingEmployeeId">
+
+            <div id="editCodeWrapper" class="hidden">
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Mã Nhân Viên</label>
+                <input type="text" id="employeeCodeDisplay" readonly class="w-full px-3.5 py-2 bg-slate-100 border border-slate-200 rounded-lg text-xs font-mono text-slate-600">
+            </div>
+
             <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1">Họ và Tên</label>
                 <input type="text" id="fullName" required placeholder="Ví dụ: Nguyễn Văn A..." class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -275,8 +326,9 @@
             </div>
 
             <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1">Mật Khẩu</label>
+                <label id="passwordLabel" class="block text-xs font-semibold text-slate-700 mb-1">Mật Khẩu</label>
                 <input type="password" id="password" required placeholder="Nhập mật khẩu..." class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p id="passwordHint" class="hidden text-[11px] text-slate-400 mt-1">Để trống nếu muốn giữ nguyên mật khẩu hiện tại.</p>
             </div>
 
             <div>
@@ -287,9 +339,17 @@
                 </select>
             </div>
 
+            <div id="statusWrapper" class="hidden">
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Trạng Thái Tài Khoản</label>
+                <select id="activeStatus" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="1">Hoạt động</option>
+                    <option value="0">Đã khóa</option>
+                </select>
+            </div>
+
             <div class="pt-2 flex items-center justify-end gap-3">
                 <button type="button" onclick="closeModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 transition">Hủy bỏ</button>
-                <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition">Lưu nhân viên</button>
+                <button type="submit" id="submitEmployeeBtn" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shadow-sm transition">Lưu nhân viên</button>
             </div>
         </form>
     </div>
@@ -297,31 +357,5 @@
 
 <!-- NẠP FILE JAVASCRIPT RIÊNG BIỆT -->
 <script src="assets/js/employee.js"></script>
-<script>
-    // Cập nhật 3 thẻ thống kê nhanh từ dữ liệu khi render bảng
-    const _origRenderEmployeeTable = window.renderEmployeeTable;
-    window.renderEmployeeTable = function (employees = []) {
-        if (typeof _origRenderEmployeeTable === 'function') {
-            _origRenderEmployeeTable(employees);
-        }
-        const list = Array.isArray(employees) ? employees : [];
-        const totalEl = document.getElementById('statTotalEmployees');
-        const activeEl = document.getElementById('statActiveEmployees');
-        const managerEl = document.getElementById('statManagers');
-
-        if (totalEl) totalEl.textContent = `${list.length} người`;
-        if (activeEl) {
-            const activeCount = list.filter(e => e.active !== 0 && e.active !== false).length;
-            activeEl.textContent = `${activeCount} người`;
-        }
-        if (managerEl) {
-            const managerCount = list.filter(e =>
-                String(e.role || '').toUpperCase().includes('QUAN_LY') ||
-                String(e.role || '').toLowerCase().includes('quản lý')
-            ).length;
-            managerEl.textContent = `${managerCount} người`;
-        }
-    };
-</script>
 </body>
 </html>
