@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320">
+  <defs>
+    <linearGradient id="bgMi" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff7ed"/>
+      <stop offset="100%" stop-color="#ffedd5"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="320" rx="28" fill="url(#bgMi)"/>
+  <rect x="94" y="34" width="132" height="252" rx="22" fill="#e2e8f0" stroke="#94a3b8" stroke-width="3"/>
+  <rect x="100" y="40" width="120" height="240" rx="18" fill="#f8fafc"/>
+  <rect x="112" y="52" width="54" height="54" rx="12" fill="#0f172a" stroke="#64748b" stroke-width="2"/>
+  <circle cx="127" cy="67" r="8" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5"/>
+  <circle cx="151" cy="67" r="8" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5"/>
+  <circle cx="127" cy="91" r="8" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="151" y="94" text-anchor="middle" font-family="Arial, sans-serif" font-size="7" font-weight="bold" fill="#f97316">LEICA</text>
+  <rect x="140" y="218" width="40" height="18" rx="4" fill="#f97316"/>
+  <text x="160" y="231" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#ffffff">mi</text>
+  <text x="160" y="264" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#334155">Xiaomi 14 Series</text>
+</svg>
