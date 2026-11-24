@@ -29,7 +29,25 @@ let selectedProductForMinStock = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
     await loadWarehouseData();
+    applyWarehouseQueryParams();
 });
+
+function applyWarehouseQueryParams() {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    const filter = params.get('filter');
+
+    if (tab === 'checks') {
+        switchWarehouseTab('checks');
+    } else if (tab === 'stock') {
+        switchWarehouseTab('stock');
+    }
+
+    if (filter === 'low' || filter === 'warning') {
+        setFilterCategory('low');
+        switchWarehouseTab('stock');
+    }
+}
 
 // Chuyển tab giữa Tồn kho và Kiểm kê
 function switchWarehouseTab(tab) {

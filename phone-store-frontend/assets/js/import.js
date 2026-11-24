@@ -64,6 +64,7 @@ let currentEditingSupplierId = null;
 // Khởi chạy khi load trang
 document.addEventListener('DOMContentLoaded', async () => {
     await loadInitialData();
+    applyTabFromQuery();
 });
 
 // Chuyển tab giữa Phiếu nhập và Nhà cung cấp
@@ -83,6 +84,14 @@ function switchTab(tab) {
         tabSuppliers.classList.remove('hidden');
         btnSuppliers.className = "py-4 text-sm font-bold border-b-2 border-blue-600 text-blue-600 flex items-center gap-2";
         btnOrders.className = "py-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2";
+    }
+}
+
+function applyTabFromQuery() {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'suppliers' || tab === 'orders') {
+        switchTab(tab);
     }
 }
 
