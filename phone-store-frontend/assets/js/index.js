@@ -3,6 +3,37 @@ function formatCurrency(amount) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0);
 }
 
+function pad2(n) {
+    return String(n).padStart(2, '0');
+}
+
+function updateTimeFilterLabels() {
+    const now = new Date();
+    const day = pad2(now.getDate());
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+
+    const todayOption = document.querySelector('#timeFilter option[value="today"]');
+    const monthOption = document.querySelector('#timeFilter option[value="this_month"]');
+    const yearOption = document.querySelector('#timeFilter option[value="year"]');
+    const chartTitle = document.getElementById('revenueChartTitle');
+
+    if (todayOption) todayOption.textContent = `Hôm nay (${day}/${pad2(month)}/${year})`;
+    if (monthOption) monthOption.textContent = `Tháng này (Tháng ${month}/${year})`;
+    if (yearOption) yearOption.textContent = `Cả năm ${year}`;
+    if (chartTitle) chartTitle.textContent = `Biểu đồ tăng trưởng doanh thu (Tháng ${month}/${year})`;
+}
+
+function getCurrentMonthChartLabels() {
+    const now = new Date();
+    const month = pad2(now.getMonth() + 1);
+    const year = now.getFullYear();
+    const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
+    const points = [1, 5, 10, 15, 20, 25, lastDay];
+    const uniquePoints = [...new Set(points)].sort((a, b) => a - b);
+    return uniquePoints.map(d => `${pad2(d)}/${month}`);
+}
+
 function showLoadingState() {
     // 1. KPI Skeletons
     document.getElementById('kpiRevenueSkeleton').classList.remove('hidden');
@@ -84,13 +115,17 @@ function renderCharts(data) {
     const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
     if (revenueChartInstance) revenueChartInstance.destroy();
 
+    const chartLabels = getCurrentMonthChartLabels();
+    const revenueValue = data.totalRevenue || 0;
+    const chartData = chartLabels.map((_, idx) => (idx < 3 ? 0 : revenueValue));
+
     revenueChartInstance = new Chart(ctxRevenue, {
         type: 'line',
         data: {
-            labels: ['01/10', '05/10', '10/10', '15/10', '20/10', '25/10', '31/10'],
+            labels: chartLabels,
             datasets: [{
                 label: 'Doanh thu (VNĐ)',
-                data: [0, 0, 0, data.totalRevenue || 0, data.totalRevenue || 0, data.totalRevenue || 0, data.totalRevenue || 0],
+                data: chartData,
                 borderColor: '#2563eb',
                 backgroundColor: 'rgba(37, 99, 235, 0.08)',
                 borderWidth: 2.5,
@@ -204,5 +239,6 @@ async function reloadDashboardData() {
 
 // Tự động tải dữ liệu ngay khi mở trang
 document.addEventListener('DOMContentLoaded', () => {
+    updateTimeFilterLabels();
     reloadDashboardData();
 });

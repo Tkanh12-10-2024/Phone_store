@@ -152,10 +152,10 @@
         <div class="flex items-center gap-3">
             <div class="relative hidden sm:block">
                 <select id="timeFilter" onchange="reloadDashboardData()" class="text-sm bg-slate-100 border border-slate-300 rounded-lg px-3 py-1.5 pr-8 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="today">Hôm nay (18/10/2026)</option>
+                    <option value="today">Hôm nay</option>
                     <option value="this_week">Tuần này</option>
-                    <option value="this_month" selected>Tháng này (Tháng 10/2026)</option>
-                    <option value="year">Cả năm 2026</option>
+                    <option value="this_month" selected>Tháng này</option>
+                    <option value="year">Cả năm</option>
                 </select>
             </div>
 
@@ -278,7 +278,7 @@
             <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm lg:col-span-2">
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <h3 class="font-bold text-base text-slate-800">Biểu đồ tăng trưởng doanh thu (Tháng 10/2026)</h3>
+                        <h3 id="revenueChartTitle" class="font-bold text-base text-slate-800">Biểu đồ tăng trưởng doanh thu</h3>
                         <p class="text-xs text-slate-500">Dữ liệu từ bảng <span class="font-mono text-blue-600">hoa_don</span> và View <span class="font-mono text-blue-600">v_thong_ke_doanh_thu</span></p>
                     </div>
                     <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 font-semibold text-xs rounded-lg border border-emerald-200">
@@ -369,7 +369,7 @@
                             <p class="text-xs text-slate-500">Dữ liệu từ View: <code class="text-amber-600">v_canh_bao_ton_kho</code></p>
                         </div>
                     </div>
-                    <button class="px-2.5 py-1 bg-amber-600 text-white text-xs font-semibold rounded-lg hover:bg-amber-700 transition">
+                    <button onclick="window.location.href='import.html?tab=orders'" class="px-2.5 py-1 bg-amber-600 text-white text-xs font-semibold rounded-lg hover:bg-amber-700 transition">
                         <i class="fa-solid fa-plus mr-1"></i> Nhập hàng
                     </button>
                 </div>
