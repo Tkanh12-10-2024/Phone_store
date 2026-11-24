@@ -151,8 +151,8 @@
             <div class="relative flex-1 min-w-56">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                 <input id="searchInput" type="text" placeholder="Tìm theo mã phiếu, tên KH, SĐT, IMEI..."
-                       class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-                       oninput="debounceSearch()">
+                    class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
+                    oninput="debounceSearch()">
             </div>
             <button onclick="loadWarranty()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-xl transition flex items-center gap-2">
                 <i class="fa-solid fa-rotate-right"></i> Làm mới
@@ -176,21 +176,601 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead class="bg-slate-50 border-b border-slate-200">
-                    <tr>
-                        <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide w-36">Mã phiếu</th>
-                        <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Khách hàng</th>
-                        <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Thiết bị / IMEI</th>
-                        <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Lỗi phản ánh</th>
-                        <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide w-28">Ngày tiếp nhận</th>
-                        <th class="text-center px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide w-32">Trạng thái</th>
-                        <th class="text-center px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide w-28">Hành động</th>
-                    </tr>
+                        <tr>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide w-36">Mã phiếu</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Khách hàng</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Thiết bị / IMEI</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Lỗi phản ánh</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide w-28">Ngày tiếp nhận</th>
+                            <th class="text-center px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide w-32">Trạng thái</th>
+                            <th class="text-center px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide w-28">Hành động</th>
+                        </tr>
                     </thead>
                     <tbody id="warrantyTableBody">
-                    <tr><td colspan="7" class="text-center py-16 text-slate-400"><i class="fa-solid fa-circle-notch fa-spin text-2xl mb-3 block"></i>Đang tải...</td></tr>
+                        <tr><td colspan="7" class="text-center py-16 text-slate-400"><i class="fa-solid fa-circle-notch fa-spin text-2xl mb-3 block"></i>Đang tải...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </main>
+
+<!-- ============================================================
+     MODAL TIẾP NHẬN BẢO HÀNH (3 BƯỚC)
+============================================================ -->
+<div id="receiveModal" class="fixed inset-0 z-50 hidden modal-overlay bg-slate-900/60 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl">
+        <!-- Header Steps -->
+        <div class="px-6 py-4 border-b border-slate-100">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-base font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-shield-halved text-blue-600"></i> Tiếp Nhận Bảo Hành</h2>
+                <button onclick="closeReceiveModal()" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center"><i class="fa-solid fa-xmark text-slate-500"></i></button>
+            </div>
+            <div class="flex items-center gap-2">
+                <div id="step1-indicator" class="flex items-center gap-1.5">
+                    <div class="w-7 h-7 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">1</div>
+                    <span class="text-xs font-medium text-blue-700">Kiểm tra IMEI</span>
+                </div>
+                <div class="flex-1 h-px bg-slate-200 mx-1"></div>
+                <div id="step2-indicator" class="flex items-center gap-1.5">
+                    <div id="step2-num" class="w-7 h-7 rounded-full bg-slate-200 text-slate-500 text-xs font-bold flex items-center justify-center">2</div>
+                    <span class="text-xs font-medium text-slate-400">Kết quả BH</span>
+                </div>
+                <div class="flex-1 h-px bg-slate-200 mx-1"></div>
+                <div id="step3-indicator" class="flex items-center gap-1.5">
+                    <div id="step3-num" class="w-7 h-7 rounded-full bg-slate-200 text-slate-500 text-xs font-bold flex items-center justify-center">3</div>
+                    <span class="text-xs font-medium text-slate-400">Điền thông tin</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 1: Nhập IMEI -->
+        <div id="modalStep1" class="p-6">
+            <p class="text-sm text-slate-600 mb-4">Nhập số IMEI của thiết bị cần bảo hành để kiểm tra tình trạng bảo hành.</p>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Số IMEI <span class="text-red-500">*</span></label>
+                    <div class="flex gap-2">
+                        <input id="imeiInput" type="text" placeholder="358941091234561" maxlength="20"
+                            class="flex-1 px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                            onkeydown="if(event.key==='Enter') checkIMEI()">
+                        <button onclick="checkIMEI()" id="checkImeiBtn" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition flex items-center gap-2 whitespace-nowrap">
+                            <i class="fa-solid fa-magnifying-glass"></i> Kiểm tra
+                        </button>
+                    </div>
+                </div>
+                <div id="checkError" class="hidden bg-red-50 border border-red-200 text-red-700 text-xs px-4 py-3 rounded-xl flex items-center gap-2">
+                    <i class="fa-solid fa-circle-exclamation"></i><span id="checkErrorMsg"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2: Kết quả kiểm tra -->
+        <div id="modalStep2" class="p-6 hidden">
+            <div id="warrantyCheckResult"></div>
+            <div class="flex gap-3 mt-4">
+                <button onclick="goStep(1)" class="flex-1 py-2.5 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Quay lại
+                </button>
+                <button id="proceedBtn" onclick="goStep(3)" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition">
+                    Tiếp tục <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 3: Điền thông tin tiếp nhận -->
+        <div id="modalStep3" class="p-6 hidden">
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Tình trạng thiết bị khi tiếp nhận</label>
+                    <input id="f_tinhTrang" type="text" placeholder="VD: Màn hình có vết xước, khung máy nguyên vẹn..."
+                        class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Lỗi khách phản ánh <span class="text-red-500">*</span></label>
+                    <textarea id="f_loiPhanAnh" rows="2" required placeholder="Mô tả chi tiết lỗi..."
+                        class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Yêu cầu sửa chữa</label>
+                    <input id="f_yeuCau" type="text" placeholder="VD: Thay pin, vệ sinh camera..."
+                        class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Mã nhân viên tiếp nhận <span class="text-red-500">*</span></label>
+                    <input id="f_maNV" type="text" value="NV003" placeholder="NV003"
+                        class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                </div>
+                <div id="submitError" class="hidden bg-red-50 border border-red-200 text-red-700 text-xs px-4 py-3 rounded-xl flex items-center gap-2">
+                    <i class="fa-solid fa-circle-exclamation"></i><span id="submitErrorMsg"></span>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-4">
+                <button onclick="goStep(2)" class="flex-1 py-2.5 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Quay lại
+                </button>
+                <button onclick="submitWarranty()" id="submitWarrantyBtn" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Tạo phiếu bảo hành
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CHI TIẾT / CẬP NHẬT TIẾN ĐỘ -->
+<div id="detailModal" class="fixed inset-0 z-50 hidden modal-overlay bg-slate-900/60 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 flex-shrink-0">
+            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-file-contract text-blue-600"></i> Chi Tiết Phiếu Bảo Hành</h2>
+            <button onclick="closeDetailModal()" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center"><i class="fa-solid fa-xmark text-slate-500"></i></button>
+        </div>
+        <div id="detailContent" class="flex-1 overflow-y-auto p-6">
+            <div class="text-center py-16 text-slate-400"><i class="fa-solid fa-circle-notch fa-spin text-2xl"></i></div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CẬP NHẬT TIẾN ĐỘ -->
+<div id="progressModal" class="fixed inset-0 z-50 hidden modal-overlay bg-slate-900/60 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-wrench text-orange-500"></i> Cập Nhật Tiến Độ</h2>
+            <button onclick="closeProgressModal()" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center"><i class="fa-solid fa-xmark text-slate-500"></i></button>
+        </div>
+        <div class="p-6 space-y-3">
+            <input type="hidden" id="p_maPhieu">
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Trạng thái mới <span class="text-red-500">*</span></label>
+                <select id="p_trangThai" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="Dang_kiem_tra">Đang kiểm tra</option>
+                    <option value="Dang_sua_chua">Đang sửa chữa</option>
+                    <option value="Cho_tra_khach">Chờ trả khách</option>
+                    <option value="Tu_choi">Từ chối bảo hành</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Kết quả kiểm tra</label>
+                <input id="p_ketQua" type="text" placeholder="VD: Pin bị chai, hỏng cell..." class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nguyên nhân lỗi</label>
+                <input id="p_nguyenNhan" type="text" placeholder="VD: Do sử dụng lâu dài..." class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nội dung sửa chữa</label>
+                <input id="p_noiDung" type="text" placeholder="VD: Thay pin chính hãng..." class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Ghi chú</label>
+                <input id="p_ghiChu" type="text" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1.5">Mã nhân viên kỹ thuật</label>
+                <input id="p_maNV" type="text" value="NV003" class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+            </div>
+            <div id="progressError" class="hidden bg-red-50 border border-red-200 text-red-700 text-xs px-4 py-3 rounded-xl flex items-center gap-2">
+                <i class="fa-solid fa-circle-exclamation"></i><span id="progressErrorMsg"></span>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeProgressModal()" class="flex-1 py-2.5 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition">Hủy</button>
+                <button onclick="submitProgress()" id="progressBtn" class="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Cập nhật
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = 'http://localhost:8080/api';
+let currentTab = '';
+let searchTimer = null;
+let warrantyCheckData = null;
+let currentDetailId = null;
+
+document.addEventListener('DOMContentLoaded', loadWarranty);
+
+function debounceSearch() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(loadWarranty, 400);
+}
+
+function setTab(status, btn) {
+    currentTab = status;
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        b.className = 'tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-600 hover:bg-blue-50 transition';
+    });
+    btn.className = 'tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 text-white transition';
+    loadWarranty();
+}
+
+// ========= UC 2.13.2 - Load danh sách =========
+async function loadWarranty() {
+    const keyword = document.getElementById('searchInput').value;
+    setBanner('loading', 'Đang tải danh sách phiếu bảo hành...');
+    try {
+        const params = new URLSearchParams();
+        if (keyword) params.set('keyword', keyword);
+        if (currentTab) params.set('trangThai', currentTab);
+        const res = await fetch(`${API}/warranty?${params}`);
+        if (!res.ok) throw new Error('Không thể kết nối backend');
+        const tickets = await res.json();
+        renderTable(tickets);
+        setBanner('success', `Đã tải ${tickets.length} phiếu bảo hành`, new Date().toLocaleTimeString('vi-VN'));
+    } catch (err) {
+        setBanner('error', 'Lỗi kết nối: ' + err.message);
+        document.getElementById('warrantyTableBody').innerHTML = `
+            <tr><td colspan="7" class="text-center py-16 text-red-400">
+                <i class="fa-solid fa-circle-exclamation text-3xl mb-3 block"></i>
+                Không thể tải dữ liệu. Hãy kiểm tra backend đang chạy.
+            </td></tr>`;
+    }
+}
+
+function getStatusBadge(status) {
+    const map = {
+        'Tiep_nhan':     'bg-blue-100 text-blue-700',
+        'Dang_kiem_tra': 'bg-yellow-100 text-yellow-700',
+        'Dang_sua_chua': 'bg-orange-100 text-orange-700',
+        'Cho_tra_khach': 'bg-purple-100 text-purple-700',
+        'Hoan_tat':      'bg-emerald-100 text-emerald-700',
+        'Tu_choi':       'bg-red-100 text-red-600',
+    };
+    const labels = {
+        'Tiep_nhan':     'Tiếp nhận',
+        'Dang_kiem_tra': 'Đang kiểm tra',
+        'Dang_sua_chua': 'Đang sửa chữa',
+        'Cho_tra_khach': 'Chờ trả khách',
+        'Hoan_tat':      'Hoàn tất',
+        'Tu_choi':       'Từ chối',
+    };
+    const cls = map[status] || 'bg-slate-100 text-slate-600';
+    return `<span class="px-2.5 py-1 rounded-full text-xs font-semibold ${cls}">${labels[status] || status}</span>`;
+}
+
+function renderTable(tickets) {
+    const tbody = document.getElementById('warrantyTableBody');
+    if (!tickets.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-16 text-slate-400"><i class="fa-solid fa-shield-halved text-3xl mb-3 block opacity-30"></i>Không có phiếu bảo hành nào</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = tickets.map(t => `
+        <tr class="border-b border-slate-50 hover:bg-slate-50 transition cursor-pointer" onclick="showDetail('${t.maPhieuBh}')">
+            <td class="px-4 py-3">
+                <span class="font-mono text-xs text-blue-700 bg-blue-50 px-2 py-1 rounded-lg">${t.maPhieuBh}</span>
+                <p class="text-xs text-slate-400 mt-1">${t.ngayTiepNhan ? new Date(t.ngayTiepNhan).toLocaleDateString('vi-VN') : ''}</p>
+            </td>
+            <td class="px-4 py-3">
+                <p class="font-semibold text-slate-800 text-sm">${t.tenKhachHang || t.maKhachHang}</p>
+                <p class="text-xs text-slate-400 font-mono">${t.soDienThoai || ''}</p>
+            </td>
+            <td class="px-4 py-3">
+                <p class="text-sm text-slate-700">${t.tenThietBi || '—'}</p>
+                <p class="text-xs text-slate-400 font-mono">${t.maImei ? 'IMEI: ' + t.maImei : ''}</p>
+            </td>
+            <td class="px-4 py-3 max-w-xs">
+                <p class="text-sm text-slate-600 line-clamp-2">${t.loiPhanAnh || ''}</p>
+            </td>
+            <td class="px-4 py-3 text-xs text-slate-500">${t.ngayTiepNhan ? new Date(t.ngayTiepNhan).toLocaleDateString('vi-VN') : '—'}</td>
+            <td class="px-4 py-3 text-center">${getStatusBadge(t.trangThai)}</td>
+            <td class="px-4 py-3" onclick="event.stopPropagation()">
+                <div class="flex items-center justify-center gap-1.5">
+                    <button onclick="showDetail('${t.maPhieuBh}')" title="Chi tiết" class="w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center text-xs transition">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                    ${t.trangThai !== 'Hoan_tat' && t.trangThai !== 'Tu_choi' ? `
+                    <button onclick="openProgressModal('${t.maPhieuBh}')" title="Cập nhật tiến độ" class="w-8 h-8 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-500 flex items-center justify-center text-xs transition">
+                        <i class="fa-solid fa-wrench"></i>
+                    </button>` : ''}
+                    ${t.trangThai === 'Cho_tra_khach' ? `
+                    <button onclick="closeTicket('${t.maPhieuBh}')" title="Hoàn tất & đóng phiếu" class="w-8 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs transition">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </button>` : ''}
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// ========= UC 2.13.1 - Tiếp nhận bảo hành (Multi-step) =========
+function openReceiveModal() {
+    warrantyCheckData = null;
+    document.getElementById('imeiInput').value = '';
+    document.getElementById('f_tinhTrang').value = '';
+    document.getElementById('f_loiPhanAnh').value = '';
+    document.getElementById('f_yeuCau').value = '';
+    document.getElementById('f_maNV').value = 'NV003';
+    document.getElementById('checkError').classList.add('hidden');
+    document.getElementById('submitError').classList.add('hidden');
+    goStep(1);
+    document.getElementById('receiveModal').classList.remove('hidden');
+}
+function closeReceiveModal() { document.getElementById('receiveModal').classList.add('hidden'); }
+
+function goStep(n) {
+    [1,2,3].forEach(i => document.getElementById(`modalStep${i}`).classList.add('hidden'));
+    document.getElementById(`modalStep${n}`).classList.remove('hidden');
+    // Update indicators
+    [1,2,3].forEach(i => {
+        const el = document.getElementById(`step${i}-num`) || document.querySelector(`#step${i}-indicator .w-7`);
+        if (el) {
+            el.className = `w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center ${
+                i < n ? 'bg-emerald-500 text-white' : i === n ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
+            }`;
+        }
+    });
+}
+
+// ========= UC 2.13.1.1 - Kiểm tra IMEI =========
+async function checkIMEI() {
+    const imei = document.getElementById('imeiInput').value.trim();
+    if (!imei) { showCheckError('Vui lòng nhập số IMEI.'); return; }
+    const btn = document.getElementById('checkImeiBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang kiểm tra...';
+    document.getElementById('checkError').classList.add('hidden');
+    try {
+        const res = await fetch(`${API}/warranty/check`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json; charset=utf-8'},
+            body: JSON.stringify({imei})
+        });
+        const data = await res.json();
+        if (!res.ok) { showCheckError(data.message || 'Có lỗi xảy ra.'); return; }
+        warrantyCheckData = data;
+        renderCheckResult(data);
+        goStep(2);
+    } catch (err) {
+        showCheckError('Lỗi kết nối: ' + err.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Kiểm tra';
+    }
+}
+
+function renderCheckResult(data) {
+    const container = document.getElementById('warrantyCheckResult');
+    if (!data.found) {
+        container.innerHTML = `
+            <div class="bg-red-50 border border-red-200 rounded-2xl p-5 text-center">
+                <i class="fa-solid fa-circle-xmark text-red-500 text-3xl mb-3 block"></i>
+                <p class="font-bold text-red-700">Không tìm thấy IMEI</p>
+                <p class="text-sm text-red-600 mt-1">${data.lyDo || 'IMEI không tồn tại trong hệ thống'}</p>
+            </div>`;
+        document.getElementById('proceedBtn').disabled = true;
+        document.getElementById('proceedBtn').className = 'flex-1 py-2.5 bg-slate-200 text-slate-400 text-sm font-semibold rounded-xl cursor-not-allowed';
+        return;
+    }
+    const isWarranty = data.conBaoHanh;
+    document.getElementById('proceedBtn').disabled = false;
+    document.getElementById('proceedBtn').className = 'flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition';
+
+    container.innerHTML = `
+        <div class="border-2 ${isWarranty ? 'border-emerald-200 bg-emerald-50' : 'border-orange-200 bg-orange-50'} rounded-2xl p-5 mb-4">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full ${isWarranty ? 'bg-emerald-500' : 'bg-orange-400'} flex items-center justify-center text-white">
+                    <i class="fa-solid ${isWarranty ? 'fa-shield-check' : 'fa-shield-xmark'}"></i>
+                </div>
+                <div>
+                    <p class="font-bold text-lg ${isWarranty ? 'text-emerald-700' : 'text-orange-700'}">${isWarranty ? '✅ Còn bảo hành' : '⚠️ Hết bảo hành'}</p>
+                    <p class="text-sm ${isWarranty ? 'text-emerald-600' : 'text-orange-600'}">${data.lyDo}</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+                <div><span class="text-xs text-slate-500">Thiết bị</span><p class="font-semibold text-slate-800">${data.tenSanPham || '—'}</p></div>
+                <div><span class="text-xs text-slate-500">IMEI</span><p class="font-mono text-slate-700 text-xs">${data.maImei}</p></div>
+                <div><span class="text-xs text-slate-500">Khách hàng</span><p class="font-semibold text-slate-800">${data.tenKhachHang || 'Chưa đăng ký'}</p></div>
+                <div><span class="text-xs text-slate-500">SĐT</span><p class="font-mono text-slate-700">${data.soDienThoai || '—'}</p></div>
+                <div><span class="text-xs text-slate-500">Ngày bán</span><p class="text-slate-700">${data.ngayBan ? new Date(data.ngayBan).toLocaleDateString('vi-VN') : '—'}</p></div>
+                <div><span class="text-xs text-slate-500">Hạn bảo hành</span><p class="font-semibold ${isWarranty ? 'text-emerald-600' : 'text-red-500'}">${data.hanBaoHanh ? new Date(data.hanBaoHanh + 'T00:00:00').toLocaleDateString('vi-VN') : '—'}</p></div>
+            </div>
+        </div>
+        ${!isWarranty ? '<div class="bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3 text-xs text-yellow-700"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Thiết bị đã hết bảo hành. Bạn vẫn có thể tiếp nhận và xử lý ngoài bảo hành.</div>' : ''}
+    `;
+}
+
+// ========= Submit tạo phiếu bảo hành =========
+async function submitWarranty() {
+    const loiPhanAnh = document.getElementById('f_loiPhanAnh').value.trim();
+    const maNV = document.getElementById('f_maNV').value.trim();
+    if (!loiPhanAnh) { document.getElementById('submitError').classList.remove('hidden'); document.getElementById('submitErrorMsg').textContent = 'Vui lòng nhập lỗi phản ánh.'; return; }
+    if (!maNV) { document.getElementById('submitError').classList.remove('hidden'); document.getElementById('submitErrorMsg').textContent = 'Vui lòng nhập mã nhân viên.'; return; }
+
+    const body = {
+        maKhachHang: warrantyCheckData?.maKhachHang || 'KH001',
+        maImei: warrantyCheckData?.maImei || document.getElementById('imeiInput').value.trim(),
+        tenThietBi: warrantyCheckData?.tenSanPham || '',
+        tinhTrangTiepNhan: document.getElementById('f_tinhTrang').value.trim(),
+        loiPhanAnh,
+        yeuCauSuaChua: document.getElementById('f_yeuCau').value.trim(),
+        maNhanVien: maNV,
+    };
+
+    const btn = document.getElementById('submitWarrantyBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang tạo phiếu...';
+    document.getElementById('submitError').classList.add('hidden');
+
+    try {
+        const res = await fetch(`${API}/warranty`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json; charset=utf-8'},
+            body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            document.getElementById('submitError').classList.remove('hidden');
+            document.getElementById('submitErrorMsg').textContent = data.message || 'Có lỗi xảy ra.';
+            return;
+        }
+        closeReceiveModal();
+        setBanner('success', `Tạo phiếu bảo hành ${data.maPhieuBh} thành công!`);
+        loadWarranty();
+    } catch (err) {
+        document.getElementById('submitError').classList.remove('hidden');
+        document.getElementById('submitErrorMsg').textContent = 'Lỗi kết nối: ' + err.message;
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Tạo phiếu bảo hành';
+    }
+}
+
+// ========= UC 2.13.2 - Chi tiết phiếu =========
+async function showDetail(maPhieu) {
+    currentDetailId = maPhieu;
+    document.getElementById('detailContent').innerHTML = '<div class="text-center py-16 text-slate-400"><i class="fa-solid fa-circle-notch fa-spin text-2xl"></i><p class="mt-3">Đang tải...</p></div>';
+    document.getElementById('detailModal').classList.remove('hidden');
+    try {
+        const res = await fetch(`${API}/warranty/${maPhieu}`);
+        const t = await res.json();
+        document.getElementById('detailContent').innerHTML = `
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono text-sm text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg font-bold">${t.maPhieuBh}</span>
+                    ${getStatusBadge(t.trangThai)}
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-50 rounded-xl p-4">
+                        <p class="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Thông tin khách hàng</p>
+                        <p class="font-semibold text-slate-800">${t.tenKhachHang || t.maKhachHang}</p>
+                        <p class="text-sm text-slate-600 font-mono">${t.soDienThoai || ''}</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-xl p-4">
+                        <p class="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Thiết bị</p>
+                        <p class="font-semibold text-slate-800">${t.tenThietBi || '—'}</p>
+                        <p class="text-xs text-slate-500 font-mono">${t.maImei ? 'IMEI: ' + t.maImei : ''}</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 gap-3">
+                    ${infoRow('Tình trạng tiếp nhận', t.tinhTrangTiepNhan)}
+                    ${infoRow('Lỗi phản ánh', t.loiPhanAnh, 'text-red-700')}
+                    ${infoRow('Yêu cầu sửa chữa', t.yeuCauSuaChua)}
+                    ${infoRow('Kết quả kiểm tra', t.ketQuaKiemTra)}
+                    ${infoRow('Nguyên nhân lỗi', t.nguyenNhanLoi)}
+                    ${infoRow('Nội dung sửa chữa', t.noiDungSuaChua)}
+                    ${infoRow('Ghi chú', t.ghiChu)}
+                </div>
+                <div class="grid grid-cols-3 gap-3 text-xs text-slate-500">
+                    <div><span class="block font-semibold text-slate-700">Ngày tiếp nhận</span>${t.ngayTiepNhan ? new Date(t.ngayTiepNhan).toLocaleString('vi-VN') : '—'}</div>
+                    <div><span class="block font-semibold text-slate-700">Cập nhật lần cuối</span>${t.ngayCapNhat ? new Date(t.ngayCapNhat).toLocaleString('vi-VN') : '—'}</div>
+                    <div><span class="block font-semibold text-slate-700">Ngày bàn giao</span>${t.ngayBanGiao ? new Date(t.ngayBanGiao).toLocaleString('vi-VN') : '—'}</div>
+                </div>
+                <div class="pt-3 border-t border-slate-100">
+                    <p class="text-xs text-slate-500">Nhân viên tiếp nhận: <span class="font-semibold text-slate-700">${t.tenNhanVienTiepNhan || t.maNhanVienTiepNhan}</span></p>
+                    ${t.tenNhanVienCapNhat ? `<p class="text-xs text-slate-500 mt-1">Nhân viên cập nhật: <span class="font-semibold text-slate-700">${t.tenNhanVienCapNhat}</span></p>` : ''}
+                </div>
+                ${t.trangThai !== 'Hoan_tat' && t.trangThai !== 'Tu_choi' ? `
+                <div class="flex gap-3 pt-2">
+                    <button onclick="closeDetailModal(); openProgressModal('${t.maPhieuBh}')" class="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-wrench"></i> Cập nhật tiến độ
+                    </button>
+                    ${t.trangThai === 'Cho_tra_khach' ? `
+                    <button onclick="closeDetailModal(); closeTicket('${t.maPhieuBh}')" class="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold rounded-xl transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-circle-check"></i> Hoàn tất & Đóng phiếu
+                    </button>` : ''}
+                </div>` : ''}
+            </div>
+        `;
+    } catch (err) {
+        document.getElementById('detailContent').innerHTML = `<div class="text-center py-8 text-red-400">Lỗi: ${err.message}</div>`;
+    }
+}
+
+function infoRow(label, value, extraClass='') {
+    if (!value) return '';
+    return `
+        <div class="bg-slate-50 rounded-xl px-4 py-3">
+            <p class="text-xs font-semibold text-slate-500 mb-1">${label}</p>
+            <p class="text-sm text-slate-700 ${extraClass}">${value}</p>
+        </div>`;
+}
+
+function closeDetailModal() { document.getElementById('detailModal').classList.add('hidden'); }
+
+// ========= UC 2.13.3 - Cập nhật tiến độ =========
+function openProgressModal(maPhieu) {
+    document.getElementById('p_maPhieu').value = maPhieu;
+    document.getElementById('p_ketQua').value = '';
+    document.getElementById('p_nguyenNhan').value = '';
+    document.getElementById('p_noiDung').value = '';
+    document.getElementById('p_ghiChu').value = '';
+    document.getElementById('progressError').classList.add('hidden');
+    document.getElementById('progressModal').classList.remove('hidden');
+}
+function closeProgressModal() { document.getElementById('progressModal').classList.add('hidden'); }
+
+async function submitProgress() {
+    const maPhieu = document.getElementById('p_maPhieu').value;
+    const body = {
+        ketQuaKiemTra: document.getElementById('p_ketQua').value.trim(),
+        nguyenNhanLoi: document.getElementById('p_nguyenNhan').value.trim(),
+        noiDungSuaChua: document.getElementById('p_noiDung').value.trim(),
+        ghiChu: document.getElementById('p_ghiChu').value.trim(),
+        trangThaiMoi: document.getElementById('p_trangThai').value,
+        maNhanVien: document.getElementById('p_maNV').value.trim(),
+    };
+    const btn = document.getElementById('progressBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang lưu...';
+    document.getElementById('progressError').classList.add('hidden');
+    try {
+        const res = await fetch(`${API}/warranty/${maPhieu}/progress`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json; charset=utf-8'},
+            body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            document.getElementById('progressError').classList.remove('hidden');
+            document.getElementById('progressErrorMsg').textContent = data.message || 'Có lỗi xảy ra.';
+            return;
+        }
+        closeProgressModal();
+        setBanner('success', 'Cập nhật tiến độ thành công!');
+        loadWarranty();
+    } catch (err) {
+        document.getElementById('progressError').classList.remove('hidden');
+        document.getElementById('progressErrorMsg').textContent = 'Lỗi: ' + err.message;
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Cập nhật';
+    }
+}
+
+// ========= UC 2.13.4 - Hoàn tất phiếu =========
+async function closeTicket(maPhieu) {
+    if (!confirm(`Xác nhận HOÀN TẤT và đóng phiếu bảo hành "${maPhieu}"?\nKhách hàng sẽ đến nhận thiết bị.`)) return;
+    try {
+        const res = await fetch(`${API}/warranty/${maPhieu}/close`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json; charset=utf-8'},
+            body: JSON.stringify({maNhanVien: 'NV003'})
+        });
+        const data = await res.json();
+        if (!res.ok) { alert(data.message || 'Có lỗi xảy ra'); return; }
+        setBanner('success', `Phiếu ${maPhieu} đã hoàn tất!`);
+        loadWarranty();
+    } catch (err) {
+        alert('Lỗi: ' + err.message);
+    }
+}
+
+// ========= UI Helpers =========
+function setBanner(type, text, time) {
+    const banner = document.getElementById('statusBanner');
+    const spinner = document.getElementById('bannerSpinner');
+    banner.className = 'border-b px-8 py-2.5 flex items-center justify-between text-xs';
+    if (type === 'loading') { banner.classList.add('bg-blue-50','border-blue-200','text-blue-800'); spinner.className = 'fa-solid fa-circle-notch fa-spin text-blue-600 text-sm'; }
+    else if (type === 'success') { banner.classList.add('bg-emerald-50','border-emerald-200','text-emerald-800'); spinner.className = 'fa-solid fa-circle-check text-emerald-600 text-sm'; }
+    else { banner.classList.add('bg-red-50','border-red-200','text-red-800'); spinner.className = 'fa-solid fa-circle-exclamation text-red-600 text-sm'; }
+    document.getElementById('bannerText').textContent = text;
+    if (time) document.getElementById('syncTimestamp').textContent = 'Cập nhật: ' + time;
+}
+
+function showCheckError(msg) {
+    document.getElementById('checkError').classList.remove('hidden');
+    document.getElementById('checkErrorMsg').textContent = msg;
+}
+</script>
+</body>
+</html>
