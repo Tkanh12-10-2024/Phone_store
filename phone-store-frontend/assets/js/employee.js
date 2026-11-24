@@ -140,11 +140,18 @@ function closeDetailModal() {
     document.getElementById('detailModal').classList.add('hidden');
 }
 
-// Mở modal Thêm mới
+// Mở modal Thêm mới (cho phép nhập Mã nhân viên)
 function openCreateModal() {
     document.getElementById('employeeForm').reset();
     document.getElementById('editingEmployeeId').value = '';
-    document.getElementById('editCodeWrapper').classList.add('hidden');
+
+    const codeInput = document.getElementById('employeeIdInput');
+    codeInput.value = '';
+    codeInput.readOnly = false;
+    codeInput.required = true;
+    codeInput.className = 'w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs font-mono uppercase focus:outline-none focus:ring-2 focus:ring-blue-500';
+    document.getElementById('employeeCodeHint').classList.add('hidden');
+
     document.getElementById('statusWrapper').classList.add('hidden');
 
     document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-user-plus text-blue-600"></i> Thêm Tài Khoản Nhân Viên Mới';
@@ -156,7 +163,7 @@ function openCreateModal() {
     document.getElementById('employeeModal').classList.remove('hidden');
 }
 
-// Mở modal Sửa thông tin nhân viên
+// Mở modal Sửa thông tin nhân viên (không cho phép sửa Mã nhân viên)
 function openEditModal(id) {
     const emp = employeesCache.find(item => String(item.id) === String(id));
     if (!emp) {
@@ -165,8 +172,13 @@ function openEditModal(id) {
     }
 
     document.getElementById('editingEmployeeId').value = emp.id;
-    document.getElementById('employeeCodeDisplay').value = emp.id;
-    document.getElementById('editCodeWrapper').classList.remove('hidden');
+
+    const codeInput = document.getElementById('employeeIdInput');
+    codeInput.value = emp.id;
+    codeInput.readOnly = true;
+    codeInput.required = false;
+    codeInput.className = 'w-full px-3.5 py-2 bg-slate-100 border border-slate-200 rounded-lg text-xs font-mono text-slate-500 cursor-not-allowed select-all';
+    document.getElementById('employeeCodeHint').classList.remove('hidden');
 
     document.getElementById('fullName').value = emp.fullName || '';
     document.getElementById('username').value = emp.username || '';
@@ -200,12 +212,23 @@ async function handleSaveEmployee(event) {
     };
 
     if (isEdit) {
+        // Giữ nguyên mã nhân viên gốc, không lấy từ input người dùng chỉnh sửa
         payload.id = editingId;
         payload.active = Number(document.getElementById('activeStatus').value);
         if (passwordValue.trim() !== '') {
             payload.password = passwordValue;
         }
     } else {
+        const newCode = document.getElementById('employeeIdInput').value.trim().toUpperCase();
+        if (!newCode) {
+            alert('Vui lòng nhập Mã nhân viên!');
+            return;
+        }
+        if (employeesCache.some(item => String(item.id).toUpperCase() === newCode)) {
+            alert(`Mã nhân viên [${newCode}] đã tồn tại!`);
+            return;
+        }
+        payload.id = newCode;
         payload.password = passwordValue;
         payload.active = 1;
     }
@@ -227,7 +250,7 @@ async function handleSaveEmployee(event) {
         } else {
             alert(isEdit
                 ? 'Cập nhật thông tin nhân viên thất bại! Vui lòng kiểm tra lại dữ liệu.'
-                : 'Thêm nhân viên thất bại! Tên đăng nhập có thể đã bị trùng.');
+                : 'Thêm nhân viên thất bại! Mã nhân viên hoặc tên đăng nhập có thể đã bị trùng.');
         }
     } catch (error) {
         console.error("Lỗi:", error);
