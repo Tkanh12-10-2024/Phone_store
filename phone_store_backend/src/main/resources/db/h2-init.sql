@@ -255,7 +255,7 @@ CREATE TABLE IF NOT EXISTS phieu_bao_hanh (
                                               ma_phieu_bao_hanh VARCHAR(30) PRIMARY KEY,
     ma_imei VARCHAR(30),
     ma_san_pham VARCHAR(20),
-    ma_khach_hang VARCHAR(20) NOT NULL,
+    ma_khach_hang VARCHAR(20),
     ma_hoa_don VARCHAR(30),
     ma_nhan_vien_tiep_nhan VARCHAR(20) NOT NULL,
     ma_ky_thuat_vien VARCHAR(20),

@@ -25,8 +25,9 @@ public class WarrantyService {
     }
 
     public String createTicket(WarrantyCreateRequest req) {
-        if (req.getMaKhachHang() == null || req.getMaKhachHang().isBlank()) {
-            throw new RuntimeException("Mã khách hàng không được để trống.");
+        if ((req.getMaKhachHang() == null || req.getMaKhachHang().isBlank())
+                && (req.getMaImei() == null || req.getMaImei().isBlank())) {
+            throw new RuntimeException("Mã khách hàng hoặc số IMEI không được để trống.");
         }
         if (req.getLoiPhanAnh() == null || req.getLoiPhanAnh().isBlank()) {
             throw new RuntimeException("Lỗi phản ánh không được để trống.");
