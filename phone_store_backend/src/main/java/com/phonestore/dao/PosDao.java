@@ -78,7 +78,7 @@ public class PosDao {
                             .ram(rs.getString("ram"))
                             .rom(rs.getString("rom"))
                             .giaBan(DaoJdbcHelper.zeroIfNull(rs.getBigDecimal("gia_ban")))
-                            .soLuongTon(rs.getInt("so_luong_ton"))
+                            .soLuongTon(imeiByProduct.getOrDefault(maSp, List.of()).size())
                             .dinhMucTonToiThieu(rs.getInt("dinh_muc_ton_toi_thieu"))
                             .thoiGianBaoHanhThang(rs.getInt("thoi_gian_bao_hanh_thang"))
                             .imeis(imeiByProduct.getOrDefault(maSp, List.of()))
@@ -296,7 +296,7 @@ public class PosDao {
                 SELECT hd.ma_hoa_don, hd.ma_don_hang, hd.ngay_lap,
                        hd.ma_khach_hang, COALESCE(kh.ho_ten, 'Khách vãng lai') AS ten_khach_hang,
                        hd.ma_nhan_vien, COALESCE(nv.ho_ten, hd.ma_nhan_vien) AS ten_nhan_vien,
-                       hd.phuong_thuc_thanh_toan, km.code_voucher, km.qua_tang,
+                       hd.phuong_thuc_thanh_toan, km.code_voucher,
                        hd.tong_tien_hang, hd.tien_giam_gia, hd.thue_vat_phan_tram,
                        hd.tien_thue_vat, hd.tong_thanh_toan, hd.tien_khach_dua,
                        hd.tien_thua, hd.trang_thai_thanh_toan
@@ -324,7 +324,6 @@ public class PosDao {
                             .tenNhanVien(rs.getString("ten_nhan_vien"))
                             .phuongThucThanhToan(rs.getString("phuong_thuc_thanh_toan"))
                             .codeVoucher(rs.getString("code_voucher"))
-                            .quaTang(rs.getString("qua_tang"))
                             .tongTienHang(DaoJdbcHelper.zeroIfNull(rs.getBigDecimal("tong_tien_hang")))
                             .tienGiamGia(DaoJdbcHelper.zeroIfNull(rs.getBigDecimal("tien_giam_gia")))
                             .thueVatPhanTram(DaoJdbcHelper.zeroIfNull(rs.getBigDecimal("thue_vat_phan_tram")))
@@ -372,13 +371,26 @@ public class PosDao {
     }
 
     private ProductLockInfo loadProductForCheckout(Connection conn, String maSanPham) throws SQLException {
-        String sql = "SELECT ten_san_pham, gia_ban, so_luong_ton, thoi_gian_bao_hanh_thang FROM san_pham WHERE ma_san_pham = ?";
+        String sql = """
+                SELECT sp.ten_san_pham, sp.gia_ban, sp.thoi_gian_bao_hanh_thang,
+                       (
+                           SELECT COUNT(*)
+                           FROM imei_san_pham i
+                           WHERE i.ma_san_pham = sp.ma_san_pham
+                             AND i.trang_thai = 'Trong_kho'
+                       ) AS so_luong_ton
+                FROM san_pham sp
+                WHERE sp.ma_san_pham = ?
+                FOR UPDATE
+                """;
+
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, maSanPham);
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next()) {
                     throw new IllegalArgumentException("Không tìm thấy sản phẩm: " + maSanPham);
                 }
+
                 return new ProductLockInfo(
                         rs.getString("ten_san_pham"),
                         DaoJdbcHelper.zeroIfNull(rs.getBigDecimal("gia_ban")),
@@ -511,23 +523,23 @@ public class PosDao {
         }
     }
 
-    private void reconcileProductStock(Connection conn, String maSanPham, int stockBefore, int qtySold) throws SQLException {
-        String selectSql = "SELECT so_luong_ton FROM san_pham WHERE ma_san_pham = ?";
-        int stockAfter;
-        try (PreparedStatement ps = conn.prepareStatement(selectSql)) {
+    private void reconcileProductStock(Connection conn, String maSanPham, int stockBefore, int qtySold)
+            throws SQLException {
+        String sql = """
+                UPDATE san_pham
+                SET so_luong_ton = (
+                    SELECT COUNT(*)
+                    FROM imei_san_pham
+                    WHERE ma_san_pham = ?
+                      AND trang_thai = 'Trong_kho'
+                )
+                WHERE ma_san_pham = ?
+                """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, maSanPham);
-            try (ResultSet rs = ps.executeQuery()) {
-                stockAfter = rs.next() ? rs.getInt(1) : stockBefore;
-            }
-        }
-        int expected = Math.max(0, stockBefore - qtySold);
-        if (stockAfter != expected) {
-            String updateSql = "UPDATE san_pham SET so_luong_ton = ? WHERE ma_san_pham = ?";
-            try (PreparedStatement ps = conn.prepareStatement(updateSql)) {
-                ps.setInt(1, expected);
-                ps.setString(2, maSanPham);
-                ps.executeUpdate();
-            }
+            ps.setString(2, maSanPham);
+            ps.executeUpdate();
         }
     }
 
