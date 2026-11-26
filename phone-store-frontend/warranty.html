@@ -368,19 +368,27 @@ let searchTimer = null;
 let warrantyCheckData = null;
 let currentDetailId = null;
 <<<<<<< HEAD
+<<<<<<< HEAD
 let allTickets = [];
 =======
 >>>>>>> edd83b4c410aa25c223f1b0623c7e1616255b12a
+=======
+let allTickets = [];
+>>>>>>> 2fb71e4553434471c89e73614d4fc7e33a4a0c74
 
 document.addEventListener('DOMContentLoaded', loadWarranty);
 
 function debounceSearch() {
     clearTimeout(searchTimer);
 <<<<<<< HEAD
+<<<<<<< HEAD
     searchTimer = setTimeout(applyFilters, 150);
 =======
     searchTimer = setTimeout(loadWarranty, 400);
 >>>>>>> edd83b4c410aa25c223f1b0623c7e1616255b12a
+=======
+    searchTimer = setTimeout(applyFilters, 150);
+>>>>>>> 2fb71e4553434471c89e73614d4fc7e33a4a0c74
 }
 
 function setTab(status, btn) {
@@ -390,6 +398,9 @@ function setTab(status, btn) {
     });
     btn.className = 'tab-btn px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 text-white transition';
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 2fb71e4553434471c89e73614d4fc7e33a4a0c74
     applyFilters();
 }
 
@@ -406,14 +417,20 @@ function applyFilters() {
     });
     renderTable(filtered);
     setBanner('success', `Hiển thị ${filtered.length}/${allTickets.length} phiếu bảo hành`, new Date().toLocaleTimeString('vi-VN'));
+<<<<<<< HEAD
 =======
     loadWarranty();
 >>>>>>> edd83b4c410aa25c223f1b0623c7e1616255b12a
+=======
+>>>>>>> 2fb71e4553434471c89e73614d4fc7e33a4a0c74
 }
 
 // ========= UC 2.13.2 - Load danh sách =========
 async function loadWarranty() {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 2fb71e4553434471c89e73614d4fc7e33a4a0c74
     setBanner('loading', 'Đang tải danh sách phiếu bảo hành...');
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 5000);
@@ -425,6 +442,7 @@ async function loadWarranty() {
     } catch (err) {
         const msg = err.name === 'AbortError' ? 'Quá thời gian kết nối (5s)' : err.message;
         setBanner('error', 'Lỗi kết nối: ' + msg);
+<<<<<<< HEAD
 =======
     const keyword = document.getElementById('searchInput').value;
     setBanner('loading', 'Đang tải danh sách phiếu bảo hành...');
@@ -440,16 +458,23 @@ async function loadWarranty() {
     } catch (err) {
         setBanner('error', 'Lỗi kết nối: ' + err.message);
 >>>>>>> edd83b4c410aa25c223f1b0623c7e1616255b12a
+=======
+>>>>>>> 2fb71e4553434471c89e73614d4fc7e33a4a0c74
         document.getElementById('warrantyTableBody').innerHTML = `
             <tr><td colspan="7" class="text-center py-16 text-red-400">
                 <i class="fa-solid fa-circle-exclamation text-3xl mb-3 block"></i>
                 Không thể tải dữ liệu. Hãy kiểm tra backend đang chạy.
             </td></tr>`;
 <<<<<<< HEAD
+<<<<<<< HEAD
     } finally {
         clearTimeout(timer);
 =======
 >>>>>>> edd83b4c410aa25c223f1b0623c7e1616255b12a
+=======
+    } finally {
+        clearTimeout(timer);
+>>>>>>> 2fb71e4553434471c89e73614d4fc7e33a4a0c74
     }
 }
 
@@ -488,15 +513,21 @@ function renderTable(tickets) {
             </td>
             <td class="px-4 py-3">
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 2fb71e4553434471c89e73614d4fc7e33a4a0c74
                 ${t.tenKhachHang || t.maKhachHang
                     ? `<p class="font-semibold text-slate-800 text-sm">${t.tenKhachHang || t.maKhachHang}</p>
                        <p class="text-xs text-slate-400 font-mono">${t.soDienThoai || ''}</p>`
                     : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-xs font-semibold"><i class="fa-solid fa-warehouse"></i> Sửa từ kho</span>`
                 }
+<<<<<<< HEAD
 =======
                 <p class="font-semibold text-slate-800 text-sm">${t.tenKhachHang || t.maKhachHang}</p>
                 <p class="text-xs text-slate-400 font-mono">${t.soDienThoai || ''}</p>
 >>>>>>> edd83b4c410aa25c223f1b0623c7e1616255b12a
+=======
+>>>>>>> 2fb71e4553434471c89e73614d4fc7e33a4a0c74
             </td>
             <td class="px-4 py-3">
                 <p class="text-sm text-slate-700">${t.tenThietBi || '—'}</p>
@@ -597,6 +628,9 @@ function renderCheckResult(data) {
     }
     const isWarranty = data.conBaoHanh;
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 2fb71e4553434471c89e73614d4fc7e33a4a0c74
     const isInStock = data.trangThaiImei && data.trangThaiImei.toLowerCase() !== 'da_ban';
     document.getElementById('proceedBtn').disabled = false;
     document.getElementById('proceedBtn').className = 'flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition';
@@ -618,6 +652,7 @@ function renderCheckResult(data) {
                 <div>
                     <p class="font-bold text-lg ${titleCls}">${titleText}</p>
                     <p class="text-sm ${subCls}">${data.lyDo}</p>
+<<<<<<< HEAD
 =======
     document.getElementById('proceedBtn').disabled = false;
     document.getElementById('proceedBtn').className = 'flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition';
@@ -632,21 +667,28 @@ function renderCheckResult(data) {
                     <p class="font-bold text-lg ${isWarranty ? 'text-emerald-700' : 'text-orange-700'}">${isWarranty ? '✅ Còn bảo hành' : '⚠️ Hết bảo hành'}</p>
                     <p class="text-sm ${isWarranty ? 'text-emerald-600' : 'text-orange-600'}">${data.lyDo}</p>
 >>>>>>> edd83b4c410aa25c223f1b0623c7e1616255b12a
+=======
+>>>>>>> 2fb71e4553434471c89e73614d4fc7e33a4a0c74
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-3 text-sm">
                 <div><span class="text-xs text-slate-500">Thiết bị</span><p class="font-semibold text-slate-800">${data.tenSanPham || '—'}</p></div>
                 <div><span class="text-xs text-slate-500">IMEI</span><p class="font-mono text-slate-700 text-xs">${data.maImei}</p></div>
 <<<<<<< HEAD
+<<<<<<< HEAD
                 <div><span class="text-xs text-slate-500">Khách hàng / Nguồn</span><p class="font-semibold text-slate-800">${khachText}</p></div>
 =======
                 <div><span class="text-xs text-slate-500">Khách hàng</span><p class="font-semibold text-slate-800">${data.tenKhachHang || 'Chưa đăng ký'}</p></div>
 >>>>>>> edd83b4c410aa25c223f1b0623c7e1616255b12a
+=======
+                <div><span class="text-xs text-slate-500">Khách hàng / Nguồn</span><p class="font-semibold text-slate-800">${khachText}</p></div>
+>>>>>>> 2fb71e4553434471c89e73614d4fc7e33a4a0c74
                 <div><span class="text-xs text-slate-500">SĐT</span><p class="font-mono text-slate-700">${data.soDienThoai || '—'}</p></div>
                 <div><span class="text-xs text-slate-500">Ngày bán</span><p class="text-slate-700">${data.ngayBan ? new Date(data.ngayBan).toLocaleDateString('vi-VN') : '—'}</p></div>
                 <div><span class="text-xs text-slate-500">Hạn bảo hành</span><p class="font-semibold ${isWarranty ? 'text-emerald-600' : 'text-red-500'}">${data.hanBaoHanh ? new Date(data.hanBaoHanh + 'T00:00:00').toLocaleDateString('vi-VN') : '—'}</p></div>
             </div>
         </div>
+<<<<<<< HEAD
 <<<<<<< HEAD
         ${isInStock
             ? '<div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800"><i class="fa-solid fa-warehouse mr-1"></i> Thiết bị đang ở trong kho (chưa bán). Nếu tiếp nhận, phiếu sẽ được ghi nhận là <strong>Sửa chữa từ kho</strong> (không gán tên khách hàng).</div>'
@@ -654,6 +696,11 @@ function renderCheckResult(data) {
 =======
         ${!isWarranty ? '<div class="bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3 text-xs text-yellow-700"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Thiết bị đã hết bảo hành. Bạn vẫn có thể tiếp nhận và xử lý ngoài bảo hành.</div>' : ''}
 >>>>>>> edd83b4c410aa25c223f1b0623c7e1616255b12a
+=======
+        ${isInStock
+            ? '<div class="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800"><i class="fa-solid fa-warehouse mr-1"></i> Thiết bị đang ở trong kho (chưa bán). Nếu tiếp nhận, phiếu sẽ được ghi nhận là <strong>Sửa chữa từ kho</strong> (không gán tên khách hàng).</div>'
+            : (!isWarranty ? '<div class="bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3 text-xs text-yellow-700"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Thiết bị đã hết bảo hành. Bạn vẫn có thể tiếp nhận và xử lý ngoài bảo hành.</div>' : '')}
+>>>>>>> 2fb71e4553434471c89e73614d4fc7e33a4a0c74
     `;
 }
 
@@ -666,10 +713,14 @@ async function submitWarranty() {
 
     const body = {
 <<<<<<< HEAD
+<<<<<<< HEAD
         maKhachHang: warrantyCheckData?.maKhachHang || null,
 =======
         maKhachHang: warrantyCheckData?.maKhachHang || 'KH001',
 >>>>>>> edd83b4c410aa25c223f1b0623c7e1616255b12a
+=======
+        maKhachHang: warrantyCheckData?.maKhachHang || null,
+>>>>>>> 2fb71e4553434471c89e73614d4fc7e33a4a0c74
         maImei: warrantyCheckData?.maImei || document.getElementById('imeiInput').value.trim(),
         tenThietBi: warrantyCheckData?.tenSanPham || '',
         tinhTrangTiepNhan: document.getElementById('f_tinhTrang').value.trim(),
@@ -724,12 +775,17 @@ async function showDetail(maPhieu) {
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-slate-50 rounded-xl p-4">
 <<<<<<< HEAD
+<<<<<<< HEAD
                         <p class="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Thông tin khách hàng / Nguồn</p>
                         <p class="font-semibold text-slate-800">${t.tenKhachHang || t.maKhachHang || '<span class="text-amber-700"><i class="fa-solid fa-warehouse mr-1"></i>Sửa chữa từ kho (Nội bộ)</span>'}</p>
 =======
                         <p class="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Thông tin khách hàng</p>
                         <p class="font-semibold text-slate-800">${t.tenKhachHang || t.maKhachHang}</p>
 >>>>>>> edd83b4c410aa25c223f1b0623c7e1616255b12a
+=======
+                        <p class="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Thông tin khách hàng / Nguồn</p>
+                        <p class="font-semibold text-slate-800">${t.tenKhachHang || t.maKhachHang || '<span class="text-amber-700"><i class="fa-solid fa-warehouse mr-1"></i>Sửa chữa từ kho (Nội bộ)</span>'}</p>
+>>>>>>> 2fb71e4553434471c89e73614d4fc7e33a4a0c74
                         <p class="text-sm text-slate-600 font-mono">${t.soDienThoai || ''}</p>
                     </div>
                     <div class="bg-slate-50 rounded-xl p-4">
