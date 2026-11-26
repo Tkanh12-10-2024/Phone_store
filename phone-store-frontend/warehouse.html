@@ -197,31 +197,17 @@
             </div>
         </div>
 
-        <!-- Banner Cảnh Báo Tồn Kho Nổi Bật (UC 2.6.1.2) -->
-        <div id="warningBanner" class="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 hidden">
-            <div class="text-amber-500 text-xl mt-0.5">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <div class="flex-1">
-                <h4 class="text-sm font-bold text-amber-800">Cảnh Báo Tồn Kho: Có sản phẩm dưới định mức an toàn!</h4>
-                <p id="warningBannerText" class="text-xs text-amber-700 mt-0.5">Hệ thống phát hiện sản phẩm có lượng tồn kho thấp hơn định mức quy định tối thiểu. Hãy cân nhắc lập phiếu nhập hàng.</p>
-            </div>
-            <button onclick="filterOnlyWarnings()" class="px-3 py-1.5 bg-amber-600 text-white rounded-lg text-xs font-semibold hover:bg-amber-700 transition">
-                Xem Danh Sách Cảnh Báo
-            </button>
-        </div>
-
         <!-- Tab chuyển đổi giữa Quản lý tồn kho và Kiểm kê kho -->
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div class="border-b border-slate-200 px-6 flex items-center justify-between">
                 <div class="flex gap-8">
                     <button id="tabBtnStock" onclick="switchWarehouseTab('stock')" class="py-4 text-sm font-bold border-b-2 border-blue-600 text-blue-600 flex items-center gap-2">
                         <i class="fa-solid fa-warehouse"></i>
-                        <span>Tồn Kho & Cảnh Báo Tồn (UC 2.6.1)</span>
+                        <span>Tồn Kho & Cảnh Báo Tồn</span>
                     </button>
                     <button id="tabBtnChecks" onclick="switchWarehouseTab('checks')" class="py-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
                         <i class="fa-solid fa-list-check"></i>
-                        <span>Kiểm Kê Kho Hàng (UC 2.6.2)</span>
+                        <span>Kiểm Kê Kho Hàng</span>
                     </button>
                 </div>
             </div>
@@ -401,7 +387,7 @@
 
             <!-- Bảng đối chiếu số lượng -->
             <div>
-                <h4 class="text-xs font-bold uppercase text-slate-600 tracking-wider mb-2">Bảng Đối Chiếu Số Lượng Tồn Kho (UC 2.6.2.2 & UC 2.6.2.3)</h4>
+                <h4 class="text-xs font-bold uppercase text-slate-600 tracking-wider mb-2">Bảng Đối Chiếu Số Lượng Tồn Kho</h4>
                 <div class="overflow-x-auto rounded-lg border border-slate-200">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-slate-100 text-slate-600 uppercase text-xs font-semibold">

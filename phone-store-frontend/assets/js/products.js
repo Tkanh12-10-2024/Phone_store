@@ -110,16 +110,10 @@
     }
 
     function setViewMode(mode) {
-        state.viewMode = mode;
-        const isTable = mode === 'table';
-        $('productTableWrapper').classList.toggle('hidden', !isTable);
-        $('productGridWrapper').classList.toggle('hidden', isTable);
-        $('btnViewTable').className = isTable
-            ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white transition flex items-center gap-1.5'
-            : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5';
-        $('btnViewGrid').className = !isTable
-            ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white transition flex items-center gap-1.5'
-            : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5';
+        state.viewMode = 'table';
+        $('productTableWrapper').classList.remove('hidden');
+        $('btnViewTable').className =
+            'px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white transition flex items-center gap-1.5';
     }
 
     async function loadAllData() {
@@ -244,13 +238,10 @@
 
     function renderProducts() {
         const tbody = $('productsTableBody');
-        const grid = $('productGridWrapper');
 
         if (!state.products.length) {
             tbody.innerHTML =
                 '<tr><td colspan="7" class="py-12 text-center text-slate-400">Không tìm thấy sản phẩm nào phù hợp điều kiện lọc.</td></tr>';
-            grid.innerHTML =
-                '<div class="col-span-full py-12 text-center text-slate-400 border border-dashed border-slate-300 rounded-2xl">Không tìm thấy sản phẩm nào phù hợp điều kiện lọc.</div>';
             return;
         }
 
@@ -321,50 +312,6 @@
                         </div>
                     </td>
                 </tr>
-            `;
-        }).join('');
-
-        grid.innerHTML = state.products.map((p) => {
-            const isActive = p.trangThai === 'Dang_kinh_doanh';
-            const imgSrc = resolveImageUrl(p.hinhAnh);
-            return `
-                <article class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between gap-3">
-                    <div>
-                        <div class="relative aspect-[4/3] bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center p-3 overflow-hidden mb-3">
-                            <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(p.tenSanPham)}"
-                                 onerror="this.src='${FALLBACK_SVG}'"
-                                 class="max-h-full max-w-full object-contain">
-                            <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-600 text-white">${escapeHtml(p.tenThuongHieu)}</span>
-                            <span class="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[11px] font-bold ${isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-700'}">
-                                ${isActive ? 'Đang bán' : 'Ngừng bán'}
-                            </span>
-                        </div>
-                        <p class="text-[11px] font-mono text-slate-400">${escapeHtml(p.maSanPham)}</p>
-                        <h3 class="font-bold text-sm text-slate-900 line-clamp-2 mt-0.5">${escapeHtml(p.tenSanPham)}</h3>
-                        <div class="flex flex-wrap gap-1 mt-2 text-[11px]">
-                            <span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md font-semibold">${escapeHtml(p.mauSac)}</span>
-                            <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-md font-semibold">${escapeHtml(p.ram)}/${escapeHtml(p.rom)}</span>
-                            <span class="px-2 py-0.5 bg-amber-50 text-amber-700 rounded-md font-semibold">Tồn: ${p.soLuongTon}</span>
-                        </div>
-                    </div>
-                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                        <p class="text-base font-extrabold text-blue-600">${formatVnd(p.giaBan)}</p>
-                        <div class="flex items-center gap-1">
-                            <button type="button" data-action="detail" data-id="${escapeHtml(p.maSanPham)}" title="Chi tiết"
-                                    class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-700">
-                                <i class="fa-solid fa-eye"></i>
-                            </button>
-                            <button type="button" data-action="edit" data-id="${escapeHtml(p.maSanPham)}" title="Sửa"
-                                    class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-amber-700">
-                                <i class="fa-solid fa-pen"></i>
-                            </button>
-                            <button type="button" data-action="delete" data-id="${escapeHtml(p.maSanPham)}" title="Xóa"
-                                    class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-red-100 text-slate-600 hover:text-red-700">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </article>
             `;
         }).join('');
     }
@@ -743,7 +690,6 @@
                 </div>
             `).join('');
 
-            $('btnDetailToggleStatus').textContent = isActive ? 'Chuyển Ngừng kinh doanh' : 'Kích hoạt Đang kinh doanh';
             if (!$('detailModal').open) {
                 $('detailModal').showModal();
             }
@@ -891,7 +837,6 @@
             btn.addEventListener('click', () => switchTab(btn.dataset.tab));
         });
         $('btnViewTable').addEventListener('click', () => setViewMode('table'));
-        $('btnViewGrid').addEventListener('click', () => setViewMode('grid'));
         $('btnRefreshAll').addEventListener('click', loadAllData);
         $('btnSidebarReload').addEventListener('click', loadAllData);
         $('btnOpenCreateProduct').addEventListener('click', openCreateProductModal);
@@ -925,8 +870,8 @@
             brandTimer = setTimeout(loadBrands, 250);
         });
 
-        // Product action delegation (table & card grid)
-        ['productsTableBody', 'productGridWrapper'].forEach((id) => {
+        // Product action delegation (table)
+        ['productsTableBody'].forEach((id) => {
             $(id).addEventListener('click', (e) => {
                 const btn = e.target.closest('button[data-action]');
                 if (!btn) return;
@@ -1012,16 +957,6 @@
         $('detailSiblingVariants').addEventListener('click', (e) => {
             const btn = e.target.closest('button[data-switch-variant]');
             if (btn) openProductDetailModal(btn.dataset.switchVariant);
-        });
-        $('btnDetailEdit').addEventListener('click', () => {
-            const ma = state.currentDetailProduct?.maSanPham;
-            $('detailModal').close();
-            if (ma) openEditProductModal(ma);
-        });
-        $('btnDetailToggleStatus').addEventListener('click', () => {
-            if (state.currentDetailProduct) {
-                toggleProductStatus(state.currentDetailProduct.maSanPham, state.currentDetailProduct.trangThai);
-            }
         });
 
         // Category & Brand modals

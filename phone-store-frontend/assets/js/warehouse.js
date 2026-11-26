@@ -93,16 +93,6 @@ function updateWarehouseStats() {
     document.getElementById('statLowStockCount').innerText = lowCount;
 
     document.getElementById('statTotalChecks').innerText = warehouseChecks.length;
-
-    // Hiển thị banner cảnh báo nếu có
-    const banner = document.getElementById('warningBanner');
-    if (lowCount > 0) {
-        banner.classList.remove('hidden');
-        document.getElementById('warningBannerText').innerText = 
-            `Hệ thống phát hiện ${lowCount} sản phẩm có tồn kho thấp hơn hoặc bằng định mức an toàn. Hãy kiểm tra và lên kế hoạch nhập hàng!`;
-    } else {
-        banner.classList.add('hidden');
-    }
 }
 
 function formatCurrency(num) {
