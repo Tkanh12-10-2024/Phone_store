@@ -1,10 +1,7 @@
 package com.phonestore.controller;
 
-import com.phonestore.dto.request.ProductGalleryRequest;
 import com.phonestore.dto.request.ProductRequest;
-import com.phonestore.dto.response.ApiMessageResponse;
 import com.phonestore.dto.response.ProductDTO;
-import com.phonestore.dto.response.ProductGalleryDTO;
 import com.phonestore.service.FileStorageService;
 import com.phonestore.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +12,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Lớp Boundary (Controller) tiếp nhận các yêu cầu REST API cho phân hệ Quản lý sản phẩm
+ * và điều phối sang lớp Service xử lý nghiệp vụ.
+ */
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
@@ -96,49 +95,7 @@ public class ProductController {
             @RequestParam(value = "files", required = false) MultipartFile[] files,
             @RequestParam(value = "file", required = false) MultipartFile singleFile
     ) {
-        List<String> urls = new ArrayList<>();
-        if (files != null) {
-            for (MultipartFile f : files) {
-                if (f != null && !f.isEmpty()) {
-                    urls.add(fileStorageService.storeProductImage(f));
-                }
-            }
-        }
-        if (singleFile != null && !singleFile.isEmpty()) {
-            urls.add(fileStorageService.storeProductImage(singleFile));
-        }
-        if (urls.isEmpty()) {
-            throw new IllegalArgumentException("Vui lòng chọn ít nhất một tệp hình ảnh để tải lên");
-        }
-        Map<String, Object> resp = new LinkedHashMap<>();
-        resp.put("success", true);
-        resp.put("urls", urls);
-        return ResponseEntity.ok(resp);
-    }
-
-    @GetMapping("/{maSanPham}/galleries")
-    public ResponseEntity<List<ProductGalleryDTO>> listGalleries(@PathVariable String maSanPham) {
-        return ResponseEntity.ok(productService.getGalleries(maSanPham));
-    }
-
-    @PostMapping("/{maSanPham}/galleries")
-    public ResponseEntity<ProductGalleryDTO> addGalleryImage(
-            @PathVariable String maSanPham,
-            @RequestBody ProductGalleryRequest request
-    ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.addGalleryImage(maSanPham, request));
-    }
-
-    @PutMapping("/{maSanPham}/galleries/{maHinhAnh}/primary")
-    public ResponseEntity<List<ProductGalleryDTO>> setPrimaryGalleryImage(
-            @PathVariable String maSanPham,
-            @PathVariable int maHinhAnh
-    ) {
-        return ResponseEntity.ok(productService.setPrimaryGalleryImage(maSanPham, maHinhAnh));
-    }
-
-    @DeleteMapping("/galleries/{maHinhAnh}")
-    public ResponseEntity<ApiMessageResponse> deleteGalleryImage(@PathVariable int maHinhAnh) {
-        return ResponseEntity.ok(productService.deleteGalleryImage(maHinhAnh));
+        List<String> urls = fileStorageService.storeProductImages(files, singleFile);
+        return ResponseEntity.ok(Map.of("success", true, "urls", urls));
     }
 }

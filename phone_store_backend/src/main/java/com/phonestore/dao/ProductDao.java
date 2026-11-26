@@ -12,6 +12,10 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
 
+/**
+ * Lớp DAO (Data Access Object) thực hiện truy vấn JDBC và ánh xạ dữ liệu
+ * cho bảng {@code san_pham} và {@code hinh_anh_san_pham}.
+ */
 @Repository
 @RequiredArgsConstructor
 public class ProductDao {
@@ -409,135 +413,6 @@ public class ProductDao {
             throw new IllegalStateException("Lỗi tải ảnh sản phẩm", e);
         }
         return list;
-    }
-
-    public ProductGalleryDTO addGalleryImage(String maSanPham, String duongDanAnh, boolean laAnhChinh, Integer thuTu) {
-        try (Connection conn = dataSource.getConnection()) {
-            int nextOrder = thuTu != null ? thuTu : 1;
-            if (thuTu == null) {
-                try (PreparedStatement psOrder = conn.prepareStatement(
-                        "SELECT COALESCE(MAX(thu_tu), 0) + 1 FROM hinh_anh_san_pham WHERE ma_san_pham = ?")) {
-                    psOrder.setString(1, maSanPham);
-                    try (ResultSet rs = psOrder.executeQuery()) {
-                        if (rs.next()) nextOrder = rs.getInt(1);
-                    }
-                }
-            }
-
-            boolean shouldBePrimary = laAnhChinh || nextOrder == 1;
-            if (shouldBePrimary) {
-                try (PreparedStatement reset = conn.prepareStatement(
-                        "UPDATE hinh_anh_san_pham SET la_anh_chinh = FALSE WHERE ma_san_pham = ?")) {
-                    reset.setString(1, maSanPham);
-                    reset.executeUpdate();
-                }
-            }
-
-            String insertSql = "INSERT INTO hinh_anh_san_pham (ma_san_pham, duong_dan_anh, la_anh_chinh, thu_tu, ngay_tao) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)";
-            int newId = 0;
-            try (PreparedStatement ins = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
-                ins.setString(1, maSanPham);
-                ins.setString(2, duongDanAnh.trim());
-                ins.setBoolean(3, shouldBePrimary);
-                ins.setInt(4, nextOrder);
-                ins.executeUpdate();
-                try (ResultSet keys = ins.getGeneratedKeys()) {
-                    if (keys.next()) newId = keys.getInt(1);
-                }
-            }
-
-            if (shouldBePrimary) {
-                try (PreparedStatement updSp = conn.prepareStatement("UPDATE san_pham SET hinh_anh = ? WHERE ma_san_pham = ?")) {
-                    updSp.setString(1, duongDanAnh.trim());
-                    updSp.setString(2, maSanPham);
-                    updSp.executeUpdate();
-                }
-            }
-
-            final int createdId = newId;
-            return findGalleriesByProduct(maSanPham).stream()
-                    .filter(g -> g.getMaHinhAnh() == createdId)
-                    .findFirst()
-                    .orElseThrow();
-        } catch (SQLException e) {
-            throw new IllegalStateException("Lỗi thêm ảnh vào thư viện sản phẩm: " + e.getMessage(), e);
-        }
-    }
-
-    public boolean setPrimaryGalleryImage(String maSanPham, int maHinhAnh) {
-        try (Connection conn = dataSource.getConnection()) {
-            String targetUrl = null;
-            try (PreparedStatement check = conn.prepareStatement(
-                    "SELECT duong_dan_anh FROM hinh_anh_san_pham WHERE ma_hinh_anh = ? AND ma_san_pham = ?")) {
-                check.setInt(1, maHinhAnh);
-                check.setString(2, maSanPham);
-                try (ResultSet rs = check.executeQuery()) {
-                    if (rs.next()) {
-                        targetUrl = rs.getString("duong_dan_anh");
-                    }
-                }
-            }
-            if (targetUrl == null) {
-                return false;
-            }
-            try (PreparedStatement reset = conn.prepareStatement(
-                    "UPDATE hinh_anh_san_pham SET la_anh_chinh = FALSE WHERE ma_san_pham = ?")) {
-                reset.setString(1, maSanPham);
-                reset.executeUpdate();
-            }
-            try (PreparedStatement setPrimary = conn.prepareStatement(
-                    "UPDATE hinh_anh_san_pham SET la_anh_chinh = TRUE WHERE ma_hinh_anh = ?")) {
-                setPrimary.setInt(1, maHinhAnh);
-                setPrimary.executeUpdate();
-            }
-            try (PreparedStatement updSp = conn.prepareStatement(
-                    "UPDATE san_pham SET hinh_anh = ? WHERE ma_san_pham = ?")) {
-                updSp.setString(1, targetUrl);
-                updSp.setString(2, maSanPham);
-                updSp.executeUpdate();
-            }
-            return true;
-        } catch (SQLException e) {
-            throw new IllegalStateException("Lỗi đặt ảnh đại diện: " + e.getMessage(), e);
-        }
-    }
-
-    public boolean deleteGalleryImage(int maHinhAnh) {
-        try (Connection conn = dataSource.getConnection()) {
-            String maSanPham = null;
-            boolean wasPrimary = false;
-            try (PreparedStatement find = conn.prepareStatement(
-                    "SELECT ma_san_pham, la_anh_chinh FROM hinh_anh_san_pham WHERE ma_hinh_anh = ?")) {
-                find.setInt(1, maHinhAnh);
-                try (ResultSet rs = find.executeQuery()) {
-                    if (rs.next()) {
-                        maSanPham = rs.getString("ma_san_pham");
-                        wasPrimary = rs.getBoolean("la_anh_chinh");
-                    }
-                }
-            }
-            if (maSanPham == null) {
-                return false;
-            }
-            try (PreparedStatement del = conn.prepareStatement("DELETE FROM hinh_anh_san_pham WHERE ma_hinh_anh = ?")) {
-                del.setInt(1, maHinhAnh);
-                del.executeUpdate();
-            }
-            if (wasPrimary) {
-                List<ProductGalleryDTO> remaining = findGalleriesByProduct(maSanPham);
-                if (!remaining.isEmpty()) {
-                    setPrimaryGalleryImage(maSanPham, remaining.get(0).getMaHinhAnh());
-                } else {
-                    try (PreparedStatement upd = conn.prepareStatement("UPDATE san_pham SET hinh_anh = NULL WHERE ma_san_pham = ?")) {
-                        upd.setString(1, maSanPham);
-                        upd.executeUpdate();
-                    }
-                }
-            }
-            return true;
-        } catch (SQLException e) {
-            throw new IllegalStateException("Lỗi xóa ảnh sản phẩm: " + e.getMessage(), e);
-        }
     }
 
     private List<ProductVariantSummaryDTO> findSiblingVariants(Integer maThuongHieu, String dongMay) {

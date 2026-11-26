@@ -12,6 +12,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
@@ -24,6 +26,25 @@ public class FileStorageService {
 
     @Value("${app.upload.dir:uploads/products}")
     private String uploadDir;
+
+    /** Lưu nhiều tệp ảnh sản phẩm từ request upload và trả về danh sách đường dẫn công khai. */
+    public List<String> storeProductImages(MultipartFile[] files, MultipartFile singleFile) {
+        List<String> urls = new ArrayList<>();
+        if (files != null) {
+            for (MultipartFile f : files) {
+                if (f != null && !f.isEmpty()) {
+                    urls.add(storeProductImage(f));
+                }
+            }
+        }
+        if (singleFile != null && !singleFile.isEmpty()) {
+            urls.add(storeProductImage(singleFile));
+        }
+        if (urls.isEmpty()) {
+            throw new IllegalArgumentException("Vui lòng chọn ít nhất một tệp hình ảnh để tải lên");
+        }
+        return urls;
+    }
 
     public String storeProductImage(MultipartFile file) {
         if (file == null || file.isEmpty()) {

@@ -3,12 +3,9 @@ package com.phonestore.service;
 import com.phonestore.dao.BrandDao;
 import com.phonestore.dao.CategoryDao;
 import com.phonestore.dao.ProductDao;
-import com.phonestore.dto.request.ProductGalleryRequest;
 import com.phonestore.dto.request.ProductRequest;
 import com.phonestore.dto.request.ProductVariantItemRequest;
-import com.phonestore.dto.response.ApiMessageResponse;
 import com.phonestore.dto.response.ProductDTO;
-import com.phonestore.dto.response.ProductGalleryDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +15,10 @@ import java.text.Normalizer;
 import java.util.*;
 import java.util.regex.Pattern;
 
+/**
+ * Lớp Control (Service) xử lý nghiệp vụ quản lý sản phẩm, kiểm tra tính hợp lệ dữ liệu
+ * và điều phối giao dịch giữa Controller và DAO.
+ */
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -193,35 +194,6 @@ public class ProductService {
         resp.put("action", "DELETED");
         resp.put("message", "Đã xóa vĩnh viễn sản phẩm '" + existing.getTenSanPham() + "'.");
         return resp;
-    }
-
-    public List<ProductGalleryDTO> getGalleries(String maSanPham) {
-        getProductById(maSanPham);
-        return productDao.findGalleriesByProduct(maSanPham);
-    }
-
-    public ProductGalleryDTO addGalleryImage(String maSanPham, ProductGalleryRequest req) {
-        getProductById(maSanPham);
-        if (req == null || req.getDuongDanAnh() == null || req.getDuongDanAnh().isBlank()) {
-            throw new IllegalArgumentException("Đường dẫn ảnh không được để trống");
-        }
-        boolean isPrimary = Boolean.TRUE.equals(req.getLaAnhChinh());
-        return productDao.addGalleryImage(maSanPham, req.getDuongDanAnh(), isPrimary, req.getThuTu());
-    }
-
-    public List<ProductGalleryDTO> setPrimaryGalleryImage(String maSanPham, int maHinhAnh) {
-        getProductById(maSanPham);
-        if (!productDao.setPrimaryGalleryImage(maSanPham, maHinhAnh)) {
-            throw new IllegalArgumentException("Không tìm thấy hình ảnh #" + maHinhAnh + " của sản phẩm " + maSanPham);
-        }
-        return productDao.findGalleriesByProduct(maSanPham);
-    }
-
-    public ApiMessageResponse deleteGalleryImage(int maHinhAnh) {
-        if (!productDao.deleteGalleryImage(maHinhAnh)) {
-            throw new IllegalArgumentException("Không tìm thấy hình ảnh mã #" + maHinhAnh);
-        }
-        return new ApiMessageResponse(true, "Đã xóa hình ảnh khỏi thư viện sản phẩm");
     }
 
     private void validateCommonFields(ProductRequest req, boolean hasVariantsList) {
