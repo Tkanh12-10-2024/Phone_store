@@ -56,7 +56,9 @@ public class WarrantyDao {
                 long soNgayConLai = 0;
                 String lyDo;
 
-                if (!"Da_ban".equalsIgnoreCase(trangThai)) {
+                if ("Trong_kho".equalsIgnoreCase(trangThai)) {
+                    lyDo = "Thiết bị đang còn trong kho (chưa bán) — Sửa chữa từ kho";
+                } else if (!"Da_ban".equalsIgnoreCase(trangThai)) {
                     lyDo = "Thiết bị chưa được bán (trạng thái: " + trangThai + ")";
                 } else if (ngayBan == null) {
                     lyDo = "Không có thông tin ngày bán";
@@ -111,7 +113,11 @@ public class WarrantyDao {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, newId);
-            ps.setString(2, req.getMaKhachHang());
+            if (req.getMaKhachHang() == null || req.getMaKhachHang().isBlank()) {
+                ps.setNull(2, Types.VARCHAR);
+            } else {
+                ps.setString(2, req.getMaKhachHang());
+            }
             ps.setString(3, req.getMaNhanVien());
             ps.setString(4, req.getMaImei() == null || req.getMaImei().isBlank() ? null : req.getMaImei());
             ps.setString(5, maSanPham);
@@ -135,7 +141,7 @@ public class WarrantyDao {
                        nv1.ho_ten AS ten_nv_tiep_nhan,
                        nv2.ho_ten AS ten_nv_cap_nhat
                 FROM phieu_bao_hanh pbh
-                JOIN khach_hang kh ON kh.ma_khach_hang = pbh.ma_khach_hang
+                LEFT JOIN khach_hang kh ON kh.ma_khach_hang = pbh.ma_khach_hang
                 LEFT JOIN san_pham sp ON sp.ma_san_pham = pbh.ma_san_pham
                 LEFT JOIN nhan_vien nv1 ON nv1.ma_nhan_vien = pbh.ma_nhan_vien_tiep_nhan
                 LEFT JOIN nhan_vien nv2 ON nv2.ma_nhan_vien = pbh.ma_ky_thuat_vien
@@ -181,7 +187,7 @@ public class WarrantyDao {
                        nv1.ho_ten AS ten_nv_tiep_nhan,
                        nv2.ho_ten AS ten_nv_cap_nhat
                 FROM phieu_bao_hanh pbh
-                JOIN khach_hang kh ON kh.ma_khach_hang = pbh.ma_khach_hang
+                LEFT JOIN khach_hang kh ON kh.ma_khach_hang = pbh.ma_khach_hang
                 LEFT JOIN san_pham sp ON sp.ma_san_pham = pbh.ma_san_pham
                 LEFT JOIN nhan_vien nv1 ON nv1.ma_nhan_vien = pbh.ma_nhan_vien_tiep_nhan
                 LEFT JOIN nhan_vien nv2 ON nv2.ma_nhan_vien = pbh.ma_ky_thuat_vien
