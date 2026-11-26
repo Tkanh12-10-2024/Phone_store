@@ -500,3 +500,26 @@ CREATE TABLE IF NOT EXISTS user_roles (
 MERGE INTO roles (id, name) KEY(id) VALUES (1, 'ROLE_ADMIN'), (2, 'ROLE_STAFF');
 MERGE INTO users (id, username, password, status) KEY(id) VALUES (1, 'admin', '123456', true);
 MERGE INTO user_roles (user_id, role_id) KEY(user_id, role_id) VALUES (1, 1);
+
+-- Dữ liệu mẫu phiếu bảo hành (của khách hàng & sửa chữa từ trong kho)
+MERGE INTO phieu_bao_hanh (
+    ma_phieu_bao_hanh, ma_imei, ma_san_pham, ma_khach_hang, ma_hoa_don,
+    ma_nhan_vien_tiep_nhan, ma_ky_thuat_vien, ngay_tiep_nhan,
+    tinh_trang_tiep_nhan, loi_khach_phan_anh, chan_doan_ky_thuat,
+    noi_dung_sua_chua, ngay_tra_thuc_te, trang_thai, ghi_chu
+) KEY(ma_phieu_bao_hanh) VALUES
+    ('PBH20261120_01', '358941091234561', 'SP_IP15PM_256TN', 'KH001', 'HD20261012_001', 'NV003', 'NV003', DATEADD('DAY', -6, CURRENT_TIMESTAMP),
+     'Màn hình có vết xước nhẹ', 'Pin tụt nhanh, nóng máy khi sạc', 'Pin chai còn 78% | Nguyên nhân: Sạc không đúng chuẩn',
+     'Đang thay pin chính hãng Apple', NULL, 'Dang_sua_chua', 'Bảo hành chính hãng cho khách hàng'),
+    ('PBH20261122_02', '864219082345671', 'SP_SS_S24U_256AM', 'KH002', 'HD20261014_002', 'NV003', 'NV003', DATEADD('DAY', -4, CURRENT_TIMESTAMP),
+     'Khung viền nguyên vẹn', 'Loa ngoài bị rè khi mở âm lượng lớn', 'Màng loa bám bụi và ẩm nhẹ',
+     'Đã vệ sinh và thay cụm loa ngoài mới', NULL, 'Cho_tra_khach', 'Đã sửa xong, chờ khách đến nhận'),
+    ('PBH20261124_03', '865123073456792', 'SP_MI_14_256TRANG', 'KH003', 'HD20261110_005', 'NV006', 'NV003', DATEADD('DAY', -2, CURRENT_TIMESTAMP),
+     'Máy đẹp như mới', 'Cổng sạc Type-C chập chờn', 'Chân tiếp xúc cổng sạc bị lỏng',
+     'Đã hàn lại và vệ sinh chân sạc', DATEADD('DAY', -1, CURRENT_TIMESTAMP), 'Hoan_tat', 'Đã bàn giao cho khách'),
+    ('PBH20261125_01', '358941091234562', 'SP_IP15PM_256TN', NULL, NULL, 'NV004', 'NV003', DATEADD('DAY', -1, CURRENT_TIMESTAMP),
+     'Máy lưu kho, trầy nhẹ khung viền', 'Lỗi camera sau rung nhẹ khi lấy nét', 'Kiểm tra nội bộ máy tồn kho',
+     NULL, NULL, 'Tiep_nhan', 'Phiếu sửa chữa nội bộ từ kho'),
+    ('PBH20261125_02', '869000112233401', 'SP_OPPO_FINDN3', NULL, NULL, 'NV004', 'NV003', CURRENT_TIMESTAMP,
+     'Máy trưng bày tồn kho >60 ngày', 'Bản lề gập mở hơi cứng', 'Đang kiểm tra bản lề và vệ sinh cơ khí',
+     NULL, NULL, 'Dang_kiem_tra', 'Phiếu bảo dưỡng máy tồn kho');
