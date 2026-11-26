@@ -154,10 +154,11 @@ public class ProductService {
         validateSingleVariantFields(req.getTenSanPham(), req.getMauSac(), req.getRam(), req.getRom(),
                 req.getGiaNhapThamKhao(), req.getGiaBan(), req.getDinhMucTonToiThieu());
 
-        String primaryImage = resolvePrimaryImage(
-                req.getHinhAnh() != null ? req.getHinhAnh() : existing.getHinhAnh(),
-                req.getGalleryUrls()
-        );
+        String explicitPrimary = req.getHinhAnh();
+        if (explicitPrimary == null && req.getGalleryUrls() == null) {
+            explicitPrimary = existing.getHinhAnh();
+        }
+        String primaryImage = resolvePrimaryImage(explicitPrimary, req.getGalleryUrls());
 
         productDao.update(maSanPham, req, primaryImage);
         if (req.getGalleryUrls() != null) {

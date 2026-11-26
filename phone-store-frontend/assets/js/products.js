@@ -12,15 +12,9 @@
         );
 
     const state = {
-        activeTab: 'products',
-        viewMode: 'table',
         products: [],
-        categories: [],
-        brands: [],
         filterOptions: null,
         editingProductId: null,
-        editingCategoryId: null,
-        editingBrandId: null,
         galleryUrls: [],
         primaryImageUrl: '',
         currentDetailProduct: null,
@@ -96,28 +90,8 @@
         el.classList.remove('hidden');
     }
 
-    function switchTab(tabName) {
-        state.activeTab = tabName;
-        document.querySelectorAll('.tab-btn').forEach((btn) => {
-            const active = btn.dataset.tab === tabName;
-            btn.className = active
-                ? 'tab-btn px-4 py-2.5 text-sm font-bold rounded-t-xl border-b-2 border-blue-600 text-blue-600 bg-white flex items-center gap-2'
-                : 'tab-btn px-4 py-2.5 text-sm font-semibold rounded-t-xl border-b-2 border-transparent text-slate-600 hover:text-slate-900 flex items-center gap-2';
-        });
-        $('tabProducts').classList.toggle('hidden', tabName !== 'products');
-        $('tabCategories').classList.toggle('hidden', tabName !== 'categories');
-        $('tabBrands').classList.toggle('hidden', tabName !== 'brands');
-    }
-
-    function setViewMode(mode) {
-        state.viewMode = 'table';
-        $('productTableWrapper').classList.remove('hidden');
-        $('btnViewTable').className =
-            'px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white transition flex items-center gap-1.5';
-    }
-
     async function loadAllData() {
-        await Promise.all([loadFilterOptions(), loadCategories(), loadBrands()]);
+        await loadFilterOptions();
         await loadProducts();
     }
 
@@ -160,6 +134,7 @@
             $('inputDanhMuc').innerHTML = (opts.categories || [])
                 .map((c) => `<option value="${c.maDanhMuc}">${escapeHtml(c.tenDanhMuc)}</option>`)
                 .join('');
+            updateKpiCards();
         } catch (err) {
             showLiveStatus(`Không thể tải tùy chọn lọc: ${err.message}`, true);
         }
@@ -192,36 +167,11 @@
             state.products = Array.isArray(list) ? list : [];
             renderProducts();
             updateKpiCards();
+            updateAdvancedFilterBadge();
         } catch (err) {
             showLiveStatus(`Lỗi tải danh sách sản phẩm: ${err.message}`, true);
             $('productsTableBody').innerHTML =
                 `<tr><td colspan="7" class="py-8 text-center text-red-500">${escapeHtml(err.message)}</td></tr>`;
-        }
-    }
-
-    async function loadCategories() {
-        try {
-            const kw = $('catSearchInput').value.trim();
-            const qs = kw ? `?keyword=${encodeURIComponent(kw)}` : '';
-            const list = await apiRequest(`/categories${qs}`);
-            state.categories = Array.isArray(list) ? list : [];
-            renderCategories();
-            updateKpiCards();
-        } catch (err) {
-            showLiveStatus(`Lỗi tải danh mục: ${err.message}`, true);
-        }
-    }
-
-    async function loadBrands() {
-        try {
-            const kw = $('brandSearchInput').value.trim();
-            const qs = kw ? `?keyword=${encodeURIComponent(kw)}` : '';
-            const list = await apiRequest(`/brands${qs}`);
-            state.brands = Array.isArray(list) ? list : [];
-            renderBrands();
-            updateKpiCards();
-        } catch (err) {
-            showLiveStatus(`Lỗi tải thương hiệu: ${err.message}`, true);
         }
     }
 
@@ -232,8 +182,15 @@
         $('statTotalProducts').textContent = total;
         $('statActiveProducts').textContent = active;
         $('statStoppedProducts').textContent = stopped;
-        $('statCatBrandCount').textContent = `${state.categories.length} / ${state.brands.length}`;
         $('resultCountLabel').textContent = `Hiển thị: ${total} sản phẩm`;
+    }
+
+    function updateAdvancedFilterBadge() {
+        const activeCount = ['filterMinPrice', 'filterMaxPrice', 'filterRam', 'filterRom', 'filterColor']
+            .filter((id) => $(id).value.trim() !== '').length;
+        const badge = $('advancedFilterBadge');
+        badge.textContent = activeCount;
+        badge.classList.toggle('hidden', activeCount === 0);
     }
 
     function renderProducts() {
@@ -291,78 +248,30 @@
                     <td class="py-3 px-3 text-center">
                         <button type="button" data-action="toggle-status" data-id="${escapeHtml(p.maSanPham)}" data-status="${escapeHtml(p.trangThai)}"
                                 title="Bấm để đổi trạng thái kinh doanh"
-                                class="px-2.5 py-1 rounded-full text-xs font-bold border ${statusBadge} hover:opacity-80 transition">
-                            ${statusText}
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${statusBadge} hover:opacity-80 transition">
+                            <span>${statusText}</span>
+                            <i class="fa-solid fa-repeat text-[10px] opacity-60"></i>
                         </button>
                     </td>
                     <td class="py-3 px-4 text-center">
-                        <div class="inline-flex items-center gap-1">
+                        <div class="inline-flex items-center gap-1.5">
                             <button type="button" data-action="detail" data-id="${escapeHtml(p.maSanPham)}" title="Xem chi tiết"
-                                    class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-blue-100 text-slate-600 hover:text-blue-700 transition">
-                                <i class="fa-solid fa-eye"></i>
+                                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold transition">
+                                <i class="fa-solid fa-eye"></i> Xem
                             </button>
                             <button type="button" data-action="edit" data-id="${escapeHtml(p.maSanPham)}" title="Chỉnh sửa"
-                                    class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-amber-700 transition">
-                                <i class="fa-solid fa-pen"></i>
+                                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-semibold transition">
+                                <i class="fa-solid fa-pen"></i> Sửa
                             </button>
                             <button type="button" data-action="delete" data-id="${escapeHtml(p.maSanPham)}" title="Xóa / Ngừng kinh doanh"
-                                    class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-red-100 text-slate-600 hover:text-red-700 transition">
-                                <i class="fa-solid fa-trash"></i>
+                                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold transition">
+                                <i class="fa-solid fa-trash"></i> Xóa
                             </button>
                         </div>
                     </td>
                 </tr>
             `;
         }).join('');
-    }
-
-    function renderCategories() {
-        const tbody = $('categoriesTableBody');
-        if (!state.categories.length) {
-            tbody.innerHTML = '<tr><td colspan="5" class="py-10 text-center text-slate-400">Chưa có danh mục nào.</td></tr>';
-            return;
-        }
-        tbody.innerHTML = state.categories.map((c) => `
-            <tr class="hover:bg-slate-50/80 transition">
-                <td class="py-3 px-4 font-mono text-xs text-slate-500">#${c.maDanhMuc}</td>
-                <td class="py-3 px-4 font-bold text-slate-900">${escapeHtml(c.tenDanhMuc)}</td>
-                <td class="py-3 px-4 text-slate-600">${escapeHtml(c.moTa || '-')}</td>
-                <td class="py-3 px-4 text-center">
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700">${c.soLuongSanPham || 0} SP</span>
-                </td>
-                <td class="py-3 px-4 text-center">
-                    <div class="inline-flex items-center gap-1.5">
-                        <button type="button" data-cat-edit="${c.maDanhMuc}" class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-semibold">Sửa</button>
-                        <button type="button" data-cat-del="${c.maDanhMuc}" class="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold">Xóa</button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    function renderBrands() {
-        const tbody = $('brandsTableBody');
-        if (!state.brands.length) {
-            tbody.innerHTML = '<tr><td colspan="6" class="py-10 text-center text-slate-400">Chưa có thương hiệu nào.</td></tr>';
-            return;
-        }
-        tbody.innerHTML = state.brands.map((b) => `
-            <tr class="hover:bg-slate-50/80 transition">
-                <td class="py-3 px-4 font-mono text-xs text-slate-500">#${b.maThuongHieu}</td>
-                <td class="py-3 px-4 font-bold text-slate-900">${escapeHtml(b.tenThuongHieu)}</td>
-                <td class="py-3 px-4 text-slate-600">${escapeHtml(b.quocGia || '-')}</td>
-                <td class="py-3 px-4 text-slate-600">${escapeHtml(b.moTa || '-')}</td>
-                <td class="py-3 px-4 text-center">
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700">${b.soLuongSanPham || 0} SP</span>
-                </td>
-                <td class="py-3 px-4 text-center">
-                    <div class="inline-flex items-center gap-1.5">
-                        <button type="button" data-brand-edit="${b.maThuongHieu}" class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-semibold">Sửa</button>
-                        <button type="button" data-brand-del="${b.maThuongHieu}" class="px-2.5 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold">Xóa</button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
     }
 
     function addVariantRow(preset = {}) {
@@ -386,11 +295,11 @@
                        placeholder="256GB" value="${escapeHtml(preset.rom || '256GB')}" required>
             </td>
             <td class="py-1.5 px-1">
-                <input type="number" min="0" step="10000" class="v-cost w-28 px-2 py-1.5 border border-slate-300 rounded-lg"
+                <input type="number" min="0" step="1" class="v-cost w-28 px-2 py-1.5 border border-slate-300 rounded-lg"
                        placeholder="20000000" value="${preset.giaNhapThamKhao ?? ''}">
             </td>
             <td class="py-1.5 px-1">
-                <input type="number" min="1" step="10000" class="v-price w-28 px-2 py-1.5 border border-slate-300 rounded-lg"
+                <input type="number" min="1" step="1" class="v-price w-28 px-2 py-1.5 border border-slate-300 rounded-lg"
                        placeholder="25990000" value="${preset.giaBan ?? ''}" required>
             </td>
             <td class="py-1.5 px-1">
@@ -466,10 +375,11 @@
     async function openEditProductModal(maSanPham) {
         try {
             const p = await apiRequest(`/products/${encodeURIComponent(maSanPham)}`);
+            $('variantRowsBody').innerHTML = '';
             state.editingProductId = p.maSanPham;
-            state.galleryUrls = (p.galleries || []).map((g) => g.duongDanAnh);
-            if (!state.galleryUrls.length && p.hinhAnh) {
-                state.galleryUrls = [p.hinhAnh];
+            state.galleryUrls = (p.galleries || []).map((g) => g.duongDanAnh).filter(Boolean);
+            if (p.hinhAnh && !state.galleryUrls.includes(p.hinhAnh)) {
+                state.galleryUrls.unshift(p.hinhAnh);
             }
             state.primaryImageUrl = p.hinhAnh || state.galleryUrls[0] || '';
 
@@ -715,36 +625,21 @@
         }
     }
 
-    function openDeleteConfirm(type, id, name) {
-        state.pendingDelete = { type, id };
-        if (type === 'product') {
-            const prod = state.products.find((x) => x.maSanPham === id);
-            $('confirmDeleteTitle').textContent = 'Xác nhận xóa / ngừng kinh doanh';
-            $('confirmDeleteMessage').textContent =
-                `Bạn muốn xóa sản phẩm "${name}" (${id})? Nếu sản phẩm đã phát sinh dữ liệu nhập kho, bán hàng hoặc bảo hành, hệ thống sẽ tự động chuyển sang "Ngừng kinh doanh" để bảo toàn lịch sử.` +
-                (prod && prod.soLuongTon > 0 ? ` (Hiện còn ${prod.soLuongTon} máy tồn kho)` : '');
-        } else if (type === 'category') {
-            $('confirmDeleteTitle').textContent = 'Xác nhận xóa danh mục';
-            $('confirmDeleteMessage').textContent = `Bạn có chắc muốn xóa danh mục "${name}"?`;
-        } else {
-            $('confirmDeleteTitle').textContent = 'Xác nhận xóa thương hiệu';
-            $('confirmDeleteMessage').textContent = `Bạn có chắc muốn xóa thương hiệu "${name}"?`;
-        }
+    function openDeleteConfirm(maSanPham, name) {
+        state.pendingDelete = { maSanPham };
+        const prod = state.products.find((x) => x.maSanPham === maSanPham);
+        $('confirmDeleteTitle').textContent = 'Xác nhận xóa / ngừng kinh doanh';
+        $('confirmDeleteMessage').textContent =
+            `Bạn muốn xóa sản phẩm "${name}" (${maSanPham})? Nếu sản phẩm đã phát sinh dữ liệu nhập kho, bán hàng hoặc bảo hành, hệ thống sẽ tự động chuyển sang "Ngừng kinh doanh" để bảo toàn lịch sử.` +
+            (prod && prod.soLuongTon > 0 ? ` (Hiện còn ${prod.soLuongTon} máy tồn kho)` : '');
         $('confirmDeleteModal').showModal();
     }
 
     async function executeConfirmedDelete() {
         if (!state.pendingDelete) return;
-        const { type, id } = state.pendingDelete;
+        const { maSanPham } = state.pendingDelete;
         try {
-            let resp;
-            if (type === 'product') {
-                resp = await apiRequest(`/products/${encodeURIComponent(id)}`, { method: 'DELETE' });
-            } else if (type === 'category') {
-                resp = await apiRequest(`/categories/${id}`, { method: 'DELETE' });
-            } else {
-                resp = await apiRequest(`/brands/${id}`, { method: 'DELETE' });
-            }
+            const resp = await apiRequest(`/products/${encodeURIComponent(maSanPham)}`, { method: 'DELETE' });
             $('confirmDeleteModal').close();
             showLiveStatus(resp?.message || 'Thao tác xóa thành công.');
             await loadAllData();
@@ -756,87 +651,7 @@
         }
     }
 
-    function openCategoryModal(cat = null) {
-        state.editingCategoryId = cat ? cat.maDanhMuc : null;
-        showBoxError('categoryFormError', '');
-        $('categoryModalTitle').textContent = cat ? `Sửa danh mục #${cat.maDanhMuc}` : 'Thêm danh mục sản phẩm';
-        $('catTenDanhMuc').value = cat?.tenDanhMuc || '';
-        $('catMoTa').value = cat?.moTa || '';
-        $('categoryModal').showModal();
-    }
-
-    async function handleCategorySubmit(e) {
-        e.preventDefault();
-        showBoxError('categoryFormError', '');
-        const payload = {
-            tenDanhMuc: $('catTenDanhMuc').value.trim(),
-            moTa: $('catMoTa').value.trim()
-        };
-        try {
-            if (state.editingCategoryId) {
-                await apiRequest(`/categories/${state.editingCategoryId}`, {
-                    method: 'PUT',
-                    body: JSON.stringify(payload)
-                });
-                showLiveStatus('Đã cập nhật danh mục thành công.');
-            } else {
-                await apiRequest('/categories', {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                });
-                showLiveStatus('Đã thêm danh mục mới thành công.');
-            }
-            $('categoryModal').close();
-            await loadAllData();
-        } catch (err) {
-            showBoxError('categoryFormError', err.message);
-        }
-    }
-
-    function openBrandModal(brand = null) {
-        state.editingBrandId = brand ? brand.maThuongHieu : null;
-        showBoxError('brandFormError', '');
-        $('brandModalTitle').textContent = brand ? `Sửa thương hiệu #${brand.maThuongHieu}` : 'Thêm thương hiệu mới';
-        $('brandTenThuongHieu').value = brand?.tenThuongHieu || '';
-        $('brandQuocGia').value = brand?.quocGia || '';
-        $('brandMoTa').value = brand?.moTa || '';
-        $('brandModal').showModal();
-    }
-
-    async function handleBrandSubmit(e) {
-        e.preventDefault();
-        showBoxError('brandFormError', '');
-        const payload = {
-            tenThuongHieu: $('brandTenThuongHieu').value.trim(),
-            quocGia: $('brandQuocGia').value.trim(),
-            moTa: $('brandMoTa').value.trim()
-        };
-        try {
-            if (state.editingBrandId) {
-                await apiRequest(`/brands/${state.editingBrandId}`, {
-                    method: 'PUT',
-                    body: JSON.stringify(payload)
-                });
-                showLiveStatus('Đã cập nhật thương hiệu thành công.');
-            } else {
-                await apiRequest('/brands', {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                });
-                showLiveStatus('Đã thêm thương hiệu mới thành công.');
-            }
-            $('brandModal').close();
-            await loadAllData();
-        } catch (err) {
-            showBoxError('brandFormError', err.message);
-        }
-    }
-
     function bindEvents() {
-        document.querySelectorAll('.tab-btn').forEach((btn) => {
-            btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-        });
-        $('btnViewTable').addEventListener('click', () => setViewMode('table'));
         $('btnRefreshAll').addEventListener('click', loadAllData);
         $('btnSidebarReload').addEventListener('click', loadAllData);
         $('btnOpenCreateProduct').addEventListener('click', openCreateProductModal);
@@ -848,8 +663,17 @@
         ['filterBrand', 'filterCategory', 'filterStatus', 'filterRam', 'filterRom', 'filterSort'].forEach((id) => {
             $(id).addEventListener('change', loadProducts);
         });
+        $('btnToggleAdvancedFilter').addEventListener('click', () => {
+            const panel = $('advancedFilterPanel');
+            panel.classList.toggle('hidden');
+            $('advancedFilterChevron').classList.toggle('rotate-180', !panel.classList.contains('hidden'));
+        });
+        ['filterMinPrice', 'filterMaxPrice', 'filterColor'].forEach((id) => {
+            $(id).addEventListener('input', updateAdvancedFilterBadge);
+        });
         $('btnResetFilters').addEventListener('click', () => {
             $('productFilterForm').reset();
+            updateAdvancedFilterBadge();
             loadProducts();
         });
 
@@ -859,59 +683,18 @@
             searchTimer = setTimeout(loadProducts, 280);
         });
 
-        let catTimer;
-        $('catSearchInput').addEventListener('input', () => {
-            clearTimeout(catTimer);
-            catTimer = setTimeout(loadCategories, 250);
-        });
-        let brandTimer;
-        $('brandSearchInput').addEventListener('input', () => {
-            clearTimeout(brandTimer);
-            brandTimer = setTimeout(loadBrands, 250);
-        });
-
         // Product action delegation (table)
-        ['productsTableBody'].forEach((id) => {
-            $(id).addEventListener('click', (e) => {
-                const btn = e.target.closest('button[data-action]');
-                if (!btn) return;
-                const maSp = btn.dataset.id;
-                const action = btn.dataset.action;
-                if (action === 'detail') openProductDetailModal(maSp);
-                else if (action === 'edit') openEditProductModal(maSp);
-                else if (action === 'toggle-status') toggleProductStatus(maSp, btn.dataset.status);
-                else if (action === 'delete') {
-                    const p = state.products.find((item) => item.maSanPham === maSp);
-                    openDeleteConfirm('product', maSp, p ? p.tenSanPham : maSp);
-                }
-            });
-        });
-
-        // Category & Brand table actions
-        $('categoriesTableBody').addEventListener('click', (e) => {
-            const editBtn = e.target.closest('button[data-cat-edit]');
-            if (editBtn) {
-                const cat = state.categories.find((c) => c.maDanhMuc === Number(editBtn.dataset.catEdit));
-                if (cat) openCategoryModal(cat);
-                return;
-            }
-            const delBtn = e.target.closest('button[data-cat-del]');
-            if (delBtn) {
-                const cat = state.categories.find((c) => c.maDanhMuc === Number(delBtn.dataset.catDel));
-                if (cat) openDeleteConfirm('category', cat.maDanhMuc, cat.tenDanhMuc);
-            }
-        });
-        $('brandsTableBody').addEventListener('click', (e) => {
-            const editBtn = e.target.closest('button[data-brand-edit]');
-            if (editBtn) {
-                const b = state.brands.find((x) => x.maThuongHieu === Number(editBtn.dataset.brandEdit));
-                if (b) openBrandModal(b);
-                return;
-            }
-            const delBtn = e.target.closest('button[data-brand-del]');
-            if (delBtn) {
-                const b = state.brands.find((x) => x.maThuongHieu === Number(delBtn.dataset.brandDel));
-                if (b) openDeleteConfirm('brand', b.maThuongHieu, b.tenThuongHieu);
+        $('productsTableBody').addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-action]');
+            if (!btn) return;
+            const maSp = btn.dataset.id;
+            const action = btn.dataset.action;
+            if (action === 'detail') openProductDetailModal(maSp);
+            else if (action === 'edit') openEditProductModal(maSp);
+            else if (action === 'toggle-status') toggleProductStatus(maSp, btn.dataset.status);
+            else if (action === 'delete') {
+                const p = state.products.find((item) => item.maSanPham === maSp);
+                openDeleteConfirm(maSp, p ? p.tenSanPham : maSp);
             }
         });
 
@@ -958,17 +741,6 @@
             const btn = e.target.closest('button[data-switch-variant]');
             if (btn) openProductDetailModal(btn.dataset.switchVariant);
         });
-
-        // Category & Brand modals
-        $('btnOpenCreateCategory').addEventListener('click', () => openCategoryModal(null));
-        $('btnCloseCategoryModal').addEventListener('click', () => $('categoryModal').close());
-        $('btnCancelCategoryModal').addEventListener('click', () => $('categoryModal').close());
-        $('categoryForm').addEventListener('submit', handleCategorySubmit);
-
-        $('btnOpenCreateBrand').addEventListener('click', () => openBrandModal(null));
-        $('btnCloseBrandModal').addEventListener('click', () => $('brandModal').close());
-        $('btnCancelBrandModal').addEventListener('click', () => $('brandModal').close());
-        $('brandForm').addEventListener('submit', handleBrandSubmit);
 
         // Delete confirm modal
         $('btnCancelDelete').addEventListener('click', () => $('confirmDeleteModal').close());
