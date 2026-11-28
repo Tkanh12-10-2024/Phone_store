@@ -1,0 +1,8 @@
+package com.phonestore.dto.product;
+
+public class ProductConflictException extends RuntimeException {
+
+    public ProductConflictException(String message) {
+        super(message);
+    }
+}

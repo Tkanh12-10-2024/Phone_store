@@ -44,6 +44,16 @@
         el.classList.remove('hidden');
     }
 
+    function setBackendStatus(isOnline) {
+        const label = $('backendStatusLabel');
+        const dot = $('backendStatusDot');
+        label.textContent = isOnline ? 'Đang hoạt động' : 'Mất kết nối';
+        label.className = isOnline ? 'text-emerald-400 font-semibold' : 'text-red-400 font-semibold';
+        dot.className = isOnline
+            ? 'w-2 h-2 rounded-full bg-emerald-500'
+            : 'w-2 h-2 rounded-full bg-red-500';
+    }
+
     function attachBackdropClose(dialogEl) {
         dialogEl.addEventListener('click', (e) => {
             if (e.target !== dialogEl) return;
@@ -57,42 +67,70 @@
     }
 
     async function loadInitialPosData() {
+        let products;
         try {
-            const [products, customers, employees, vouchers, brands] = await Promise.all([
-                apiRequest('/pos/products'),
-                apiRequest('/pos/customers'),
-                apiRequest('/pos/employees'),
-                apiRequest('/pos/vouchers'),
-                apiRequest('/pos/brands')
-            ]);
-
-            state.products = products || [];
-            state.customers = customers || [];
-            state.employees = employees || [];
-            const now = new Date();
-            state.activePromotions = (vouchers || []).filter((voucher) =>
-                voucher.trangThai === 'Dang_dien_ra'
-                && (!voucher.ngayBatDau || new Date(voucher.ngayBatDau) <= now)
-                && (!voucher.ngayKetThuc || new Date(voucher.ngayKetThuc) >= now)
-                && (!Number(voucher.soLuongPhatHanh)
-                    || Number(voucher.soLuongDaDung) < Number(voucher.soLuongPhatHanh))
-            );
-
-            const brandFilter = $('posBrandFilter');
-
-            brandFilter.innerHTML = '<option value="">Tất cả thương hiệu</option>'
-                + (brands || []).map((brand) =>
-                    `<option value="${escapeHtml(brand.maThuongHieu)}">${escapeHtml(brand.tenThuongHieu)}</option>`
-                ).join('');
-
-            renderCustomerSelect();
-            renderEmployeeSelect();
-            renderProductGrid(state.products);
-            renderActiveVoucherPills();
-            recalculateTotals();
-
+            products = await apiRequest('/pos/products');
+            if (!Array.isArray(products)) {
+                throw new Error('Dữ liệu sản phẩm trả về không hợp lệ.');
+            }
         } catch (err) {
-            showPosStatus('Không thể tải dữ liệu POS: ' + err.message, true);
+            setBackendStatus(false);
+            showPosStatus('Không thể tải sản phẩm POS: ' + err.message, true);
+            return;
+        }
+
+        state.products = products;
+        renderProductGrid(state.products);
+        setBackendStatus(true);
+
+        const results = await Promise.allSettled([
+            apiRequest('/pos/customers'),
+            apiRequest('/pos/employees'),
+            apiRequest('/pos/vouchers'),
+            apiRequest('/pos/brands')
+        ]);
+        const labels = ['khách hàng', 'nhân viên', 'voucher', 'thương hiệu'];
+        const errors = [];
+        const lists = results.map((result, index) => {
+            if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+                return result.value;
+            }
+
+            const detail = result.status === 'rejected'
+                ? (result.reason instanceof Error ? result.reason.message : String(result.reason))
+                : 'dữ liệu trả về không hợp lệ';
+            errors.push(`${labels[index]}: ${detail}`);
+            return [];
+        });
+
+        const [customers, employees, vouchers, brands] = lists;
+        state.customers = customers;
+        state.employees = employees;
+        const now = new Date();
+        state.activePromotions = vouchers.filter((voucher) =>
+            voucher.trangThai === 'Dang_dien_ra'
+            && (!voucher.ngayBatDau || new Date(voucher.ngayBatDau) <= now)
+            && (!voucher.ngayKetThuc || new Date(voucher.ngayKetThuc) >= now)
+            && (!Number(voucher.soLuongPhatHanh)
+                || Number(voucher.soLuongDaDung) < Number(voucher.soLuongPhatHanh))
+        );
+
+        const brandFilter = $('posBrandFilter');
+
+        brandFilter.innerHTML = '<option value="">Tất cả thương hiệu</option>'
+            + brands.map((brand) =>
+                `<option value="${escapeHtml(brand.maThuongHieu)}">${escapeHtml(brand.tenThuongHieu)}</option>`
+            ).join('');
+
+        renderCustomerSelect();
+        renderEmployeeSelect();
+        renderActiveVoucherPills();
+        recalculateTotals();
+
+        if (errors.length) {
+            showPosStatus(`Đã tải ${products.length} sản phẩm. Một số dữ liệu phụ chưa tải được: ${errors.join('; ')}.`, true);
+        } else {
+            $('posStatusRegion').classList.add('hidden');
         }
     }
 
@@ -133,7 +171,7 @@
         const grid = $('posProductGrid');
 
         if (!list.length) {
-            grid.innerHTML = '<div class="col-span-full py-8 text-center text-slate-400 text-sm">Không tìm thấy thiết bị phù hợp.</div>';
+            grid.innerHTML = '<div class="col-span-full py-8 text-center text-slate-400 text-sm">Chưa có sản phẩm đang kinh doanh trong danh mục POS.</div>';
             return;
         }
 

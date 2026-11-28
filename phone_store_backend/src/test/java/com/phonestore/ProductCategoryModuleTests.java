@@ -31,6 +31,49 @@ class ProductCategoryModuleTests {
     private ObjectMapper objectMapper;
 
     @Test
+    void filterOptionsAndAutomaticSkuCreation() throws Exception {
+        MvcResult filtersRes = mockMvc.perform(get("/api/products/filters"))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode filters = objectMapper.readTree(
+                filtersRes.getResponse().getContentAsString(StandardCharsets.UTF_8)
+        );
+        assertTrue(filters.get("brands").size() > 0);
+        assertTrue(filters.get("categories").size() > 0);
+        assertTrue(filters.get("rams").size() > 0);
+        assertTrue(filters.get("productLines").size() > 0);
+
+        Map<String, Object> payload = Map.of(
+                "tenSanPham", "Điện thoại tự sinh SKU Test",
+                "maThuongHieu", 1,
+                "maDanhMuc", 1,
+                "dongMay", "Auto SKU Test Series",
+                "variants", List.of(Map.of(
+                        "mauSac", "Xanh Test",
+                        "ram", "8GB",
+                        "rom", "128GB",
+                        "giaNhapThamKhao", 10000000,
+                        "giaBan", 12000000,
+                        "dinhMucTonToiThieu", 1
+                ))
+        );
+        MvcResult createRes = mockMvc.perform(post("/api/products/with-variants")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        JsonNode created = objectMapper.readTree(
+                createRes.getResponse().getContentAsString(StandardCharsets.UTF_8)
+        ).get(0);
+        String generatedSku = created.get("maSanPham").asText();
+        assertTrue(generatedSku.startsWith("SP_"));
+        assertTrue(generatedSku.length() <= 20);
+
+        mockMvc.perform(delete("/api/products/" + generatedSku))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void categoryCrudAndDeleteProtection() throws Exception {
         // 1. Create valid category
         Map<String, Object> payload = Map.of(

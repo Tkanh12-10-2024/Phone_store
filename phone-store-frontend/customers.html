@@ -108,9 +108,9 @@
     <!-- Trạng thái CSDL -->
     <div class="p-4 m-3 bg-slate-800/80 rounded-xl border border-slate-700 text-xs">
         <div class="flex items-center justify-between mb-2">
-            <span class="text-slate-400">Database XAMPP:</span>
-            <span class="text-emerald-400 font-semibold flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Kết nối OK
+            <span class="text-slate-400">Backend API:</span>
+            <span id="customerApiStatus" class="text-slate-400 font-semibold flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-slate-500"></span> Đang kiểm tra
             </span>
         </div>
         <p class="text-slate-400 truncate">CSDL: <span class="text-white font-mono">quanly_cuahang_dienthoai</span></p>
@@ -286,7 +286,10 @@
     let allCustomers = [];
 
     // ========= Khởi động =========
-    document.addEventListener('DOMContentLoaded', loadCustomers);
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('customerTableBody').addEventListener('click', handleCustomerTableAction);
+        loadCustomers();
+    });
 
     function debounceSearch() {
         clearTimeout(searchTimer);
@@ -302,8 +305,10 @@
             const params = new URLSearchParams();
             if (keyword) params.set('keyword', keyword);
             const res = await fetch(`${API}/customers?${params}`);
-            if (!res.ok) throw new Error('Không thể kết nối backend');
-            allCustomers = await res.json();
+            const data = await res.json().catch(() => null);
+            if (!res.ok) throw new Error(data?.message || `Yêu cầu thất bại (HTTP ${res.status})`);
+            if (!Array.isArray(data)) throw new Error('Dữ liệu khách hàng trả về không hợp lệ.');
+            allCustomers = data;
 
             // Lọc theo status filter
             let filtered = allCustomers;
@@ -311,16 +316,38 @@
 
             renderTable(filtered);
             updateStats(allCustomers);
+            setApiConnection(true);
             setBanner('success', `Đã tải ${filtered.length} khách hàng`, new Date().toLocaleTimeString('vi-VN'));
         } catch (err) {
+            setApiConnection(false);
             setBanner('error', 'Lỗi kết nối: ' + err.message);
             document.getElementById('customerTableBody').innerHTML = `
             <tr><td colspan="7" class="text-center py-16 text-red-400">
                 <i class="fa-solid fa-circle-exclamation text-3xl mb-3 block"></i>
                 Không thể tải dữ liệu. Hãy kiểm tra backend đang chạy.<br>
-                <code class="text-xs mt-2 block">java -jar target/phong_store_backend-0.0.1-SNAPSHOT.jar</code>
+                <code class="text-xs mt-2 block">.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=h2"</code>
             </td></tr>`;
         }
+    }
+
+    function setApiConnection(connected) {
+        const status = document.getElementById('customerApiStatus');
+        status.className = connected
+            ? 'text-emerald-400 font-semibold flex items-center gap-1'
+            : 'text-red-400 font-semibold flex items-center gap-1';
+        status.innerHTML = connected
+            ? '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Kết nối OK'
+            : '<span class="w-2 h-2 rounded-full bg-red-500"></span> Mất kết nối';
+    }
+
+    function escapeHtml(value) {
+        if (value === null || value === undefined) return '';
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
     function renderTable(customers) {
@@ -332,14 +359,14 @@
         tbody.innerHTML = customers.map(c => `
         <tr class="border-b border-slate-50 hover:bg-slate-50 transition group">
             <td class="px-4 py-3">
-                <span class="font-mono text-xs text-blue-700 bg-blue-50 px-2 py-1 rounded-lg">${c.maKhachHang}</span>
+                <span class="font-mono text-xs text-blue-700 bg-blue-50 px-2 py-1 rounded-lg">${escapeHtml(c.maKhachHang)}</span>
             </td>
             <td class="px-4 py-3">
-                <div class="font-semibold text-slate-800">${c.hoTen}</div>
-                <div class="text-xs text-slate-400">${c.diaChi || ''}</div>
+                <div class="font-semibold text-slate-800">${escapeHtml(c.hoTen)}</div>
+                <div class="text-xs text-slate-400">${escapeHtml(c.diaChi)}</div>
             </td>
-            <td class="px-4 py-3 text-sm text-slate-600 font-mono">${c.soDienThoai}</td>
-            <td class="px-4 py-3 text-sm text-slate-500">${c.email || '<span class="text-slate-300">—</span>'}</td>
+            <td class="px-4 py-3 text-sm text-slate-600 font-mono">${escapeHtml(c.soDienThoai)}</td>
+            <td class="px-4 py-3 text-sm text-slate-500">${c.email ? escapeHtml(c.email) : '<span class="text-slate-300">—</span>'}</td>
             <td class="px-4 py-3 text-center">
                 <div class="flex items-center justify-center gap-2 text-xs">
                     <span class="flex items-center gap-1 text-purple-600"><i class="fa-solid fa-receipt"></i> ${c.soHoaDon || 0}</span>
@@ -354,15 +381,15 @@
             </td>
             <td class="px-4 py-3">
                 <div class="flex items-center justify-center gap-1.5">
-                    <button onclick="showHistory('${c.maKhachHang}', '${c.hoTen}')" title="Lịch sử mua hàng"
+                    <button data-action="history" data-id="${escapeHtml(c.maKhachHang)}" title="Lịch sử mua hàng"
                         class="w-8 h-8 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-600 flex items-center justify-center transition text-xs">
                         <i class="fa-solid fa-clock-rotate-left"></i>
                     </button>
-                    <button onclick="openEditModal(${JSON.stringify(c).replace(/"/g,'&quot;')})" title="Sửa"
+                    <button data-action="edit" data-id="${escapeHtml(c.maKhachHang)}" title="Sửa"
                         class="w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition text-xs">
                         <i class="fa-solid fa-pen"></i>
                     </button>
-                    <button onclick="deleteCustomer('${c.maKhachHang}', '${c.hoTen}', ${c.soHoaDon || 0}, ${c.soPhieuBaoHanh || 0})" title="Xóa / Vô hiệu hóa"
+                    <button data-action="delete" data-id="${escapeHtml(c.maKhachHang)}" title="Xóa / Vô hiệu hóa"
                         class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 flex items-center justify-center transition text-xs">
                         <i class="fa-solid fa-trash"></i>
                     </button>
@@ -370,6 +397,21 @@
             </td>
         </tr>
     `).join('');
+    }
+
+    function handleCustomerTableAction(event) {
+        const button = event.target.closest('button[data-action]');
+        if (!button) return;
+        const customer = allCustomers.find((item) => item.maKhachHang === button.dataset.id);
+        if (!customer) return;
+
+        if (button.dataset.action === 'history') {
+            showHistory(customer.maKhachHang, customer.hoTen);
+        } else if (button.dataset.action === 'edit') {
+            openEditModal(customer);
+        } else if (button.dataset.action === 'delete') {
+            deleteCustomer(customer);
+        }
     }
 
     function updateStats(customers) {
@@ -437,18 +479,19 @@
     }
 
     // ========= UC 2.12.4 - Xóa =========
-    async function deleteCustomer(id, hoTen, soHD, soBH) {
-        const hasHistory = soHD > 0 || soBH > 0;
+    async function deleteCustomer(customer) {
+        const { maKhachHang: id, hoTen, soHoaDon = 0, soPhieuBaoHanh = 0, soDonHang = 0 } = customer;
+        const hasHistory = soHoaDon > 0 || soPhieuBaoHanh > 0 || soDonHang > 0;
         const confirmMsg = hasHistory
-            ? `Khách hàng "${hoTen}" có ${soHD} hóa đơn và ${soBH} phiếu bảo hành.\nHệ thống sẽ VÔ HIỆU HÓA (không xóa dữ liệu).\n\nBạn xác nhận?`
+            ? `Khách hàng "${hoTen}" có ${soHoaDon} hóa đơn, ${soDonHang} đơn hàng và ${soPhieuBaoHanh} phiếu bảo hành.\nHệ thống sẽ VÔ HIỆU HÓA (không xóa dữ liệu).\n\nBạn xác nhận?`
             : `Bạn có chắc muốn XÓA khách hàng "${hoTen}"?`;
         if (!confirm(confirmMsg)) return;
         try {
-            const res = await fetch(`${API}/customers/${id}`, { method: 'DELETE' });
-            const data = await res.json();
-            if (!res.ok) { alert(data.message || 'Có lỗi xảy ra'); return; }
+            const res = await fetch(`${API}/customers/${encodeURIComponent(id)}`, { method: 'DELETE' });
+            const data = await res.json().catch(() => null);
+            if (!res.ok) { alert(data?.message || 'Có lỗi xảy ra'); return; }
             setBanner('success', data.message);
-            loadCustomers();
+            await loadCustomers();
         } catch (err) {
             alert('Lỗi: ' + err.message);
         }
@@ -461,11 +504,16 @@
         document.getElementById('historyPanel').classList.remove('hidden');
         setTimeout(() => { document.getElementById('historyPanelContent').style.transform = 'translateX(0)'; }, 10);
         try {
-            const res = await fetch(`${API}/customers/${maKH}/history`);
-            const history = await res.json();
+            const res = await fetch(`${API}/customers/${encodeURIComponent(maKH)}/history`);
+            const history = await res.json().catch(() => null);
+            if (!res.ok) throw new Error(history?.message || `Yêu cầu thất bại (HTTP ${res.status})`);
+            if (!Array.isArray(history)) throw new Error('Dữ liệu lịch sử mua hàng không hợp lệ.');
             renderHistory(history);
         } catch (err) {
-            document.getElementById('historyContent').innerHTML = `<div class="text-center py-8 text-red-400">Lỗi tải lịch sử: ${err.message}</div>`;
+            const error = document.createElement('div');
+            error.className = 'text-center py-8 text-red-400';
+            error.textContent = `Lỗi tải lịch sử: ${err.message}`;
+            document.getElementById('historyContent').replaceChildren(error);
         }
     }
 
@@ -481,23 +529,27 @@
         document.getElementById('historyContent').innerHTML = `
         <div class="space-y-4">
             ${history.map(h => {
-            const isInWarranty = h.hanBaoHanh && new Date(h.hanBaoHanh) > new Date();
-            const hanBH = h.hanBaoHanh ? new Date(h.hanBaoHanh).toLocaleDateString('vi-VN') : '—';
+            const warrantyDate = h.hanBaoHanh ? new Date(h.hanBaoHanh) : null;
+            const isInWarranty = warrantyDate && warrantyDate > new Date();
+            const hanBH = warrantyDate && !Number.isNaN(warrantyDate.getTime())
+                ? warrantyDate.toLocaleDateString('vi-VN')
+                : '—';
+            const saleDate = h.ngayMua ? new Date(h.ngayMua) : null;
             return `
                 <div class="border border-slate-100 rounded-2xl p-4 hover:border-blue-200 transition bg-white shadow-sm">
                     <div class="flex items-start justify-between mb-3">
                         <div>
-                            <span class="font-mono text-xs text-blue-700 bg-blue-50 px-2 py-1 rounded-lg">${h.maHoaDon}</span>
-                            <p class="font-semibold text-slate-800 mt-1.5">${h.tenSanPham}</p>
+                            <span class="font-mono text-xs text-blue-700 bg-blue-50 px-2 py-1 rounded-lg">${escapeHtml(h.maHoaDon)}</span>
+                            <p class="font-semibold text-slate-800 mt-1.5">${escapeHtml(h.tenSanPham)}</p>
                         </div>
                         <div class="text-right">
-                            <p class="text-sm font-bold text-emerald-600">${(h.giaBan || 0).toLocaleString('vi-VN')}₫</p>
-                            <p class="text-xs text-slate-400 mt-0.5">${h.ngayMua ? new Date(h.ngayMua).toLocaleDateString('vi-VN') : '—'}</p>
+                            <p class="text-sm font-bold text-emerald-600">${Number(h.giaBan || 0).toLocaleString('vi-VN')}₫</p>
+                            <p class="text-xs text-slate-400 mt-0.5">${saleDate && !Number.isNaN(saleDate.getTime()) ? saleDate.toLocaleDateString('vi-VN') : '—'}</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2 text-xs text-slate-500">
-                        <div class="flex items-center gap-1.5"><i class="fa-solid fa-barcode text-slate-400"></i> IMEI: <span class="font-mono text-slate-700">${h.maImei || '—'}</span></div>
-                        <div class="flex items-center gap-1.5"><i class="fa-solid fa-clock text-slate-400"></i> BH: ${h.thoiGianBaoHanhThang || 0} tháng</div>
+                        <div class="flex items-center gap-1.5"><i class="fa-solid fa-barcode text-slate-400"></i> IMEI: <span class="font-mono text-slate-700">${escapeHtml(h.maImei || '—')}</span></div>
+                        <div class="flex items-center gap-1.5"><i class="fa-solid fa-clock text-slate-400"></i> BH: ${Number(h.thoiGianBaoHanhThang || 0)} tháng</div>
                         <div class="col-span-2 flex items-center gap-1.5">
                             <i class="fa-solid fa-calendar-check text-slate-400"></i>
                             Hạn BH: <span class="font-semibold ${isInWarranty ? 'text-emerald-600' : 'text-red-500'}">${hanBH}</span>

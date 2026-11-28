@@ -34,6 +34,15 @@ public class KhuyenMai {
     private String quaTang;
     private String moTa;
 
+    private String tenThuongHieu;
+    private String tenDanhMuc;
+    private int soLuongConLai;
+    private int tiLeConLai;
+    private boolean sapHetSoLuong;
+    private boolean sapHetHan;
+    private boolean coCanhBao;
+    private String lyDoCanhBao;
+
     public void taoKhuyenMai() {
         this.trangThai = "Dang_dien_ra";
     }
@@ -314,5 +323,69 @@ public class KhuyenMai {
 
     public void setMoTa(String moTa) {
         this.moTa = moTa;
+    }
+
+    public String getTenThuongHieu() {
+        return tenThuongHieu;
+    }
+
+    public void setTenThuongHieu(String tenThuongHieu) {
+        this.tenThuongHieu = tenThuongHieu;
+    }
+
+    public String getTenDanhMuc() {
+        return tenDanhMuc;
+    }
+
+    public void setTenDanhMuc(String tenDanhMuc) {
+        this.tenDanhMuc = tenDanhMuc;
+    }
+
+    public int getSoLuongConLai() {
+        return soLuongConLai;
+    }
+
+    public void setSoLuongConLai(int soLuongConLai) {
+        this.soLuongConLai = soLuongConLai;
+    }
+
+    public int getTiLeConLai() {
+        return tiLeConLai;
+    }
+
+    public void setTiLeConLai(int tiLeConLai) {
+        this.tiLeConLai = tiLeConLai;
+    }
+
+    public boolean isSapHetSoLuong() {
+        return sapHetSoLuong;
+    }
+
+    public void setSapHetSoLuong(boolean sapHetSoLuong) {
+        this.sapHetSoLuong = sapHetSoLuong;
+    }
+
+    public boolean isSapHetHan() {
+        return sapHetHan;
+    }
+
+    public void setSapHetHan(boolean sapHetHan) {
+        this.sapHetHan = sapHetHan;
+    }
+
+    public boolean isCoCanhBao() {
+        return coCanhBao;
+    }
+
+    public void setCoCanhBao(boolean coCanhBao) {
+        this.coCanhBao = coCanhBao;
+    }
+
+    public String getLyDoCanhBao() {
+        return lyDoCanhBao;
+    }
+
+    public void setLyDoCanhBao(String lyDoCanhBao) {
+        this.lyDoCanhBao = lyDoCanhBao;
     }
 }
