@@ -14,7 +14,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -22,15 +24,16 @@ import java.util.UUID;
 public class HoaDonDAO {
 
     private final JdbcTemplate jdbcTemplate;
+    private final KhuyenMaiDAO khuyenMaiDAO;
 
-    public HoaDonDAO(JdbcTemplate jdbcTemplate) {
+    public HoaDonDAO(
+            JdbcTemplate jdbcTemplate,
+            KhuyenMaiDAO khuyenMaiDAO
+    ) {
         this.jdbcTemplate = jdbcTemplate;
+        this.khuyenMaiDAO = khuyenMaiDAO;
     }
 
-    /*
-     * Sinh mã hóa đơn duy nhất.
-     * Ví dụ: HD20261128103315A1B2C3
-     */
     public String sinhMaHoaDonMoi() {
         String thoiGian = LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
@@ -44,33 +47,23 @@ public class HoaDonDAO {
         return "HD" + thoiGian + ngauNhien;
     }
 
-    /*
-     * Sinh mã đơn hàng từ mã hóa đơn.
-     */
     private String sinhMaDonHang(String maHoaDon) {
         return "DH" + maHoaDon.substring(2);
     }
 
-    /*
-     * Kiểm tra khách hàng có tồn tại hay không.
-     * Khách vãng lai được lưu ma_khach_hang = NULL.
-     */
     private String xuLyMaKhachHang(String maKhachHang) {
-
         if (maKhachHang == null
                 || maKhachHang.isBlank()
                 || "KH_LE".equalsIgnoreCase(maKhachHang.trim())) {
             return null;
         }
 
-        String sql = """
-            SELECT COUNT(*)
-            FROM khach_hang
-            WHERE ma_khach_hang = ?
-        """;
-
         Integer count = jdbcTemplate.queryForObject(
-                sql,
+                """
+                SELECT COUNT(*)
+                FROM khach_hang
+                WHERE ma_khach_hang = ?
+                """,
                 Integer.class,
                 maKhachHang.trim()
         );
@@ -84,26 +77,19 @@ public class HoaDonDAO {
         return maKhachHang.trim();
     }
 
-    /*
-     * Kiểm tra nhân viên tồn tại.
-     * Bảng hoa_don và don_hang đều yêu cầu ma_nhan_vien.
-     */
     private void kiemTraNhanVien(String maNhanVien) {
-
         if (maNhanVien == null || maNhanVien.isBlank()) {
             throw new IllegalArgumentException(
                     "Mã nhân viên không được để trống."
             );
         }
 
-        String sql = """
-            SELECT COUNT(*)
-            FROM nhan_vien
-            WHERE ma_nhan_vien = ?
-        """;
-
         Integer count = jdbcTemplate.queryForObject(
-                sql,
+                """
+                SELECT COUNT(*)
+                FROM nhan_vien
+                WHERE ma_nhan_vien = ?
+                """,
                 Integer.class,
                 maNhanVien.trim()
         );
@@ -115,37 +101,32 @@ public class HoaDonDAO {
         }
     }
 
-    /*
-     * Tìm mã khuyến mãi từ code voucher.
-     * Không sử dụng voucher thì trả về NULL.
-     */
     private String timMaKhuyenMai(String codeVoucher) {
-
         if (codeVoucher == null || codeVoucher.isBlank()) {
             return null;
         }
 
-        String sql = """
-            SELECT ma_khuyen_mai
-            FROM khuyen_mai
-            WHERE LOWER(code_voucher) = LOWER(?)
-            LIMIT 1
-        """;
-
         List<String> result = jdbcTemplate.query(
-                sql,
+                """
+                SELECT ma_khuyen_mai
+                FROM khuyen_mai
+                WHERE LOWER(code_voucher) = LOWER(?)
+                LIMIT 1
+                """,
                 (rs, rowNum) -> rs.getString("ma_khuyen_mai"),
                 codeVoucher.trim()
         );
 
-        return result.isEmpty() ? null : result.get(0);
+        if (result.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Không tìm thấy voucher: " + codeVoucher
+            );
+        }
+
+        return result.get(0);
     }
 
-    /*
-     * Kiểm tra phương thức thanh toán có hợp lệ theo ENUM SQL.
-     */
     private void kiemTraPhuongThucThanhToan(String phuongThuc) {
-
         Set<String> hopLe = Set.of(
                 "Tien_mat",
                 "Chuyen_khoan_QR",
@@ -160,86 +141,68 @@ public class HoaDonDAO {
     }
 
     /*
-     * Lấy và khóa IMEI còn trong kho theo mã sản phẩm.
-     *
-     * FOR UPDATE giúp tránh hai giao dịch cùng lấy một IMEI.
-     * Phải gọi bên trong transaction.
+     * Khóa và lấy chính xác IMEI cần bán.
+     * Phải gọi trong transaction.
      */
     private List<String> layVaKhoaImei(
             String maSanPham,
             int soLuong
     ) {
-
-        if (maSanPham == null || maSanPham.isBlank()) {
+        if (maSanPham == null || maSanPham.isBlank() || soLuong <= 0) {
             throw new IllegalArgumentException(
-                    "Mã sản phẩm không được để trống."
+                    "Thông tin sản phẩm hoặc số lượng không hợp lệ."
             );
         }
-
-        if (soLuong <= 0) {
-            throw new IllegalArgumentException(
-                    "Số lượng sản phẩm phải lớn hơn 0."
-            );
-        }
-
-        String sql = """
-            SELECT ma_imei
-            FROM imei_san_pham
-            WHERE ma_san_pham = ?
-              AND trang_thai = 'Trong_kho'
-            ORDER BY ngay_nhap ASC, ma_imei ASC
-            LIMIT ?
-            FOR UPDATE
-        """;
 
         List<String> imeiList = jdbcTemplate.query(
-                sql,
+                """
+                SELECT ma_imei
+                FROM imei_san_pham
+                WHERE ma_san_pham = ?
+                  AND trang_thai = 'Trong_kho'
+                ORDER BY ngay_nhap ASC, ma_imei ASC
+                LIMIT ?
+                FOR UPDATE
+                """,
                 (rs, rowNum) -> rs.getString("ma_imei"),
                 maSanPham,
                 soLuong
         );
 
-        if (imeiList.size() < soLuong) {
+        if (imeiList.size() != soLuong) {
             throw new IllegalStateException(
                     "Sản phẩm " + maSanPham
-                            + " không đủ IMEI trong kho. "
-                            + "Cần: " + soLuong
-                            + ", còn: " + imeiList.size()
+                            + " không đủ IMEI trong kho. Cần: "
+                            + soLuong + ", còn: " + imeiList.size()
             );
         }
 
         return imeiList;
     }
 
-    /*
-     * Lưu đơn hàng và toàn bộ chi tiết đơn hàng.
-     */
     private void luuDonHang(
             String maDonHang,
             HoaDon hoaDon,
             String maKhachHang,
             String maKhuyenMai
     ) {
-
-        String sqlDonHang = """
-            INSERT INTO don_hang (
-                ma_don_hang,
-                ma_khach_hang,
-                ma_nhan_vien,
-                ma_khuyen_mai,
-                ngay_tao,
-                tong_tien_hang,
-                tien_giam_gia,
-                thue_vat,
-                tong_tien_can_tra,
-                trang_thai,
-                ghi_chu
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Da_thanh_toan', ?)
-        """;
-
         jdbcTemplate.update(
-                sqlDonHang,
+                """
+                INSERT INTO don_hang (
+                    ma_don_hang,
+                    ma_khach_hang,
+                    ma_nhan_vien,
+                    ma_khuyen_mai,
+                    ngay_tao,
+                    tong_tien_hang,
+                    tien_giam_gia,
+                    thue_vat,
+                    tong_tien_can_tra,
+                    trang_thai,
+                    ghi_chu
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Da_thanh_toan', ?)
+                """,
                 maDonHang,
                 maKhachHang,
                 hoaDon.getMaNhanVien(),
@@ -252,20 +215,17 @@ public class HoaDonDAO {
                 hoaDon.getGhiChu()
         );
 
-        String sqlChiTietDon = """
-            INSERT INTO chi_tiet_don_hang (
-                ma_don_hang,
-                ma_san_pham,
-                so_luong,
-                don_gia
-            )
-            VALUES (?, ?, ?, ?)
-        """;
-
         for (ChiTietHoaDon item : hoaDon.getItems()) {
-
             jdbcTemplate.update(
-                    sqlChiTietDon,
+                    """
+                    INSERT INTO chi_tiet_don_hang (
+                        ma_don_hang,
+                        ma_san_pham,
+                        so_luong,
+                        don_gia
+                    )
+                    VALUES (?, ?, ?, ?)
+                    """,
                     maDonHang,
                     item.getMaSanPham(),
                     item.getSoLuong(),
@@ -274,38 +234,32 @@ public class HoaDonDAO {
         }
     }
 
-    /*
-     * Lưu thông tin hóa đơn.
-     */
     private void luuThongTinHoaDon(
             String maDonHang,
             HoaDon hoaDon,
             String maKhachHang
     ) {
-
-        String sql = """
-            INSERT INTO hoa_don (
-                ma_hoa_don,
-                ma_don_hang,
-                ma_khach_hang,
-                ma_nhan_vien,
-                ngay_lap,
-                tong_tien_hang,
-                thue_vat_phan_tram,
-                tien_thue_vat,
-                tien_giam_gia,
-                tong_thanh_toan,
-                phuong_thuc_thanh_toan,
-                tien_khach_dua,
-                tien_thua,
-                trang_thai_thanh_toan,
-                ghi_chu
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Thanh_cong', ?)
-        """;
-
         jdbcTemplate.update(
-                sql,
+                """
+                INSERT INTO hoa_don (
+                    ma_hoa_don,
+                    ma_don_hang,
+                    ma_khach_hang,
+                    ma_nhan_vien,
+                    ngay_lap,
+                    tong_tien_hang,
+                    thue_vat_phan_tram,
+                    tien_thue_vat,
+                    tien_giam_gia,
+                    tong_thanh_toan,
+                    phuong_thuc_thanh_toan,
+                    tien_khach_dua,
+                    tien_thua,
+                    trang_thai_thanh_toan,
+                    ghi_chu
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Thanh_cong', ?)
+                """,
                 hoaDon.getMaHoaDon(),
                 maDonHang,
                 maKhachHang,
@@ -324,47 +278,40 @@ public class HoaDonDAO {
     }
 
     /*
-     * Lưu chi tiết hóa đơn.
-     *
-     * Một sản phẩm có số lượng N sẽ được tách thành N dòng,
-     * mỗi dòng gắn với một IMEI riêng.
+     * Lưu chi tiết hóa đơn và ghi nhớ IMEI đã chọn.
+     * Trigger MySQL có thể cập nhật trạng thái IMEI ngay khi INSERT.
      */
-    private void luuChiTietHoaDon(
+    private Map<String, List<String>> luuChiTietHoaDon(
             String maHoaDon,
             List<ChiTietHoaDon> items
     ) {
-
-        String sql = """
-            INSERT INTO chi_tiet_hoa_don (
-                ma_hoa_don,
-                ma_san_pham,
-                ma_imei,
-                don_gia,
-                thoi_gian_bao_hanh_thang
-            )
-            VALUES (?, ?, ?, ?, ?)
-        """;
-
-        // Tránh một IMEI bị sử dụng hai lần trong cùng hóa đơn.
-        Set<String> imeiDaChon = new HashSet<>();
+        Map<String, List<String>> imeiDaChon = new LinkedHashMap<>();
+        Set<String> imeiTrungLap = new HashSet<>();
 
         for (ChiTietHoaDon item : items) {
-
             List<String> imeiList = layVaKhoaImei(
                     item.getMaSanPham(),
                     item.getSoLuong()
             );
 
             for (String imei : imeiList) {
-
-                if (!imeiDaChon.add(imei)) {
+                if (!imeiTrungLap.add(imei)) {
                     throw new IllegalStateException(
                             "IMEI bị trùng trong hóa đơn: " + imei
                     );
                 }
 
                 jdbcTemplate.update(
-                        sql,
+                        """
+                        INSERT INTO chi_tiet_hoa_don (
+                            ma_hoa_don,
+                            ma_san_pham,
+                            ma_imei,
+                            don_gia,
+                            thoi_gian_bao_hanh_thang
+                        )
+                        VALUES (?, ?, ?, ?, ?)
+                        """,
                         maHoaDon,
                         item.getMaSanPham(),
                         imei,
@@ -374,66 +321,133 @@ public class HoaDonDAO {
                                 : 12
                 );
             }
+
+            imeiDaChon.put(item.getMaSanPham(), imeiList);
         }
+
+        return imeiDaChon;
     }
 
     /*
-     * Cập nhật trạng thái IMEI sau khi đã lưu chi tiết hóa đơn.
+     * Đồng bộ trạng thái IMEI cho cả MySQL và H2:
+     *
+     * - MySQL: trigger đã cập nhật IMEI và tồn kho khi INSERT.
+     * - H2: nếu chưa có trigger, DAO cập nhật đúng các IMEI đã chọn
+     *   và tự trừ tồn kho.
+     *
+     * Không cập nhật một nhóm IMEI khác.
      */
-    private void capNhatTrangThaiImei(
+    private void dongBoTrangThaiImei(
             String maHoaDon,
-            List<ChiTietHoaDon> items
+            List<ChiTietHoaDon> items,
+            Map<String, List<String>> imeiDaChon
     ) {
-
         for (ChiTietHoaDon item : items) {
+            List<String> imeiList = imeiDaChon.get(item.getMaSanPham());
 
-            String sql = """
-                UPDATE imei_san_pham
-                SET trang_thai = 'Da_ban',
-                    ma_hoa_don = ?,
-                    ngay_ban = CURRENT_TIMESTAMP,
-                    han_bao_hanh = DATE_ADD(
-                        CURRENT_DATE,
-                        INTERVAL ? MONTH
-                    )
-                WHERE ma_san_pham = ?
-                  AND trang_thai = 'Trong_kho'
-                ORDER BY ngay_nhap ASC, ma_imei ASC
-                LIMIT ?
-            """;
+            if (imeiList == null || imeiList.size() != item.getSoLuong()) {
+                throw new IllegalStateException(
+                        "Danh sách IMEI không khớp sản phẩm: "
+                                + item.getMaSanPham()
+                );
+            }
 
-            int updated = jdbcTemplate.update(
-                    sql,
-                    maHoaDon,
-                    item.getThoiGianBaoHanhThang() > 0
-                            ? item.getThoiGianBaoHanhThang()
-                            : 12,
-                    item.getMaSanPham(),
-                    item.getSoLuong()
+            String placeholders = String.join(
+                    ",",
+                    java.util.Collections.nCopies(imeiList.size(), "?")
             );
 
-            if (updated != item.getSoLuong()) {
+            List<Object> args = new ArrayList<>();
+            args.add(maHoaDon);
+            args.add(item.getThoiGianBaoHanhThang() > 0
+                    ? item.getThoiGianBaoHanhThang()
+                    : 12);
+            args.addAll(imeiList);
+
+            String sql = """
+                    UPDATE imei_san_pham
+                    SET trang_thai = 'Da_ban',
+                        ma_hoa_don = ?,
+                        ngay_ban = CURRENT_TIMESTAMP,
+                        han_bao_hanh = DATE_ADD(
+                            CURRENT_DATE,
+                            INTERVAL ? MONTH
+                        )
+                    WHERE ma_imei IN (%s)
+                      AND trang_thai = 'Trong_kho'
+                    """.formatted(placeholders);
+
+            int updated = jdbcTemplate.update(sql, args.toArray());
+
+            if (updated == imeiList.size()) {
+                // Không có trigger: DAO tự trừ tồn kho.
+                int stockUpdated = jdbcTemplate.update(
+                        """
+                        UPDATE san_pham
+                        SET so_luong_ton = so_luong_ton - ?
+                        WHERE ma_san_pham = ?
+                          AND so_luong_ton >= ?
+                        """,
+                        item.getSoLuong(),
+                        item.getMaSanPham(),
+                        item.getSoLuong()
+                );
+
+                if (stockUpdated != 1) {
+                    throw new IllegalStateException(
+                            "Không thể cập nhật tồn kho sản phẩm: "
+                                    + item.getMaSanPham()
+                    );
+                }
+
+            } else if (updated == 0) {
+                // Có thể trigger MySQL đã cập nhật IMEI.
+                Integer daBan = jdbcTemplate.queryForObject(
+                        """
+                        SELECT COUNT(*)
+                        FROM imei_san_pham
+                        WHERE ma_hoa_don = ?
+                          AND ma_san_pham = ?
+                          AND trang_thai = 'Da_ban'
+                          AND ma_imei IN (%s)
+                        """.formatted(placeholders),
+                        Integer.class,
+                        buildArgs(maHoaDon, item.getMaSanPham(), imeiList)
+                );
+
+                if (daBan == null || daBan != imeiList.size()) {
+                    throw new IllegalStateException(
+                            "Không thể xác nhận trạng thái IMEI của hóa đơn "
+                                    + maHoaDon
+                    );
+                }
+
+            } else {
                 throw new IllegalStateException(
-                        "Không thể cập nhật trạng thái IMEI cho sản phẩm: "
+                        "Chỉ cập nhật được một phần IMEI của sản phẩm: "
                                 + item.getMaSanPham()
                 );
             }
         }
     }
 
+    private Object[] buildArgs(
+            String maHoaDon,
+            String maSanPham,
+            List<String> imeiList
+    ) {
+        List<Object> args = new ArrayList<>();
+        args.add(maHoaDon);
+        args.add(maSanPham);
+        args.addAll(imeiList);
+        return args.toArray();
+    }
+
     /*
-     * Lưu hóa đơn và chi tiết hóa đơn trong một transaction.
-     *
-     * Nếu bất kỳ bước nào lỗi, Spring sẽ rollback toàn bộ:
-     * - Đơn hàng
-     * - Chi tiết đơn hàng
-     * - Hóa đơn
-     * - Chi tiết hóa đơn
-     * - Trạng thái IMEI
+     * Toàn bộ thao tác bán hàng nằm trong một transaction.
      */
     @Transactional(rollbackFor = Exception.class)
     public HoaDon luuHoaDonVaChiTiet(HoaDon hoaDon) {
-
         if (hoaDon == null) {
             throw new IllegalArgumentException("Hóa đơn không được null.");
         }
@@ -463,32 +477,15 @@ public class HoaDonDAO {
                 hoaDon.getPhuongThucThanhToan()
         );
 
-        // Kiểm tra dữ liệu sản phẩm trước khi ghi database.
         for (ChiTietHoaDon item : hoaDon.getItems()) {
-
-            if (item == null) {
+            if (item == null
+                    || item.getMaSanPham() == null
+                    || item.getMaSanPham().isBlank()
+                    || item.getSoLuong() <= 0
+                    || item.getDonGia() == null
+                    || item.getDonGia().compareTo(BigDecimal.ZERO) <= 0) {
                 throw new IllegalArgumentException(
-                        "Chi tiết hóa đơn không được null."
-                );
-            }
-
-            if (item.getMaSanPham() == null
-                    || item.getMaSanPham().isBlank()) {
-                throw new IllegalArgumentException(
-                        "Chi tiết hóa đơn thiếu mã sản phẩm."
-                );
-            }
-
-            if (item.getSoLuong() <= 0) {
-                throw new IllegalArgumentException(
-                        "Số lượng sản phẩm phải lớn hơn 0."
-                );
-            }
-
-            if (item.getDonGia() == null
-                    || item.getDonGia().compareTo(BigDecimal.ZERO) < 0) {
-                throw new IllegalArgumentException(
-                        "Đơn giá sản phẩm không hợp lệ."
+                        "Chi tiết hóa đơn không hợp lệ."
                 );
             }
         }
@@ -499,7 +496,15 @@ public class HoaDonDAO {
                 hoaDon.getCodeVoucher()
         );
 
-        // 1. Tạo đơn hàng và chi tiết đơn hàng.
+        // Tăng lượt sử dụng voucher bằng UPDATE có điều kiện.
+        // Nếu thất bại, transaction sẽ rollback.
+        if (maKhuyenMai != null
+                && !khuyenMaiDAO.tangSoLuongDaDung(maKhuyenMai)) {
+            throw new IllegalStateException(
+                    "Voucher đã hết lượt, hết hạn hoặc không còn hiệu lực."
+            );
+        }
+
         luuDonHang(
                 maDonHang,
                 hoaDon,
@@ -507,33 +512,27 @@ public class HoaDonDAO {
                 maKhuyenMai
         );
 
-        // 2. Lưu hóa đơn.
         luuThongTinHoaDon(
                 maDonHang,
                 hoaDon,
                 maKhachHang
         );
 
-        // 3. Tự chọn IMEI và lưu chi tiết hóa đơn.
-        luuChiTietHoaDon(
+        Map<String, List<String>> imeiDaChon = luuChiTietHoaDon(
                 hoaDon.getMaHoaDon(),
                 hoaDon.getItems()
         );
 
-        // 4. Cập nhật trạng thái IMEI.
-        capNhatTrangThaiImei(
+        dongBoTrangThaiImei(
                 hoaDon.getMaHoaDon(),
-                hoaDon.getItems()
+                hoaDon.getItems(),
+                imeiDaChon
         );
 
         return hoaDon;
     }
 
-    /*
-     * RowMapper cho danh sách hóa đơn gần nhất.
-     */
     private final RowMapper<HoaDon> hoaDonRowMapper = (rs, rowNum) -> {
-
         HoaDon hd = new HoaDon();
 
         hd.setMaHoaDon(rs.getString("ma_hoa_don"));
@@ -565,34 +564,28 @@ public class HoaDonDAO {
         return hd;
     };
 
-    /*
-     * Lấy danh sách hóa đơn mới nhất.
-     */
     public List<HoaDon> layHoaDonGanNhat(int limit) {
-
         int soLuong = Math.max(1, Math.min(limit, 100));
 
-        String sql = """
-            SELECT
-                hd.*,
-                kh.ho_ten AS ten_khach_hang,
-                nv.ho_ten AS ten_nhan_vien,
-                km.code_voucher AS code_voucher
-            FROM hoa_don hd
-            LEFT JOIN khach_hang kh
-                ON hd.ma_khach_hang = kh.ma_khach_hang
-            LEFT JOIN nhan_vien nv
-                ON hd.ma_nhan_vien = nv.ma_nhan_vien
-            LEFT JOIN don_hang dh
-                ON hd.ma_don_hang = dh.ma_don_hang
-            LEFT JOIN khuyen_mai km
-                ON dh.ma_khuyen_mai = km.ma_khuyen_mai
-            ORDER BY hd.ngay_lap DESC
-            LIMIT ?
-        """;
-
         return jdbcTemplate.query(
-                sql,
+                """
+                SELECT
+                    hd.*,
+                    kh.ho_ten AS ten_khach_hang,
+                    nv.ho_ten AS ten_nhan_vien,
+                    km.code_voucher AS code_voucher
+                FROM hoa_don hd
+                LEFT JOIN khach_hang kh
+                    ON hd.ma_khach_hang = kh.ma_khach_hang
+                LEFT JOIN nhan_vien nv
+                    ON hd.ma_nhan_vien = nv.ma_nhan_vien
+                LEFT JOIN don_hang dh
+                    ON hd.ma_don_hang = dh.ma_don_hang
+                LEFT JOIN khuyen_mai km
+                    ON dh.ma_khuyen_mai = km.ma_khuyen_mai
+                ORDER BY hd.ngay_lap DESC
+                LIMIT ?
+                """,
                 hoaDonRowMapper,
                 soLuong
         );
