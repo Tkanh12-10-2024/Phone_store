@@ -219,8 +219,13 @@ class Uc23To28IntegrationTests {
                                 .andReturn();
                 JsonNode coJson = objectMapper.readTree(coRes.getResponse().getContentAsString(StandardCharsets.UTF_8));
                 assertTrue(coJson.get("maHoaDon").asText().startsWith("HD"));
+                assertFalse(coJson.get("tenNhanVien").asText().isBlank());
+                assertFalse(coJson.get("tenKhachHang").asText().isBlank());
                 assertEquals(0, new BigDecimal("1200000").compareTo(coJson.get("tienGiamGia").decimalValue()));
                 assertEquals(0, new BigDecimal("26790000").compareTo(coJson.get("tongThanhToan").decimalValue()));
+                assertEquals(1, coJson.get("items").get(0).get("soLuong").asInt());
+                assertEquals(1, coJson.get("items").get(0).get("danhSachImei").size());
+                assertTrue(coJson.get("items").get(0).get("maImei").asText().matches("\\d{15}"));
 
                 MvcResult afterProds = mockMvc.perform(get("/api/pos/products")).andExpect(status().isOk()).andReturn();
                 int afterStock = 0;

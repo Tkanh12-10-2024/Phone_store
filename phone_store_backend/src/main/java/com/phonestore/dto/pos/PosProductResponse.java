@@ -26,6 +26,12 @@ public class PosProductResponse {
 
     private String trangThai;
 
+    private String ram;
+
+    private String rom;
+
+    private String mauSac;
+
     public PosProductResponse() {
     }
 
@@ -51,7 +57,38 @@ public class PosProductResponse {
         this.trangThai = trangThai;
     }
 
+    public PosProductResponse(
+            String maSanPham,
+            String tenSanPham,
+            String maThuongHieu,
+            String tenThuongHieu,
+            String dongMay,
+            String ram,
+            String rom,
+            String mauSac,
+            BigDecimal giaBan,
+            int soLuongTon,
+            String hinhAnh,
+            String trangThai
+    ) {
+        this(maSanPham, tenSanPham, dongMay, maThuongHieu, tenThuongHieu,
+                giaBan, soLuongTon, hinhAnh, trangThai);
+        this.ram = ram;
+        this.rom = rom;
+        this.mauSac = mauSac;
+    }
+
     public PosProductResponse(String maSanPham, String tenSanPham, String maThuongHieu, String tenThuongHieu, String dongMay, String ram, String rom, String mauSac, BigDecimal giaBan, int soLuongTon) {
+        this.maSanPham = maSanPham;
+        this.tenSanPham = tenSanPham;
+        this.maThuongHieu = maThuongHieu;
+        this.tenThuongHieu = tenThuongHieu;
+        this.dongMay = dongMay;
+        this.ram = ram;
+        this.rom = rom;
+        this.mauSac = mauSac;
+        this.giaBan = giaBan;
+        this.soLuongTon = soLuongTon;
     }
 
     public String getMaSanPham() {
@@ -124,5 +161,29 @@ public class PosProductResponse {
 
     public void setTrangThai(String trangThai) {
         this.trangThai = trangThai;
+    }
+
+    public String getRam() {
+        return ram;
+    }
+
+    public void setRam(String ram) {
+        this.ram = ram;
+    }
+
+    public String getRom() {
+        return rom;
+    }
+
+    public void setRom(String rom) {
+        this.rom = rom;
+    }
+
+    public String getMauSac() {
+        return mauSac;
+    }
+
+    public void setMauSac(String mauSac) {
+        this.mauSac = mauSac;
     }
 }

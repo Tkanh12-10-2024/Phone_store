@@ -3,8 +3,9 @@
     const state = {
         products: [],
         customers: [],
+        employees: [],
         activePromotions: [],
-        cart: [], // { maSanPham, tenSanPham, donGia, soLuong, availableImeis }
+        cart: [], // { maSanPham, tenSanPham, donGia, soLuong }
         appliedVoucher: null,
         paymentMethod: 'Tien_mat',
         totals: { subTotal: 0, discount: 0, vat: 0, total: 0 }
@@ -57,31 +58,41 @@
 
     async function loadInitialPosData() {
         try {
-            const [products, customers, promos, opts] = await Promise.all([
+            const [products, customers, employees, vouchers, brands] = await Promise.all([
                 apiRequest('/pos/products'),
                 apiRequest('/pos/customers'),
-                apiRequest('/promotions?trangThai=Dang_dien_ra'),
-                apiRequest('/promotions/options')
+                apiRequest('/pos/employees'),
+                apiRequest('/pos/vouchers'),
+                apiRequest('/pos/brands')
             ]);
 
             state.products = products || [];
             state.customers = customers || [];
-            state.activePromotions = promos || [];
+            state.employees = employees || [];
+            const now = new Date();
+            state.activePromotions = (vouchers || []).filter((voucher) =>
+                voucher.trangThai === 'Dang_dien_ra'
+                && (!voucher.ngayBatDau || new Date(voucher.ngayBatDau) <= now)
+                && (!voucher.ngayKetThuc || new Date(voucher.ngayKetThuc) >= now)
+                && (!Number(voucher.soLuongPhatHanh)
+                    || Number(voucher.soLuongDaDung) < Number(voucher.soLuongPhatHanh))
+            );
 
             const brandFilter = $('posBrandFilter');
 
             brandFilter.innerHTML = '<option value="">Tất cả thương hiệu</option>'
-                + (opts.brands || []).map((b) =>
-                    `<option value="${escapeHtml(b.value)}">${escapeHtml(b.label)}</option>`
+                + (brands || []).map((brand) =>
+                    `<option value="${escapeHtml(brand.maThuongHieu)}">${escapeHtml(brand.tenThuongHieu)}</option>`
                 ).join('');
 
             renderCustomerSelect();
+            renderEmployeeSelect();
             renderProductGrid(state.products);
             renderActiveVoucherPills();
             recalculateTotals();
 
         } catch (err) {
-            showPosStatus('Không thể kết nối API POS: ' + err.message, true);
+            showPosStatus('Không thể tải dữ liệu POS: ' + err.message, true);
         }
     }
 
@@ -103,6 +114,21 @@
         if (currentVal) sel.value = currentVal;
     }
 
+    function renderEmployeeSelect() {
+        const select = $('employeeSelect');
+        const previousValue = select.value;
+        select.innerHTML = state.employees.map((employee) => `
+            <option value="${escapeHtml(employee.maNhanVien)}">
+                ${escapeHtml(employee.hoTen)} (${escapeHtml(employee.maNhanVien)})
+            </option>
+        `).join('');
+
+        if (state.employees.some((employee) => employee.maNhanVien === previousValue)) {
+            select.value = previousValue;
+        }
+        select.disabled = state.employees.length === 0;
+    }
+
     function renderProductGrid(list) {
         const grid = $('posProductGrid');
 
@@ -112,8 +138,7 @@
         }
 
         grid.innerHTML = list.map((p) => {
-            const outOfStock = Number(p.soLuongTon || 0) <= 0
-                || !(p.imeis && p.imeis.length);
+            const outOfStock = Number(p.soLuongTon || 0) <= 0;
 
             return `
             <button type="button"
@@ -185,7 +210,7 @@
     function addProductToCart(maSanPham) {
         const prod = state.products.find((p) => p.maSanPham === maSanPham);
 
-        if (!prod || !prod.imeis || !prod.imeis.length) return;
+        if (!prod || Number(prod.soLuongTon || 0) <= 0) return;
 
         const existingIndex = state.cart.findIndex(
             (item) => item.maSanPham === maSanPham
@@ -203,8 +228,7 @@
             maSanPham: prod.maSanPham,
             tenSanPham: prod.tenSanPham,
             donGia: Number(prod.giaBan),
-            soLuong: 1,
-            availableImeis: prod.imeis
+            soLuong: 1
         });
 
         renderCart();
@@ -226,13 +250,7 @@
             (p) => p.maSanPham === item.maSanPham
         );
 
-        const stockLimit = Math.max(
-            1,
-            Math.min(
-                Number(prod?.soLuongTon || item.availableImeis.length),
-                item.availableImeis.length
-            )
-        );
+        const stockLimit = Math.max(1, Number(prod?.soLuongTon || 0));
 
         const normalized = Math.min(
             stockLimit,
@@ -279,13 +297,9 @@
         container.innerHTML = state.cart.map((item, idx) => {
             const stockLimit = Math.max(
                 1,
-                Math.min(
-                    Number(
-                        state.products.find((p) => p.maSanPham === item.maSanPham)?.soLuongTon
-                        || item.availableImeis.length
-                    ),
-                    item.availableImeis.length
-                )
+                Number(state.products.find(
+                    (p) => p.maSanPham === item.maSanPham
+                )?.soLuongTon || 0)
             );
 
             const imeiControl = `
@@ -518,6 +532,14 @@
             return;
         }
 
+        if (!$('employeeSelect').value) {
+            showPosStatus(
+                'Không có nhân viên đang hoạt động để thực hiện giao dịch.',
+                true
+            );
+            return;
+        }
+
         const given = state.paymentMethod === 'Tien_mat'
             ? Number($('customerGivenMoney').value || 0)
             : state.totals.total;
@@ -540,9 +562,7 @@
                 body: JSON.stringify({
                     maKhachHang: $('customerSelect').value,
 
-                    // TODO: Thay mã nhân viên cố định bằng nhân viên đăng nhập
-                    // sau khi tích hợp xác thực và phân quyền POS.
-                    maNhanVien: 'NV003',
+                    maNhanVien: $('employeeSelect').value,
 
                     codeVoucher: state.appliedVoucher
                         ? state.appliedVoucher.codeVoucher
@@ -601,7 +621,7 @@
                     </div>
 
                     <div class="text-xs text-slate-500 font-mono">
-                        IMEI: ${escapeHtml(it.maImei)} • BH ${it.thoiGianBaoHanhThang} tháng
+                        IMEI: ${escapeHtml((it.danhSachImei || []).join(', ') || it.maImei || '--')} • BH ${it.thoiGianBaoHanhThang} tháng
                     </div>
                 </td>
 

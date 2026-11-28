@@ -35,6 +35,8 @@ public class PosCheckoutResponse {
     private String phuongThucThanhToan;
     private String codeVoucher;
 
+    private String quaTang;
+
     private List<PosInvoiceDetailResponse> items = new ArrayList<>();
 
     private String message;
@@ -170,6 +172,14 @@ public class PosCheckoutResponse {
         this.codeVoucher = codeVoucher;
     }
 
+    public String getQuaTang() {
+        return quaTang;
+    }
+
+    public void setQuaTang(String quaTang) {
+        this.quaTang = quaTang;
+    }
+
     public List<PosInvoiceDetailResponse> getItems() {
         return items;
     }
@@ -184,5 +194,17 @@ public class PosCheckoutResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public BigDecimal getTongTienHang() {
+        return tamTinh;
+    }
+
+    public BigDecimal getTienGiamGia() {
+        return soTienGiam;
+    }
+
+    public BigDecimal getTienThueVat() {
+        return tienVat;
     }
 }

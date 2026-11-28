@@ -35,7 +35,14 @@ public class PosCatalogDAO {
                     sp.rom,
                     sp.mau_sac,
                     sp.gia_ban,
-                    sp.so_luong_ton
+                    COALESCE((
+                        SELECT COUNT(*)
+                        FROM imei_san_pham i
+                        WHERE i.ma_san_pham = sp.ma_san_pham
+                          AND i.trang_thai = 'Trong_kho'
+                    ), 0) AS so_luong_ton,
+                    sp.hinh_anh,
+                    sp.trang_thai
                 FROM san_pham sp
                 LEFT JOIN thuong_hieu th
                     ON sp.ma_thuong_hieu = th.ma_thuong_hieu
@@ -62,7 +69,9 @@ public class PosCatalogDAO {
                     rs.getString("rom"),
                     rs.getString("mau_sac"),
                     rs.getBigDecimal("gia_ban"),
-                    soLuongTon
+                    soLuongTon,
+                    rs.getString("hinh_anh"),
+                    rs.getString("trang_thai")
             );
         });
     }
@@ -122,7 +131,12 @@ public class PosCatalogDAO {
                     sp.rom,
                     sp.gia_ban,
                     sp.thoi_gian_bao_hanh_thang,
-                    sp.so_luong_ton,
+                    COALESCE((
+                        SELECT COUNT(*)
+                        FROM imei_san_pham i
+                        WHERE i.ma_san_pham = sp.ma_san_pham
+                          AND i.trang_thai = 'Trong_kho'
+                    ), 0) AS so_luong_ton,
                     sp.trang_thai,
                     sp.ma_thuong_hieu,
                     th.ten_thuong_hieu,
@@ -243,6 +257,24 @@ public class PosCatalogDAO {
         }
 
         return xacDinhHangKhachHang(result.get(0));
+    }
+
+    public String layTenKhachHang(String maKhachHang) {
+        if (maKhachHang == null || maKhachHang.isBlank()) {
+            return "Khách vãng lai";
+        }
+
+        List<String> result = jdbcTemplate.query(
+                """
+                SELECT ho_ten
+                FROM khach_hang
+                WHERE ma_khach_hang = ?
+                  AND trang_thai = 'Hoat_dong'
+                """,
+                (rs, rowNum) -> rs.getString("ho_ten"),
+                maKhachHang
+        );
+        return result.isEmpty() ? "Khách vãng lai" : result.get(0);
     }
 
     /*

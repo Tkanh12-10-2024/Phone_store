@@ -99,6 +99,12 @@ public class PosInvoiceDetailResponse {
         this.danhSachImei = danhSachImei;
     }
 
+    public String getMaImei() {
+        return danhSachImei == null || danhSachImei.isEmpty()
+                ? null
+                : danhSachImei.get(0);
+    }
+
     public int getThoiGianBaoHanhThang() {
         return thoiGianBaoHanhThang;
     }

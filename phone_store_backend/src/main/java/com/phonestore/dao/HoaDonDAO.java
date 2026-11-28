@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -63,6 +64,7 @@ public class HoaDonDAO {
                 SELECT COUNT(*)
                 FROM khach_hang
                 WHERE ma_khach_hang = ?
+                  AND trang_thai = 'Hoat_dong'
                 """,
                 Integer.class,
                 maKhachHang.trim()
@@ -359,9 +361,10 @@ public class HoaDonDAO {
 
             List<Object> args = new ArrayList<>();
             args.add(maHoaDon);
-            args.add(item.getThoiGianBaoHanhThang() > 0
+            int warrantyMonths = item.getThoiGianBaoHanhThang() > 0
                     ? item.getThoiGianBaoHanhThang()
-                    : 12);
+                    : 12;
+            args.add(java.sql.Date.valueOf(LocalDate.now().plusMonths(warrantyMonths)));
             args.addAll(imeiList);
 
             String sql = """
@@ -369,10 +372,7 @@ public class HoaDonDAO {
                     SET trang_thai = 'Da_ban',
                         ma_hoa_don = ?,
                         ngay_ban = CURRENT_TIMESTAMP,
-                        han_bao_hanh = DATE_ADD(
-                            CURRENT_DATE,
-                            INTERVAL ? MONTH
-                        )
+                        han_bao_hanh = ?
                     WHERE ma_imei IN (%s)
                       AND trang_thai = 'Trong_kho'
                     """.formatted(placeholders);
@@ -588,6 +588,34 @@ public class HoaDonDAO {
                 """,
                 hoaDonRowMapper,
                 soLuong
+        );
+    }
+
+    public List<ChiTietHoaDon> layChiTietHoaDon(String maHoaDon) {
+        return jdbcTemplate.query(
+                """
+                SELECT cthd.ma_san_pham,
+                       sp.ten_san_pham,
+                       cthd.ma_imei,
+                       cthd.don_gia,
+                       cthd.thoi_gian_bao_hanh_thang
+                FROM chi_tiet_hoa_don cthd
+                JOIN san_pham sp ON sp.ma_san_pham = cthd.ma_san_pham
+                WHERE cthd.ma_hoa_don = ?
+                ORDER BY cthd.ma_chi_tiet_hd
+                """,
+                (rs, rowNum) -> {
+                    ChiTietHoaDon item = new ChiTietHoaDon();
+                    item.setMaSanPham(rs.getString("ma_san_pham"));
+                    item.setTenSanPham(rs.getString("ten_san_pham"));
+                    item.setMaImei(rs.getString("ma_imei"));
+                    item.setDonGia(rs.getBigDecimal("don_gia"));
+                    item.setThoiGianBaoHanhThang(
+                            rs.getInt("thoi_gian_bao_hanh_thang")
+                    );
+                    return item;
+                },
+                maHoaDon
         );
     }
 }

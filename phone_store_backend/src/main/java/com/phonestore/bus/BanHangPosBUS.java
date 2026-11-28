@@ -12,6 +12,7 @@ import com.phonestore.dto.pos.PosInvoiceDetailResponse;
 import com.phonestore.dto.pos.PosInvoiceResponse;
 import com.phonestore.dto.pos.PosProductResponse;
 import com.phonestore.dto.pos.PosCustomerResponse;
+import com.phonestore.dto.pos.PosEmployeeResponse;
 import com.phonestore.dto.pos.PosVoucherRequest;
 import com.phonestore.dto.pos.PosVoucherResponse;
 
@@ -68,6 +69,10 @@ public class BanHangPosBUS {
 
     public List<PosCustomerResponse> layDanhSachKhachHang() {
         return posCatalogDAO.layDanhSachKhachHang();
+    }
+
+    public List<PosEmployeeResponse> layDanhSachNhanVienHoatDong() {
+        return posEmployeeDAO.layDanhSachNhanVienHoatDong();
     }
 
     // =====================================================
@@ -851,10 +856,21 @@ public class BanHangPosBUS {
             BigDecimal tamTinh
     ) {
         if (km.getTrangThai() != null
-                && "Ngung_hoat_dong".equalsIgnoreCase(
-                km.getTrangThai()
-        )) {
+                && ("Het_han".equalsIgnoreCase(km.getTrangThai())
+                || "Ngung_hoat_dong".equalsIgnoreCase(km.getTrangThai()))) {
+            return "EXPIRED";
+        }
+
+        if (km.getTrangThai() != null
+                && "Tam_dung".equalsIgnoreCase(km.getTrangThai())) {
             return "INACTIVE";
+        }
+
+        if ((km.getNgayBatDau() != null
+                && java.time.LocalDateTime.now().isBefore(km.getNgayBatDau()))
+                || (km.getNgayKetThuc() != null
+                && java.time.LocalDateTime.now().isAfter(km.getNgayKetThuc()))) {
+            return "EXPIRED";
         }
 
         if (km.getSoLuongPhatHanh() > 0
@@ -883,6 +899,30 @@ public class BanHangPosBUS {
                 km.getDoiTuongKhachHang()
         )) {
             return "CUSTOMER_TIER_MISMATCH";
+        }
+
+        for (ChiTietHoaDon item : items) {
+            Optional<SanPham> optional = posCatalogDAO.timSanPhamTheoMa(
+                    item.getMaSanPham()
+            );
+            if (optional.isEmpty()) {
+                continue;
+            }
+
+            SanPham product = optional.get();
+            if (km.getMaThuongHieuApDung() != null
+                    && !km.getMaThuongHieuApDung().equals(product.getMaThuongHieu())) {
+                return "BRAND_MISMATCH";
+            }
+            if (km.getMaDanhMucApDung() != null
+                    && !km.getMaDanhMucApDung().equals(product.getMaDanhMuc())) {
+                return "CATEGORY_MISMATCH";
+            }
+            if (km.getDongMayApDung() != null
+                    && !km.getDongMayApDung().isBlank()
+                    && !km.getDongMayApDung().equalsIgnoreCase(product.getDongMay())) {
+                return "MODEL_MISMATCH";
+            }
         }
 
         return "PRODUCT_MISMATCH";
@@ -924,10 +964,19 @@ public class BanHangPosBUS {
 
         response.setSuccess(true);
         response.setMaHoaDon(hoaDon.getMaHoaDon());
+        response.setMaDonHang("DH" + hoaDon.getMaHoaDon().substring(2));
         response.setMaKhachHang(hoaDon.getMaKhachHang());
-        response.setTenKhachHang(hoaDon.getTenKhachHang());
+        response.setTenKhachHang(
+                hoaDon.getTenKhachHang() != null
+                        ? hoaDon.getTenKhachHang()
+                        : posCatalogDAO.layTenKhachHang(hoaDon.getMaKhachHang())
+        );
         response.setMaNhanVien(hoaDon.getMaNhanVien());
-        response.setTenNhanVien(hoaDon.getTenNhanVien());
+        response.setTenNhanVien(
+                hoaDon.getTenNhanVien() != null
+                        ? hoaDon.getTenNhanVien()
+                        : posEmployeeDAO.layTenNhanVien(hoaDon.getMaNhanVien())
+        );
         response.setNgayLap(hoaDon.getNgayLap());
 
         response.setTamTinh(hoaDon.getTongTienHang());
@@ -943,39 +992,34 @@ public class BanHangPosBUS {
         );
 
         response.setCodeVoucher(codeVoucher);
+        response.setQuaTang(hoaDon.getQuaTang());
         response.setMessage("Thanh toán thành công.");
 
         List<PosInvoiceDetailResponse> detailResponses =
                 new ArrayList<>();
 
-        if (hoaDon.getItems() != null) {
-            for (ChiTietHoaDon item : hoaDon.getItems()) {
-                PosInvoiceDetailResponse detail =
-                        new PosInvoiceDetailResponse();
-
+        Map<String, PosInvoiceDetailResponse> detailsByProduct =
+                new LinkedHashMap<>();
+        for (ChiTietHoaDon item : hoaDonDAO.layChiTietHoaDon(hoaDon.getMaHoaDon())) {
+            PosInvoiceDetailResponse detail = detailsByProduct.get(item.getMaSanPham());
+            if (detail == null) {
+                detail = new PosInvoiceDetailResponse();
                 detail.setMaSanPham(item.getMaSanPham());
                 detail.setTenSanPham(item.getTenSanPham());
-                detail.setSoLuong(item.getSoLuong());
                 detail.setDonGia(item.getDonGia());
-                detail.setThanhTien(item.tinhThanhTien());
-
-                detail.setThoiGianBaoHanhThang(
-                        item.getThoiGianBaoHanhThang()
-                );
-
-                List<String> imeis = new ArrayList<>();
-
-                if (item.getMaImei() != null
-                        && !item.getMaImei().isBlank()) {
-                    imeis.add(item.getMaImei());
-                }
-
-                detail.setDanhSachImei(imeis);
-
-                detailResponses.add(detail);
+                detail.setSoLuong(0);
+                detail.setThanhTien(ZERO);
+                detail.setThoiGianBaoHanhThang(item.getThoiGianBaoHanhThang());
+                detailsByProduct.put(item.getMaSanPham(), detail);
             }
+            detail.setSoLuong(detail.getSoLuong() + 1);
+            detail.setThanhTien(
+                    detail.getDonGia().multiply(BigDecimal.valueOf(detail.getSoLuong()))
+            );
+            detail.getDanhSachImei().add(item.getMaImei());
         }
 
+        detailResponses.addAll(detailsByProduct.values());
         response.setItems(detailResponses);
 
         return response;

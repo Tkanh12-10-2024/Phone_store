@@ -5,11 +5,14 @@ import com.phonestore.bus.BanHangPosBUS;
 import com.phonestore.dao.KhuyenMaiDAO;
 import com.phonestore.dto.pos.PosCheckoutRequest;
 import com.phonestore.dto.pos.PosCheckoutResponse;
+import com.phonestore.dto.pos.PosEmployeeResponse;
 import com.phonestore.dto.pos.PosVoucherRequest;
 import com.phonestore.dto.pos.PosVoucherResponse;
 import com.phonestore.model.HoaDon;
 import com.phonestore.model.KhuyenMai;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,6 +25,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/pos")
 public class PosController {
+
+    private static final Logger log = LoggerFactory.getLogger(PosController.class);
 
     private final BanHangPosBUS banHangPosBUS;
     private final KhuyenMaiDAO khuyenMaiDAO;
@@ -66,6 +71,17 @@ public class PosController {
             );
         } catch (Exception e) {
             return loiServer("Không thể tải danh sách khách hàng.", e);
+        }
+    }
+
+    @GetMapping("/employees")
+    public ResponseEntity<?> layDanhSachNhanVienHoatDong() {
+        try {
+            List<PosEmployeeResponse> employees =
+                    banHangPosBUS.layDanhSachNhanVienHoatDong();
+            return ResponseEntity.ok(employees);
+        } catch (Exception e) {
+            return loiServer("Không thể tải danh sách nhân viên đang hoạt động.", e);
         }
     }
 
@@ -219,6 +235,7 @@ public class PosController {
          * Không trả stack trace hoặc thông tin database
          * về phía frontend.
          */
+        log.error(message, exception);
         Map<String, Object> body = taoLoi(message);
 
         return ResponseEntity

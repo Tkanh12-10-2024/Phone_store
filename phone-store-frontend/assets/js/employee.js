@@ -113,6 +113,7 @@ async function viewEmployeeDetail(id) {
 
     document.getElementById('detailId').textContent = emp.id || '--';
     document.getElementById('detailFullName').textContent = emp.fullName || '--';
+    document.getElementById('detailPhone').textContent = emp.phone || '--';
     document.getElementById('detailUsername').textContent = emp.username || '--';
 
     const roleBadge = document.getElementById('detailRole');
@@ -181,6 +182,7 @@ function openEditModal(id) {
     document.getElementById('employeeCodeHint').classList.remove('hidden');
 
     document.getElementById('fullName').value = emp.fullName || '';
+    document.getElementById('phone').value = emp.phone || '';
     document.getElementById('username').value = emp.username || '';
     document.getElementById('password').value = '';
     document.getElementById('password').required = false;
@@ -207,6 +209,7 @@ async function handleSaveEmployee(event) {
 
     const payload = {
         fullName: document.getElementById('fullName').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
         username: document.getElementById('username').value.trim(),
         role: document.getElementById('role').value
     };
