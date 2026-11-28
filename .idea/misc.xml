@@ -5,6 +5,7 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/phong_store_backend/pom.xml" />
+        <option value="$PROJECT_DIR$/phone_store_backend/pom.xml" />
       </list>
     </option>
   </component>
