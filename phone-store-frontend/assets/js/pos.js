@@ -137,10 +137,9 @@
         const prod = state.products.find((p) => p.maSanPham === maSanPham);
         if (!prod || !prod.imeis || !prod.imeis.length) return;
 
-        const usedImeis = new Set(state.cart.map((c) => c.maImei));
-        const nextImei = prod.imeis.find((im) => !usedImeis.has(im));
-        if (!nextImei) {
-            showPosStatus(`Tất cả IMEI khả dụng của ${prod.tenSanPham} đã có trong giỏ hàng.`, true);
+        const existingIndex = state.cart.findIndex((item) => item.maSanPham === maSanPham);
+        if (existingIndex >= 0) {
+            setCartQuantity(existingIndex, state.cart[existingIndex].soLuong + 1);
             return;
         }
 
@@ -149,7 +148,7 @@
             tenSanPham: prod.tenSanPham,
             donGia: Number(prod.giaBan),
             soLuong: 1,
-            maImei: nextImei,
+            maImei: prod.imeis[0],
             availableImeis: prod.imeis
         });
 
@@ -161,8 +160,43 @@
         }
     }
 
+    function setCartQuantity(index, quantity) {
+        const item = state.cart[index];
+        if (!item) return;
+
+        const prod = state.products.find((p) => p.maSanPham === item.maSanPham);
+        const stockLimit = Math.max(1, Math.min(
+            Number(prod?.soLuongTon || item.availableImeis.length),
+            item.availableImeis.length
+        ));
+        const normalized = Math.min(stockLimit, Math.max(1, Number.parseInt(quantity, 10) || 1));
+
+        item.soLuong = normalized;
+        if (normalized === 1) {
+            if (!item.availableImeis.includes(item.maImei)) {
+                item.maImei = item.availableImeis[0];
+            }
+        } else {
+            item.maImei = null;
+        }
+
+        if (normalized !== Number(quantity) && Number(quantity) > stockLimit) {
+            showPosStatus(`Số lượng tối đa cho ${item.tenSanPham} là ${stockLimit}.`, true);
+        } else {
+            const status = $('posStatusRegion');
+            status.classList.add('hidden');
+        }
+
+        renderCart();
+        if (state.appliedVoucher) {
+            applyVoucher(true);
+        } else {
+            recalculateTotals();
+        }
+    }
+
     function renderCart() {
-        $('cartItemCount').textContent = state.cart.length;
+        $('cartItemCount').textContent = state.cart.reduce((sum, item) => sum + Number(item.soLuong || 1), 0);
         const container = $('posCartList');
         if (!state.cart.length) {
             container.innerHTML = '<div class="py-10 text-center text-slate-400 text-sm">Chưa có thiết bị nào trong giỏ hàng. Bấm chọn máy ở danh mục phía trên.</div>';
@@ -170,23 +204,51 @@
         }
 
         container.innerHTML = state.cart.map((item, idx) => {
-            const imeiOptions = item.availableImeis.map((im) =>
-                `<option value="${escapeHtml(im)}" ${im === item.maImei ? 'selected' : ''}>${escapeHtml(im)}</option>`
-            ).join('');
-            return `
-            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div class="min-w-0 flex-1">
-                    <p class="font-bold text-slate-900 text-sm">${escapeHtml(item.tenSanPham)}</p>
+            const stockLimit = Math.max(1, Math.min(
+                Number(state.products.find((p) => p.maSanPham === item.maSanPham)?.soLuongTon || item.availableImeis.length),
+                item.availableImeis.length
+            ));
+            const imeiControl = item.soLuong === 1
+                ? `
                     <div class="flex items-center gap-2 mt-1">
                         <label for="cartImei_${idx}" class="text-[11px] font-bold text-slate-500">IMEI:</label>
                         <select id="cartImei_${idx}" data-imei-idx="${idx}"
                                 class="px-2 py-1 bg-white border border-slate-300 rounded-lg text-xs font-mono">
-                            ${imeiOptions}
+                            ${item.availableImeis.map((im) =>
+                                `<option value="${escapeHtml(im)}" ${im === item.maImei ? 'selected' : ''}>${escapeHtml(im)}</option>`
+                            ).join('')}
                         </select>
-                    </div>
+                    </div>`
+                : `
+                    <p class="text-[11px] text-slate-500 mt-1">
+                        Hệ thống tự chọn ${item.soLuong} IMEI khả dụng
+                    </p>`;
+            return `
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                    <p class="font-bold text-slate-900 text-sm">${escapeHtml(item.tenSanPham)}</p>
+                    ${imeiControl}
                 </div>
                 <div class="flex items-center gap-3 justify-between sm:justify-end">
-                    <strong class="text-blue-700 text-sm">${formatVnd(item.donGia)}</strong>
+                    <div class="flex items-center rounded-xl border border-slate-300 bg-white overflow-hidden">
+                        <button type="button" data-cart-qty="${idx}" data-cart-delta="-1"
+                                ${item.soLuong <= 1 ? 'disabled' : ''}
+                                aria-label="Giảm số lượng ${escapeHtml(item.tenSanPham)}"
+                                class="w-9 h-9 text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">
+                            <i class="fa-solid fa-minus text-xs"></i>
+                        </button>
+                        <input type="number" min="1" max="${stockLimit}" step="1"
+                               value="${item.soLuong}" data-cart-qty-input="${idx}"
+                               aria-label="Số lượng ${escapeHtml(item.tenSanPham)}"
+                               class="w-14 h-9 border-x border-slate-200 text-center text-sm font-bold text-slate-900 outline-none">
+                        <button type="button" data-cart-qty="${idx}" data-cart-delta="1"
+                                ${item.soLuong >= stockLimit ? 'disabled' : ''}
+                                aria-label="Tăng số lượng ${escapeHtml(item.tenSanPham)}"
+                                class="w-9 h-9 text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                        </button>
+                    </div>
+                    <strong class="text-blue-700 text-sm whitespace-nowrap">${formatVnd(item.donGia * item.soLuong)}</strong>
                     <button type="button" data-remove-idx="${idx}" aria-label="Xóa ${escapeHtml(item.tenSanPham)}"
                             class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center">
                         <i class="fa-solid fa-trash-can text-xs"></i>
@@ -343,7 +405,7 @@
                     tienKhachDua: given,
                     items: state.cart.map((c) => ({
                         maSanPham: c.maSanPham,
-                        maImei: c.maImei,
+                        maImei: c.soLuong === 1 ? c.maImei : null,
                         soLuong: c.soLuong,
                         donGia: c.donGia
                     }))
@@ -491,6 +553,16 @@
         });
 
         $('posCartList').addEventListener('click', (e) => {
+            const qtyBtn = e.target.closest('button[data-cart-qty]');
+            if (qtyBtn) {
+                const idx = Number(qtyBtn.dataset.cartQty);
+                const delta = Number(qtyBtn.dataset.cartDelta);
+                if (state.cart[idx]) {
+                    setCartQuantity(idx, state.cart[idx].soLuong + delta);
+                }
+                return;
+            }
+
             const btn = e.target.closest('button[data-remove-idx]');
             if (!btn) return;
             state.cart.splice(Number(btn.dataset.removeIdx), 1);
@@ -501,9 +573,16 @@
 
         $('posCartList').addEventListener('change', (e) => {
             const sel = e.target.closest('select[data-imei-idx]');
-            if (!sel) return;
-            const idx = Number(sel.dataset.imeiIdx);
-            if (state.cart[idx]) state.cart[idx].maImei = sel.value;
+            if (sel) {
+                const idx = Number(sel.dataset.imeiIdx);
+                if (state.cart[idx]) state.cart[idx].maImei = sel.value;
+                return;
+            }
+
+            const qtyInput = e.target.closest('input[data-cart-qty-input]');
+            if (qtyInput) {
+                setCartQuantity(Number(qtyInput.dataset.cartQtyInput), qtyInput.value);
+            }
         });
 
         $('btnClearCart').addEventListener('click', () => {
